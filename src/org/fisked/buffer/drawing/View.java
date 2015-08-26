@@ -3,10 +3,10 @@ package org.fisked.buffer.drawing;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.fisked.responder.Event;
 import org.fisked.responder.IRawInputResponder;
 import org.fisked.theme.ThemeManager;
 
-import jcurses.system.InputChar;
 import jcurses.system.Toolkit;
 
 public class View implements IRawInputResponder, IDrawable {
@@ -44,7 +44,7 @@ public class View implements IRawInputResponder, IDrawable {
 	}
 
 	@Override
-	public boolean handleInput(InputChar input) {
+	public boolean handleInput(Event input) {
 		for (View view: _subviews) {
 			if (view.handleInput(input)) {
 				return true;

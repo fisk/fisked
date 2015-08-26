@@ -8,14 +8,12 @@ import org.fisked.theme.ThemeManager;
 import jcurses.system.CharColor;
 import jcurses.system.Toolkit;
 
-public class BufferView extends View {
-	BufferController _controller;
+public class ModeLineView extends View {
 	
-	public BufferView(Rectangle frame) {
+	private ModeLineController _controller;
+
+	public ModeLineView(Rectangle frame, ModeLineController controller) {
 		super(frame);
-	}
-	
-	public void setBufferController(BufferController controller) {
 		_controller = controller;
 	}
 	
@@ -28,7 +26,7 @@ public class BufferView extends View {
 				ThemeManager.getThemeManager().getCurrentTheme().getForegroundColor().getRawColor()
 				);
 		
-		String string = _controller.getString(drawingRect);
-		Toolkit.printString(string, drawingRect.toJcursesRectangle(), charColor);
+		Toolkit.printString(_controller.getModeLineText(), drawingRect.toJcursesRectangle(), charColor);
 	}
+
 }

@@ -9,7 +9,8 @@ public class EventLoop {
 	public void start() {
 		while (true) {
 			InputChar nextChar = Toolkit.readCharacter();
-			_primaryResponder.handleInput(nextChar);
+			Event nextEvent = new Event(nextChar);
+			_primaryResponder.handleInput(nextEvent);
 		}
 	}
 	

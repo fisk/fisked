@@ -2,7 +2,6 @@ package org.fisked.buffer;
 
 public class Buffer {
 	private StringBuilder _buffer;
-	
 	private int _pointIndex = 0;
 	
 	public Buffer() {
@@ -20,5 +19,9 @@ public class Buffer {
 	
 	public String toString() {
 		return _buffer.toString();
+	}
+	
+	public StringBuilder getStringBuilder() {
+		return _buffer;
 	}
 }

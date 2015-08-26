@@ -1,7 +1,8 @@
 package org.fisked;
 
-import org.fisked.buffer.Window;
+import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.drawing.Rectangle;
+import org.fisked.buffer.drawing.Window;
 import org.fisked.responder.EventLoop;
 
 import jcurses.system.Toolkit;
@@ -20,19 +21,40 @@ public class Application {
 	
 	private EventLoop _loop;
 	private Window _primaryWindow;
+	private volatile Throwable _exception;
 	
 	public void start() {
-		_loop = new EventLoop();
-		Rectangle windowRect = new Rectangle(0, 0, getScreenWidth(), getScreenHeight());
-		_primaryWindow = new Window(windowRect);
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+		    public void run() {
+				Toolkit.shutdown();
+				if (_exception != null) {
+					_exception.printStackTrace();
+				}
+		    }
+		});
 		
-		_loop.setPrimaryResponder(_primaryWindow);
-		
-		Toolkit.init();
-		
-		_primaryWindow.draw();
-		
-		_loop.start();
+		try {
+			_loop = new EventLoop();
+			Rectangle windowRect = new Rectangle(0, 0, getScreenWidth(), getScreenHeight());
+			_primaryWindow = new BufferWindow(windowRect);
+
+			_loop.setPrimaryResponder(_primaryWindow);
+
+			Toolkit.init();
+			Toolkit.setEncoding("UTF-8");
+
+			_primaryWindow.draw();
+
+			_loop.start();
+		} catch (Throwable throwable) {
+			Application app = Application.getApplication();
+			app.setException(throwable);
+			app.exit();
+		}
+	}
+	
+	public void setException(Throwable throwable) {
+		_exception = throwable;
 	}
 	
 	public int getScreenWidth() {
@@ -44,7 +66,6 @@ public class Application {
 	}
 	
 	public void exit() {
-		Toolkit.shutdown();
 		System.exit(0);
 	}
 }
