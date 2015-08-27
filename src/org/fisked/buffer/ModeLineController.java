@@ -9,7 +9,10 @@ public class ModeLineController {
 	}
 
 	public String getModeLineText() {
-		return "--" + _window.getCurrentMode().getModeName().toUpperCase() + "--";
+		StringBuilder str = new StringBuilder();
+		str.append(_window.getCurrentMode().getModeName().toUpperCase());
+		str.append("> ");
+		return str.toString();
 	}
 
 }
