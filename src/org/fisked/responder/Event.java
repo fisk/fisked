@@ -10,7 +10,7 @@ public class Event {
 	}
 	
 	public boolean isCharacter() {
-		return !_input.isSpecialCode() || isEscape();
+		return !_input.isSpecialCode() || isEscape() || isBackspace();
 	}
 	
 	public int getCode() {
@@ -19,6 +19,18 @@ public class Event {
 	
 	public boolean isEscape() {
 		return _input.getCode() == 27;
+	}
+	
+	public boolean isReturn() {
+		return _input.getCharacter() == '\n';
+	}
+	
+	public boolean isBackspace() {
+		return _input.getCode() == 127;
+	}
+	
+	public boolean isDelete() {
+		return _input.getCode() == 330;
 	}
 
 	public char getCharacter() {

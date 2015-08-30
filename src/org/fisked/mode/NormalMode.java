@@ -1,34 +1,42 @@
 package org.fisked.mode;
 
-import org.fisked.Application;
 import org.fisked.buffer.BufferWindow;
-import org.fisked.log.Log;
 import org.fisked.responder.Event;
 
 public class NormalMode extends AbstractMode {
-	
+
+	private boolean _writingCommand;
+
 	public NormalMode(BufferWindow window) {
 		super(window);
+		_writingCommand = false;
 	}
-	
+
 	@Override
 	public boolean handleInput(Event input) {
-		if (input.getCharacter() == 'q') {
-			Application.getApplication().exit();
-		} else if (input.getCharacter() == 'i') {
-			_window.switchToInputMode();
+		try {
+			if (_writingCommand) {
+				if (!_window.getCommandController().handleInput(input)) {
+					_writingCommand = false;
+				}
+				return true;
+			}
+			_window.getCommandController().setCommandFeedback(null);
+			if (input.getCharacter() == 'i') {
+				_window.switchToInputMode();
+			} else if (input.getCharacter() == ':') {
+				_writingCommand = true;
+				_window.getCommandController().startCommand();
+			}
+			return true;
+		} finally {
+			_window.refresh();
 		}
-		if (input.isSpecialCode()) {
-			Log.println("This is special: " + input.getCode());
-		} else {
-			Log.println("Not so special: " + input.getCode() + ", " + input.getCharacter());
-		}
-		return true;
 	}
 
 	@Override
 	public String getModeName() {
 		return "normal";
 	}
-	
+
 }

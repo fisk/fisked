@@ -11,8 +11,8 @@ public class BufferController {
 	private BufferView _bufferView;
 	private TextLayout _layout;
 	
-	public BufferController(Buffer buffer, BufferView bufferView) {
-		_buffer = buffer;
+	public BufferController(BufferView bufferView) {
+		_buffer = new Buffer();
 		_bufferView = bufferView;
 		_layout = new TextLayout(_buffer.getStringBuilder(), bufferView.getClippingRect().getSize().getWidth());
 	}
@@ -30,12 +30,16 @@ public class BufferController {
 		int maxY = offsetY + clipRect.getSize().getHeight();
 		Range range = new Range(offsetY, maxY);
 		String str = _layout.getLogicalString(range);
-		Log.println("str: " + str);
-		Log.println("buf: " + _buffer.getStringBuilder().toString());
 		return str;
 	}
 	
-	public Point getLogicalPointAtIndex(int index) {
+	public Point getLogicalPoint() {
+		int index = _buffer.getPointIndex();
 		return _layout.getLogicalPointForCharIndex(index, _bufferView.getClippingRect());
+	}
+
+	public void setBuffer(Buffer buffer) {
+		_buffer = buffer;
+		_layout.setText(_buffer.getStringBuilder());
 	}
 }

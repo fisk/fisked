@@ -3,6 +3,8 @@ package org.fisked;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.drawing.Rectangle;
 import org.fisked.buffer.drawing.Window;
+import org.fisked.command.CommandManager;
+import org.fisked.command.OpenFileCommand;
 import org.fisked.responder.EventLoop;
 
 import jcurses.system.Toolkit;
@@ -23,6 +25,22 @@ public class Application {
 	private Window _primaryWindow;
 	private volatile Throwable _exception;
 	
+	private void setupCommands() {
+		CommandManager cm = CommandManager.getSingleton();
+		cm.registerHandler("q", (BufferWindow window, String[] argv) -> { 
+			System.exit(0);
+			});
+		cm.registerHandler("e", new OpenFileCommand());
+		cm.registerHandler("w", (BufferWindow window, String[] argv) -> { 
+			try {
+				window.getBuffer().save();
+			} catch (Exception e) {
+				window.getCommandController().setCommandFeedback("Couldn't save.");
+			}
+			});
+		
+	}
+	
 	public void start() {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 		    public void run() {
@@ -34,6 +52,7 @@ public class Application {
 		});
 		
 		try {
+			setupCommands();
 			_loop = new EventLoop();
 			Rectangle windowRect = new Rectangle(0, 0, getScreenWidth(), getScreenHeight());
 			_primaryWindow = new BufferWindow(windowRect);

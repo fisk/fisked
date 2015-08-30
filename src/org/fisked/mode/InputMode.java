@@ -12,15 +12,20 @@ public class InputMode extends AbstractMode {
 
 	@Override
 	public boolean handleInput(Event input) {
-		if (input.isEscape()) {
-			_window.switchToNormalMode();
+		try {
+			if (input.isBackspace()) {
+				_window.getBuffer().removeCharAtPoint();
+				return true;
+			} else if (input.isEscape()) {
+				_window.switchToNormalMode();
+				return true;
+			}
+			Buffer buffer = _window.getBuffer();
+			buffer.appendCharAtPoint(input.getCharacter());
 			return true;
+		} finally {
+			_window.refresh();
 		}
-		Buffer buffer = _window.getBuffer();
-		buffer.appendCharAtPoint(input.getCharacter());
-		_window.draw();
-		_window.drawPoint();
-		return true;
 	}
 
 	@Override

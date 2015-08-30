@@ -11,7 +11,7 @@ public class FiskedDefaultTheme implements ITheme {
 
 	@Override
 	public Color getForegroundColor() {
-		return Color.MAGENTA;
+		return Color.WHITE;
 	}
 
 }

@@ -2,6 +2,11 @@ package org.fisked.buffer.drawing;
 
 import org.fisked.responder.Event;
 import org.fisked.responder.IRawInputResponder;
+import org.fisked.theme.ITheme;
+import org.fisked.theme.ThemeManager;
+
+import jcurses.system.CharColor;
+import jcurses.system.Toolkit;
 
 public class Window implements IRawInputResponder, IDrawable {
 	protected View _rootView;
@@ -23,6 +28,8 @@ public class Window implements IRawInputResponder, IDrawable {
 
 	@Override
 	public void draw() {
+		ITheme theme = ThemeManager.getThemeManager().getCurrentTheme();
+		Toolkit.clearScreen(theme.getBackgroundColor().getCharColor());
 		_rootView.draw();
 	}
 	
