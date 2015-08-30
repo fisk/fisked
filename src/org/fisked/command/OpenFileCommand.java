@@ -2,6 +2,8 @@ package org.fisked.command;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
@@ -16,15 +18,13 @@ public class OpenFileCommand implements ICommandHandler {
 			window.refresh();
 			return;
 		}
-		String path = argv[1];
-		path = path.replaceFirst("^~",System.getProperty("user.home"));
-		File file = new File(path);
-		if (!file.isAbsolute()) {
-			path = System.getProperty("user.dir") + File.separator + path;
-			Log.println(path);
-			file = new File(path);
-		}
+		String pathString = argv[1].replaceFirst("^~",System.getProperty("user.home"));
+		Path path = Paths.get(pathString);
+		path = path.normalize();
+		File file = path.toFile();
+		Log.println("Path: " + file.toString());
 		try {
+			file.createNewFile();
 			Buffer buffer = new Buffer(file);
 			window.setBuffer(buffer);
 		} catch (IOException e) {
