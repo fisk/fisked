@@ -1,7 +1,7 @@
-package org.fisked.buffer;
+package org.fisked.command;
 
+import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.drawing.Rectangle;
-import org.fisked.command.CommandManager;
 import org.fisked.responder.Event;
 import org.fisked.responder.IRawInputResponder;
 

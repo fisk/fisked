@@ -1,4 +1,4 @@
-package org.fisked.buffer;
+package org.fisked.command;
 
 import org.fisked.buffer.drawing.Color;
 import org.fisked.buffer.drawing.Rectangle;
@@ -22,7 +22,7 @@ public class CommandView extends View {
 		Color backgroundColor = getBackgroundColor();
 		CharColor charColor = new CharColor(
 				backgroundColor.getRawColor(), 
-				ThemeManager.getThemeManager().getCurrentTheme().getForegroundColor().getRawColor()
+				ThemeManager.getThemeManager().getCurrentTheme().getCommandForegroundColor().getRawColor()
 				);
 		
 		String string = _controller.getString(drawingRect);

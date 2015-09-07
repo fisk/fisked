@@ -11,7 +11,12 @@ public class FiskedDefaultTheme implements ITheme {
 
 	@Override
 	public Color getForegroundColor() {
-		return Color.WHITE;
+		return Color.MAGENTA;
+	}
+
+	@Override
+	public Color getCommandForegroundColor() {
+		return Color.RED;
 	}
 
 }

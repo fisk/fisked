@@ -37,6 +37,11 @@ public class Toolkit {
 	static {
 		try {
 			NativeLoader.loadLibrary("jcurses");
+			fillBasicColors(__basicColors);
+			fillAttributes(__attributes);
+			fillColorPairs();
+			initEncoding();
+			init();
 		} catch (Throwable e) {
 			e.printStackTrace();
 			System.exit(0);

@@ -83,8 +83,11 @@
 						<compilerStartOption>-I"${project.build.directory}/custom-javah"</compilerStartOption>
 					</compilerStartOptions>
 					<linkerStartOptions>
+						<linkerStartOption>-fPIC</linkerStartOption>
 						<linkerStartOption>-lncurses</linkerStartOption>
-						<linkerStartOption>-shared</linkerStartOption>
+						<linkerStartOption>-L${java.home}/lib/server</linkerStartOption>
+						<linkerStartOption>-ljvm</linkerStartOption>
+						<linkerStartOption>-dynamiclib</linkerStartOption>
 					</linkerStartOptions>
 
 					<linkerOutputDirectory>${project.build.directory}</linkerOutputDirectory>

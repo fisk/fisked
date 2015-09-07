@@ -7,6 +7,7 @@ import org.fisked.command.CommandManager;
 import org.fisked.command.OpenFileCommand;
 import org.fisked.responder.EventLoop;
 
+import jcurses.system.CharColor;
 import jcurses.system.Toolkit;
 
 public class Application {
@@ -42,29 +43,31 @@ public class Application {
 	}
 	
 	public void start() {
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-		    public void run() {
-				Toolkit.shutdown();
-				if (_exception != null) {
-					_exception.printStackTrace();
-				}
-		    }
-		});
-		
 		try {
+			Toolkit.init();
+			Toolkit.setEncoding("UTF-8");
+
+			Runtime.getRuntime().addShutdownHook(new Thread() {
+			    public void run() {
+					Toolkit.shutdown();
+					if (_exception != null) {
+						_exception.printStackTrace();
+					}
+			    }
+			});
+			
 			setupCommands();
 			_loop = new EventLoop();
+			
 			Rectangle windowRect = new Rectangle(0, 0, getScreenWidth(), getScreenHeight());
+			
 			_primaryWindow = new BufferWindow(windowRect);
 
 			_loop.setPrimaryResponder(_primaryWindow);
 
-			Toolkit.init();
-			Toolkit.setEncoding("UTF-8");
-
 			_primaryWindow.draw();
 
-			_loop.start();
+			_loop.start();	
 		} catch (Throwable throwable) {
 			Application app = Application.getApplication();
 			app.setException(throwable);

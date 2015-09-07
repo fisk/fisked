@@ -27,8 +27,7 @@ JNIEXPORT jint JNICALL Java_jcurses_system_Toolkit_getScreenWidth (JNIEnv * env,
 
 
 JNIEXPORT jint JNICALL Java_jcurses_system_Toolkit_getScreenHeight (JNIEnv * env, jclass class) {
-	return LINES
-	;
+	return LINES;
 }
 
 

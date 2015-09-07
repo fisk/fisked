@@ -4,6 +4,9 @@ import org.fisked.buffer.drawing.Point;
 import org.fisked.buffer.drawing.Rectangle;
 import org.fisked.buffer.drawing.View;
 import org.fisked.buffer.drawing.Window;
+import org.fisked.command.CommandController;
+import org.fisked.command.CommandView;
+import org.fisked.log.Log;
 import org.fisked.mode.AbstractMode;
 import org.fisked.mode.InputMode;
 import org.fisked.mode.NormalMode;
@@ -25,6 +28,7 @@ public class BufferWindow extends Window {
 
 	public BufferWindow(Rectangle windowRect) {
 		super(windowRect);
+		
 		Rectangle rootViewRect = windowRect;
 		Rectangle modeLineRect = new Rectangle(
 				0, rootViewRect.getSize().getHeight() - 2,

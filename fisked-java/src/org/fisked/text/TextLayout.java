@@ -75,7 +75,7 @@ public class TextLayout {
 		}
 
 		if (line >= rect.getOrigin().getY() && line < rect.getOrigin().getY() + rect.getSize().getWidth()) {
-			Log.println("Coordinate: " + column + "," + line);
+			
 			return new Point(column, line);
 		}
 
