@@ -1,0 +1,83 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>fisked</groupId>
+	<artifactId>natives-jcurses-platform</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<parent>
+		<groupId>fisked</groupId>
+		<artifactId>jcurses-native</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	<packaging>dylib</packaging>
+	<name>JCurses Native Extensions OS X</name>
+  <dependencies>
+    <dependency>
+      <groupId>fisked</groupId>
+	  <artifactId>jcurses-java</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+      <type>jar</type>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+  <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                  <!--  trigger javah -->
+                  <javahOS>macosx</javahOS>
+
+                  <compilerProvider>generic-classic</compilerProvider>
+                    <compilerExecutable>gcc</compilerExecutable>
+                    <linkerExecutable>gcc</linkerExecutable>
+                    <sources>
+                        <source>
+                            <directory>../src/c</directory>
+                            <fileNames>
+                                <fileName>Toolkit.c</fileName>
+                            </fileNames>
+                        </source>
+                    </sources>
+
+					<compilerStartOptions>
+                     <compilerStartOption>-fPIC</compilerStartOption>
+					 <compilerStartOption>-I"${project.build.directory}/custom-javah"</compilerStartOption>
+                    </compilerStartOptions>
+                    <linkerStartOptions>
+                     <linkerStartOption>-lncurses</linkerStartOption>
+                     <linkerStartOption>-shared</linkerStartOption>
+                    </linkerStartOptions>
+
+					<linkerOutputDirectory>${project.build.directory}</linkerOutputDirectory>
+					<linkerFinalName>libjcurses</linkerFinalName>
+
+                </configuration>
+
+
+		<executions>
+           <execution>
+             <id>javah</id>
+             <phase>generate-sources</phase>
+             <configuration>
+          <javahOS>macosx</javahOS>
+          <javahProvider>default</javahProvider>
+          <javahOutputDirectory>${project.build.directory}/custom-javah</javahOutputDirectory>
+          <workingDirectory>${basedir}</workingDirectory>
+          <javahOutputFileName>jcurses_system_Toolkit.h</javahOutputFileName>
+          <javahClassNames>
+            <javahClassName>jcurses.system.Toolkit</javahClassName>
+          </javahClassNames>
+             </configuration>
+             <goals>
+               <goal>javah</goal>
+             </goals>
+           </execution>
+        </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

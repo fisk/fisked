@@ -13,26 +13,26 @@ public class TextLayout {
 	private int _width;
 	private List<String> _physicalLines = null;
 	private List<String> _logicalLines = null;
-	
+
 	public TextLayout(StringBuilder string, int width) {
 		_string = string;
 		_width = width;
 		layoutText();
 	}
-	
+
 	public void setText(StringBuilder string) {
 		_string = string;
 		layoutText();
 	}
-	
+
 	public void layoutText() {
 		_physicalLines = new ArrayList<>();
 		_logicalLines = new ArrayList<>();
-		
+
 		int currentLineIndex = 0;
 		StringBuilder currentLogicalLine = new StringBuilder();
 		StringBuilder currentPhysicalLine = new StringBuilder();
-		
+
 		for (char character : _string.toString().toCharArray()) {
 			if (character == '\n') {
 				_physicalLines.add(currentPhysicalLine.toString());
@@ -53,17 +53,17 @@ public class TextLayout {
 				}
 			}
 		}
-		
+
 		_physicalLines.add(currentPhysicalLine.toString());
 		_logicalLines.add(currentLogicalLine.toString());
 	}
-	
+
 	public Point getLogicalPointForCharIndex(int charIndex, Rectangle rect) {
 		int line = 0;
 		int column = 0;
-		
+
 		String currentLine = _logicalLines.get(line);
-		
+
 		for (int i = 0; i < charIndex; i++) {
 			if (column >= currentLine.length()) {
 				line++;
@@ -73,13 +73,13 @@ public class TextLayout {
 				column++;
 			}
 		}
-		
+
 		if (line >= rect.getOrigin().getY() && line < rect.getOrigin().getY() + rect.getSize().getWidth()) {
 			Log.println("Coordinate: " + column + "," + line);
-			return new Point(column, line);	
+			return new Point(column, line);
 		}
-		
-		return null;
+
+		return new Point(0, 0);
 	}
 
 	public String getLogicalString(Range range) {
@@ -87,12 +87,12 @@ public class TextLayout {
 		int fromY = range.getFrom();
 		int toY = Math.min(range.getTo(), _logicalLines.size());
 		StringBuilder result = new StringBuilder();
-		
+
 		for (int line = fromY; line < toY; line++) {
 			result.append(_logicalLines.get(line));
 			result.append("\n");
 		}
-		
+
 		return result.toString();
 	}
 }

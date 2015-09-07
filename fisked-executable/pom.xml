@@ -1,0 +1,85 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>fisked</groupId>
+	<artifactId>fisked-executable</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<parent>
+		<groupId>fisked</groupId>
+		<artifactId>fisked</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>fisked</groupId>
+			<artifactId>fisked-java</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>fisked</groupId>
+			<artifactId>natives-jcurses-platform</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<type>dylib</type>
+			<scope>system</scope>
+			<systemPath>${basedir}/../jcurses-native/osx/target/libjcurses.dylib</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>fisked</groupId>
+			<artifactId>jcurses-java</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<type>jar</type>
+		</dependency>
+
+	</dependencies>
+	<build>
+
+    <plugins>
+
+		<plugin>
+               <groupId>com.googlecode.mavennatives</groupId>
+               <artifactId>maven-nativedependencies-plugin</artifactId>
+               <version>0.0.6</version>
+               <executions>
+                       <execution>
+                               <id>unpacknatives</id>
+                               <phase>generate-resources</phase>
+                               <goals>
+                                       <goal>copy</goal>
+                               </goals>
+                       </execution>
+               </executions>
+       </plugin>
+
+
+	<plugin>
+                            <artifactId>maven-assembly-plugin</artifactId>
+                            <version>2.2.1</version>
+                            <executions>
+                                    <execution>
+                                            <id>bundle-project-sources</id>
+                                            <phase>package</phase>
+                                            <goals>
+                                                    <goal>single</goal>
+                                            </goals>
+                                            <configuration>
+                                                    <descriptors>
+														<descriptor>src/main/assembly/osx.xml</descriptor>
+                                                    </descriptors>
+		  <archive>
+            <manifest>
+              <mainClass>org.fisked.Main</mainClass>
+            </manifest>
+          </archive>
+                                            </configuration>
+                                    </execution>
+                            </executions>
+                    </plugin>
+
+    </plugins>
+
+	</build>
+</project>

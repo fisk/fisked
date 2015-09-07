@@ -1,3 +1,4 @@
 /bin/
 /target/
 /fisked.log
+*.swp
