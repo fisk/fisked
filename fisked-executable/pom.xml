@@ -37,49 +37,49 @@
 	</dependencies>
 	<build>
 
-    <plugins>
+		<plugins>
 
-		<plugin>
-               <groupId>com.googlecode.mavennatives</groupId>
-               <artifactId>maven-nativedependencies-plugin</artifactId>
-               <version>0.0.6</version>
-               <executions>
-                       <execution>
-                               <id>unpacknatives</id>
-                               <phase>generate-resources</phase>
-                               <goals>
-                                       <goal>copy</goal>
-                               </goals>
-                       </execution>
-               </executions>
-       </plugin>
+			<plugin>
+				<groupId>com.googlecode.mavennatives</groupId>
+				<artifactId>maven-nativedependencies-plugin</artifactId>
+				<version>0.0.6</version>
+				<executions>
+					<execution>
+						<id>unpacknatives</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
 
-	<plugin>
-                            <artifactId>maven-assembly-plugin</artifactId>
-                            <version>2.2.1</version>
-                            <executions>
-                                    <execution>
-                                            <id>bundle-project-sources</id>
-                                            <phase>package</phase>
-                                            <goals>
-                                                    <goal>single</goal>
-                                            </goals>
-                                            <configuration>
-                                                    <descriptors>
-														<descriptor>src/main/assembly/osx.xml</descriptor>
-                                                    </descriptors>
-		  <archive>
-            <manifest>
-              <mainClass>org.fisked.Main</mainClass>
-            </manifest>
-          </archive>
-                                            </configuration>
-                                    </execution>
-                            </executions>
-                    </plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<id>bundle-project-sources</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>src/main/assembly/osx.xml</descriptor>
+							</descriptors>
+							<archive>
+								<manifest>
+									<mainClass>org.fisked.Main</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
-    </plugins>
+		</plugins>
 
 	</build>
 </project>

@@ -11,33 +11,33 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>JCurses native extensions</name>
-    <profiles>
+	<profiles>
 
-      <profile>
-        <id>osx</id>
-        <activation>
-          <property>
-            <name>platform</name>
-            <value>osx</value>
-          </property>
-        </activation>
-        <modules>
-          <module>osx</module>
-        </modules>
-      </profile>
+		<profile>
+			<id>osx</id>
+			<activation>
+				<property>
+					<name>platform</name>
+					<value>osx</value>
+				</property>
+			</activation>
+			<modules>
+				<module>osx</module>
+			</modules>
+		</profile>
 
-      <profile>
-        <id>linux</id>
-        <activation>
-          <property>
-            <name>platform</name>
-            <value>linux</value>
-          </property>
-        </activation>
-        <modules>
-          <module>linux</module>
-        </modules>
-      </profile>
+		<profile>
+			<id>linux</id>
+			<activation>
+				<property>
+					<name>platform</name>
+					<value>linux</value>
+				</property>
+			</activation>
+			<modules>
+				<module>linux</module>
+			</modules>
+		</profile>
 
-    </profiles>
+	</profiles>
 </project>
