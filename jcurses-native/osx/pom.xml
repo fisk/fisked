@@ -44,7 +44,9 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore />
+										<execute>
+											<runOnIncremental>false</runOnIncremental>
+										</execute>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
