@@ -1,9 +1,9 @@
 package org.fisked.buffer;
 
-import org.fisked.buffer.drawing.Point;
-import org.fisked.buffer.drawing.Range;
-import org.fisked.buffer.drawing.Rectangle;
 import org.fisked.log.Log;
+import org.fisked.renderingengine.service.models.Point;
+import org.fisked.renderingengine.service.models.Range;
+import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.text.TextLayout;
 
 public class BufferController {
@@ -41,5 +41,22 @@ public class BufferController {
 	public void setBuffer(Buffer buffer) {
 		_buffer = buffer;
 		_layout.setText(_buffer.getStringBuilder());
+	}
+	
+	public interface IStringDecorator {
+		void draw(Point point, String string, int offset);
+	}
+	
+	public void drawBuffer(Rectangle drawingRect, IStringDecorator decorator) {
+		String string = getString(drawingRect);
+		String[] lines = string.split("\n");
+		int i = 0;
+		int offset = 0;
+		for (String line : lines) {
+			Point point = new Point(drawingRect.getOrigin().getX(), drawingRect.getOrigin().getY() + i);
+			decorator.draw(point, line, offset);
+			offset += line.length() + 1;
+			i++;
+		}
 	}
 }

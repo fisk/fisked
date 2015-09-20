@@ -1,14 +1,16 @@
 package org.fisked;
 
 import org.fisked.buffer.BufferWindow;
-import org.fisked.buffer.drawing.Rectangle;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.command.CommandManager;
 import org.fisked.command.OpenFileCommand;
+import org.fisked.log.Log;
+import org.fisked.renderingengine.service.IConsoleService;
+import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
+import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.EventLoop;
-
-import jcurses.system.CharColor;
-import jcurses.system.Toolkit;
+import org.fisked.services.ServiceManager;
+import org.fisked.shell.ShellCommandHandler;
 
 public class Application {
 	private static Application _sharedInstance;
@@ -39,31 +41,37 @@ public class Application {
 				window.getCommandController().setCommandFeedback("Couldn't save.");
 			}
 			});
-		
+		cm.registerHandler("r", new ShellCommandHandler());
 	}
 	
 	public void start() {
 		try {
-			Toolkit.init();
-			Toolkit.setEncoding("UTF-8");
-
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 			    public void run() {
-					Toolkit.shutdown();
+					ServiceManager sm = ServiceManager.getInstance();
+					IConsoleService cs = sm.getConsoleService();
+					try (IRenderingContext context = cs.getRenderingContext()) {
+						context.clearScreen();
+						cs.flush();
+					}
 					if (_exception != null) {
 						_exception.printStackTrace();
 					}
 			    }
 			});
-			
+
 			setupCommands();
 			_loop = new EventLoop();
+			ServiceManager sm = ServiceManager.getInstance();
+			IConsoleService cs = sm.getConsoleService();
 			
-			Rectangle windowRect = new Rectangle(0, 0, getScreenWidth(), getScreenHeight());
+			Rectangle windowRect = new Rectangle(0, 0, cs.getScreenWidth(), cs.getScreenHeight());
 			
 			_primaryWindow = new BufferWindow(windowRect);
 
 			_loop.setPrimaryResponder(_primaryWindow);
+			
+			Log.println("Initializing app with window: [" + cs.getScreenWidth() + ", " + cs.getScreenHeight() + "]");
 
 			_primaryWindow.draw();
 
@@ -77,14 +85,6 @@ public class Application {
 	
 	public void setException(Throwable throwable) {
 		_exception = throwable;
-	}
-	
-	public int getScreenWidth() {
-		return Toolkit.getScreenWidth();
-	}
-	
-	public int getScreenHeight() {
-		return Toolkit.getScreenHeight();
 	}
 	
 	public void exit() {

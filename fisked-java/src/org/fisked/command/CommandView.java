@@ -1,12 +1,11 @@
 package org.fisked.command;
 
-import org.fisked.buffer.drawing.Color;
-import org.fisked.buffer.drawing.Rectangle;
 import org.fisked.buffer.drawing.View;
+import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
+import org.fisked.renderingengine.service.models.AttributedString;
+import org.fisked.renderingengine.service.models.Color;
+import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.theme.ThemeManager;
-
-import jcurses.system.CharColor;
-import jcurses.system.Toolkit;
 
 public class CommandView extends View {
 	private CommandController _controller;
@@ -16,17 +15,18 @@ public class CommandView extends View {
 		_controller = controller;
 	}
 	
-	public void drawInRect(Rectangle drawingRect) {
-		super.drawInRect(drawingRect);
+	public void drawInRect(Rectangle drawingRect, IRenderingContext context) {
+		super.drawInRect(drawingRect, context);
 		
 		Color backgroundColor = getBackgroundColor();
-		CharColor charColor = new CharColor(
-				backgroundColor.getRawColor(), 
-				ThemeManager.getThemeManager().getCurrentTheme().getCommandForegroundColor().getRawColor()
-				);
+		Color foregroundColor = ThemeManager.getThemeManager().getCurrentTheme().getCommandForegroundColor();
 		
 		String string = _controller.getString(drawingRect);
-		Toolkit.printString(string, drawingRect.toJcursesRectangle(), charColor);
+		AttributedString attrString = new AttributedString(string);
+		attrString.setBackgroundColor(backgroundColor);
+		attrString.setForegroundColor(foregroundColor);
+		
+		context.printString(attrString);
 	}
 
 }

@@ -1,18 +1,16 @@
 package org.fisked.buffer;
 
-import org.fisked.buffer.drawing.Point;
-import org.fisked.buffer.drawing.Rectangle;
 import org.fisked.buffer.drawing.View;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.command.CommandController;
 import org.fisked.command.CommandView;
-import org.fisked.log.Log;
 import org.fisked.mode.AbstractMode;
 import org.fisked.mode.InputMode;
 import org.fisked.mode.NormalMode;
+import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
+import org.fisked.renderingengine.service.models.Point;
+import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
-
-import jcurses.system.Toolkit;
 
 public class BufferWindow extends Window {
 	private ModeLineController _modeLineController;
@@ -79,9 +77,9 @@ public class BufferWindow extends Window {
 	}
 	
 	@Override
-	public void drawPoint() {
+	public void drawPoint(IRenderingContext context) {
 		Point point = _bufferController.getLogicalPoint();
-		Toolkit.move(point.getX(), point.getY());
+		context.moveTo(point.getX(), point.getY());
 	}
 
 	public void switchToInputMode() {
@@ -100,7 +98,6 @@ public class BufferWindow extends Window {
 	
 	public void refresh() {
 		draw();
-		drawPoint();
 	}
 
 }

@@ -1,12 +1,13 @@
 package org.fisked.buffer;
 
-import org.fisked.buffer.drawing.Color;
-import org.fisked.buffer.drawing.Rectangle;
 import org.fisked.buffer.drawing.View;
+import org.fisked.log.Log;
+import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
+import org.fisked.renderingengine.service.models.AttributedString;
+import org.fisked.renderingengine.service.models.Color;
+import org.fisked.renderingengine.service.models.Point;
+import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.theme.ThemeManager;
-
-import jcurses.system.CharColor;
-import jcurses.system.Toolkit;
 
 public class BufferView extends View {
 	BufferController _controller;
@@ -19,16 +20,18 @@ public class BufferView extends View {
 		_controller = controller;
 	}
 	
-	public void drawInRect(Rectangle drawingRect) {
-		super.drawInRect(drawingRect);
+	public void drawInRect(Rectangle drawingRect, IRenderingContext context) {
+		super.drawInRect(drawingRect, context);
 		
 		Color backgroundColor = getBackgroundColor();
-		CharColor charColor = new CharColor(
-				backgroundColor.getRawColor(), 
-				ThemeManager.getThemeManager().getCurrentTheme().getForegroundColor().getRawColor()
-				);
+		Color foregroundColor = ThemeManager.getThemeManager().getCurrentTheme().getForegroundColor();
 		
-		String string = _controller.getString(drawingRect);
-		Toolkit.printString(string, drawingRect.toJcursesRectangle(), charColor);
+		_controller.drawBuffer(drawingRect, (Point point, String str, int offset) -> {
+			AttributedString attrString = new AttributedString(str);
+			attrString.setBackgroundColor(backgroundColor);
+			attrString.setForegroundColor(foregroundColor);
+			context.moveTo(point.getX(), point.getY());
+			context.printString(str);
+		});
 	}
 }

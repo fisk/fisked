@@ -21,7 +21,11 @@ public class InputMode extends AbstractMode {
 				return true;
 			}
 			Buffer buffer = _window.getBuffer();
-			buffer.appendCharAtPoint(input.getCharacter());
+			if (input.isReturn()) {
+				buffer.appendCharAtPoint('\n');
+			} else {
+				buffer.appendCharAtPoint(input.getCharacter());
+			}
 			return true;
 		} finally {
 			_window.refresh();

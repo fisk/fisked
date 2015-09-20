@@ -3,10 +3,9 @@ package org.fisked.text;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.fisked.buffer.drawing.Point;
-import org.fisked.buffer.drawing.Range;
-import org.fisked.buffer.drawing.Rectangle;
-import org.fisked.log.Log;
+import org.fisked.renderingengine.service.models.Point;
+import org.fisked.renderingengine.service.models.Range;
+import org.fisked.renderingengine.service.models.Rectangle;
 
 public class TextLayout {
 	private StringBuilder _string;

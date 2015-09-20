@@ -1,14 +1,18 @@
 package org.fisked.responder;
 
-import jcurses.system.InputChar;
-import jcurses.system.Toolkit;
+import org.fisked.log.Log;
+import org.fisked.renderingengine.service.IConsoleService;
+import org.fisked.services.ServiceManager;
 
 public class EventLoop {
 	private IRawInputResponder _primaryResponder;
 	
 	public void start() {
 		while (true) {
-			InputChar nextChar = Toolkit.readCharacter();
+			ServiceManager sm = ServiceManager.getInstance();
+			IConsoleService cs = sm.getConsoleService();
+			int nextChar = cs.getChar();
+			Log.println("Got event: " + nextChar);
 			Event nextEvent = new Event(nextChar);
 			_primaryResponder.handleInput(nextEvent);
 		}

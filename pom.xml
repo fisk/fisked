@@ -6,8 +6,8 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<modules>
-		<module>jcurses-java</module>
-		<module>jcurses-native</module>
+		
+		
 		<module>fisked-java</module>
 		<module>fisked-executable</module>
 	</modules>

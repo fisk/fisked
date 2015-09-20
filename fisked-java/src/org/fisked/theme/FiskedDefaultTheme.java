@@ -1,6 +1,6 @@
 package org.fisked.theme;
 
-import org.fisked.buffer.drawing.Color;
+import org.fisked.renderingengine.service.models.Color;
 
 public class FiskedDefaultTheme implements ITheme {
 
@@ -11,7 +11,7 @@ public class FiskedDefaultTheme implements ITheme {
 
 	@Override
 	public Color getForegroundColor() {
-		return Color.MAGENTA;
+		return Color.GREEN;
 	}
 
 	@Override

@@ -3,11 +3,14 @@ package org.fisked.buffer.drawing;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.fisked.renderingengine.service.IConsoleService;
+import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
+import org.fisked.renderingengine.service.models.Color;
+import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
 import org.fisked.responder.IRawInputResponder;
+import org.fisked.services.ServiceManager;
 import org.fisked.theme.ThemeManager;
-
-import jcurses.system.Toolkit;
 
 public class View implements IRawInputResponder, IDrawable {
 	private Rectangle _bounds;
@@ -68,24 +71,20 @@ public class View implements IRawInputResponder, IDrawable {
 
 	@Override
 	public void draw() {
-		Toolkit.startPainting();
-		Rectangle rect = getClippingRect();
-		Toolkit.setClipRectangle(rect.toJcursesRectangle());
-		drawInRect(rect);
-		Toolkit.unsetClipRectangle();
-		_subviews.forEach(subview -> subview.draw());
-		Toolkit.endPainting();
+		ServiceManager sm = ServiceManager.getInstance();
+		IConsoleService cs = sm.getConsoleService();
+		
+		try (IRenderingContext context = cs.getRenderingContext()) {
+			Rectangle rect = getClippingRect();
+			drawInRect(rect, context);
+			_subviews.forEach(subview -> subview.draw());
+		}
 	}
 	
-	public void drawInRect(Rectangle drawingRect) {
+	public void drawInRect(Rectangle drawingRect, IRenderingContext context) {
 		if (_backgroundColor != null && _backgroundColor.equals(getParentBackgroundColor())) {
-			Toolkit.drawRectangle(
-					drawingRect.getOrigin().getX(), 
-					drawingRect.getOrigin().getY(), 
-					drawingRect.getSize().getWidth(), 
-					drawingRect.getSize().getHeight(), 
-					_backgroundColor.getCharColor()
-					);
+			
+			context.clearRect(drawingRect, _backgroundColor);
 		}
 	}
 

@@ -1,44 +1,42 @@
 package org.fisked.responder;
 
-import jcurses.system.InputChar;
-
 public class Event {
-	private InputChar _input;
+	private int _input;
 	
-	public Event(InputChar input) {
+	public Event(int input) {
 		_input = input;
 	}
 	
 	public boolean isCharacter() {
-		return !_input.isSpecialCode() || isEscape() || isBackspace();
+		return !Character.isISOControl(_input);
 	}
 	
 	public int getCode() {
-		return _input.getCode();
+		return _input;
 	}
 	
 	public boolean isEscape() {
-		return _input.getCode() == 27;
+		return _input == 27;
 	}
 	
 	public boolean isReturn() {
-		return _input.getCharacter() == '\n';
+		return _input == 13;
 	}
 	
 	public boolean isBackspace() {
-		return _input.getCode() == 127;
+		return _input == 127;
 	}
 	
 	public boolean isDelete() {
-		return _input.getCode() == 330;
+		return _input == 330;
 	}
 
 	public char getCharacter() {
-		return _input.getCharacter();
+		return (char)_input;
 	}
 
 	public boolean isSpecialCode() {
-		return !isCharacter();
+		return Character.isISOControl(_input);
 	}
 
 }
