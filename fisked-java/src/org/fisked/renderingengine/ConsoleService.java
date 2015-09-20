@@ -20,10 +20,6 @@ public class ConsoleService implements IConsoleService {
 		} catch (IOException e) {}
 	}
 	
-	private void print(int integer) {
-		print(Integer.toString(integer));
-	}
-	
 	private void print(String string) {
 		System.out.print(string);
 	}

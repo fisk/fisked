@@ -1,6 +1,5 @@
 package org.fisked.buffer;
 
-import org.fisked.log.Log;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;

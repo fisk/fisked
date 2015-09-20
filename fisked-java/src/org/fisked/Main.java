@@ -1,6 +1,5 @@
 package org.fisked;
 
-import org.fisked.log.Log;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.models.AttributedString;

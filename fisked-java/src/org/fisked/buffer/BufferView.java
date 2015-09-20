@@ -1,7 +1,6 @@
 package org.fisked.buffer;
 
 import org.fisked.buffer.drawing.View;
-import org.fisked.log.Log;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.renderingengine.service.models.Color;
