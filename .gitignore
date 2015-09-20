@@ -2,3 +2,4 @@
 /target/
 /fisked.log
 *.swp
+.settings
