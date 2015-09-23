@@ -5,6 +5,8 @@ import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Rectangle;
 
 public interface IConsoleService {
+	void activate();
+	void deactivate();
 	int getChar();
 	void flush();
 	int getScreenWidth();

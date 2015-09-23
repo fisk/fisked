@@ -116,4 +116,19 @@ public class ConsoleService implements IConsoleService {
 		return context;
 	}
 
+	@Override
+	public void activate() {
+		csi();
+		print("?1049h");
+		print("\u001B%G");
+		flush();
+	}
+
+	@Override
+	public void deactivate() {
+		csi();
+		print("?1049l");
+		flush();
+	}
+
 }

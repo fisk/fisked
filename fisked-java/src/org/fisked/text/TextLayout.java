@@ -64,17 +64,19 @@ public class TextLayout {
 		String currentLine = _logicalLines.get(line);
 
 		for (int i = 0; i < charIndex; i++) {
-			if (column >= currentLine.length()) {
+			if (column == currentLine.length()) {
 				line++;
-				currentLine = _logicalLines.get(line);
 				column = 0;
+				charIndex++;
+				if (line < _logicalLines.size()) {
+					currentLine = _logicalLines.get(line);
+				}
 			} else {
 				column++;
 			}
 		}
 
 		if (line >= rect.getOrigin().getY() && line < rect.getOrigin().getY() + rect.getSize().getWidth()) {
-			
 			return new Point(column, line);
 		}
 

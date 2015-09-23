@@ -50,10 +50,7 @@ public class Application {
 			    public void run() {
 					ServiceManager sm = ServiceManager.getInstance();
 					IConsoleService cs = sm.getConsoleService();
-					try (IRenderingContext context = cs.getRenderingContext()) {
-						context.clearScreen();
-						cs.flush();
-					}
+					cs.deactivate();
 					if (_exception != null) {
 						_exception.printStackTrace();
 					}
@@ -64,6 +61,8 @@ public class Application {
 			_loop = new EventLoop();
 			ServiceManager sm = ServiceManager.getInstance();
 			IConsoleService cs = sm.getConsoleService();
+			
+			cs.activate();
 			
 			Rectangle windowRect = new Rectangle(0, 0, cs.getScreenWidth(), cs.getScreenHeight());
 			

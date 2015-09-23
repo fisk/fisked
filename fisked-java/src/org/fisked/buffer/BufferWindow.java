@@ -60,7 +60,8 @@ public class BufferWindow extends Window {
 	
 	@Override
 	public boolean handleInput(Event input) {
-		return _currentMode.handleInput(input);
+		boolean result = _currentMode.handleInput(input);
+		return result;
 	}
 
 	public Buffer getBuffer() {
