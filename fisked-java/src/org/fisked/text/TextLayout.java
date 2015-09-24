@@ -10,8 +10,17 @@ import org.fisked.renderingengine.service.models.Rectangle;
 public class TextLayout {
 	private StringBuilder _string;
 	private int _width;
-	private List<String> _physicalLines = null;
-	private List<String> _logicalLines = null;
+	private List<Line> _physicalLines = null;
+	private List<Line> _logicalLines = null;
+	
+	private static class Line {
+		public final String _value;
+		public final boolean _trailingEndline;
+		public Line(String value, boolean trailingEndline) {
+			_trailingEndline = trailingEndline;
+			_value = value;
+		}
+	}
 
 	public TextLayout(StringBuilder string, int width) {
 		_string = string;
@@ -34,52 +43,63 @@ public class TextLayout {
 
 		for (char character : _string.toString().toCharArray()) {
 			if (character == '\n') {
-				_physicalLines.add(currentPhysicalLine.toString());
-				_logicalLines.add(currentLogicalLine.toString());
+				_physicalLines.add(new Line(currentPhysicalLine.toString(), true));
+				_logicalLines.add(new Line(currentLogicalLine.toString(), true));
 
 				currentLogicalLine = new StringBuilder();
 				currentPhysicalLine = new StringBuilder();
 				currentLineIndex = 0;
 			} else {
 				currentPhysicalLine.append(character);
-				if (currentLineIndex++ < _width) {
-					currentLogicalLine.append(character);
-				} else {
+				currentLogicalLine.append(character);
+				
+				if (++currentLineIndex == _width) {
+					_logicalLines.add(new Line(currentLogicalLine.toString(), false));
 					currentLineIndex = 0;
-					_logicalLines.add(currentLogicalLine.toString());
 					currentLogicalLine = new StringBuilder();
-					currentLogicalLine.append(character);
 				}
 			}
 		}
 
-		_physicalLines.add(currentPhysicalLine.toString());
-		_logicalLines.add(currentLogicalLine.toString());
+		_physicalLines.add(new Line(currentPhysicalLine.toString(), false));
+		_logicalLines.add(new Line(currentLogicalLine.toString(), false));
 	}
 
 	public Point getLogicalPointForCharIndex(int charIndex, Rectangle rect) {
 		int line = 0;
 		int column = 0;
+		
+		int i = 0;
 
-		String currentLine = _logicalLines.get(line);
-
-		for (int i = 0; i < charIndex; i++) {
-			if (column == currentLine.length()) {
-				line++;
-				column = 0;
-				charIndex++;
-				if (line < _logicalLines.size()) {
-					currentLine = _logicalLines.get(line);
+		exit:
+		for (Line currentLine : _logicalLines) {
+			for (column = 0; column < currentLine._value.length(); column++) {
+				if (i == charIndex) {
+					break;
 				}
-			} else {
-				column++;
+				i++;
 			}
+			if (currentLine._trailingEndline) {
+				if (i == charIndex) {
+					break exit;
+				}
+				i++;
+			}
+			if (i == charIndex) {
+				break exit;
+			}
+			line++;
 		}
-
+		
+		if (column >= rect.getSize().getWidth()) {
+			column = 0;
+			line++;
+		}
+		
 		if (line >= rect.getOrigin().getY() && line < rect.getOrigin().getY() + rect.getSize().getWidth()) {
 			return new Point(column, line);
 		}
-
+		
 		return new Point(0, 0);
 	}
 
@@ -90,7 +110,7 @@ public class TextLayout {
 		StringBuilder result = new StringBuilder();
 
 		for (int line = fromY; line < toY; line++) {
-			result.append(_logicalLines.get(line));
+			result.append(_logicalLines.get(line)._value);
 			result.append("\n");
 		}
 
