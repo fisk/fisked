@@ -30,14 +30,6 @@ public class Rectangle {
 		_size = size;
 	}
 	
-	public jcurses.util.Rectangle toJcursesRectangle() {
-		return
-		new jcurses.util.Rectangle(
-				_origin.getX(), _origin.getY(),
-				_size.getWidth(), _size.getHeight()
-				);
-	}
-	
 	public String toString() {
 		return "[" + _origin.getX() + ", " + _origin.getY() + ", " + _size.getWidth() + ", " + _size.getHeight() + "]";
 	}
