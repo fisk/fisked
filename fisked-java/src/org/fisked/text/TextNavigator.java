@@ -58,11 +58,17 @@ public class TextNavigator {
 	}
 
 	public void moveLeft() {
-		setIndex(getIndex() - 1, true);
+		int newIndex = getIndex() - 1;
+		if (newIndex >= 0) {
+			setIndex(newIndex, true);
+		}
 	}
 
 	public void moveRight() {
-		setIndex(getIndex() + 1, true);
+		int newIndex = getIndex() + 1;
+		if (newIndex <= _buffer.getStringBuilder().length()) {
+			setIndex(newIndex, true);
+		}
 	}
 
 	public void moveDown() {
