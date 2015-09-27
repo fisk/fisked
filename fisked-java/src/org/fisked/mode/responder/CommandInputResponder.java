@@ -2,9 +2,9 @@ package org.fisked.mode.responder;
 
 import org.fisked.buffer.BufferWindow;
 import org.fisked.responder.Event;
-import org.fisked.responder.IRawInputResponder;
+import org.fisked.responder.IInputResponder;
 
-public class CommandInputResponder implements IRawInputResponder {
+public class CommandInputResponder implements IInputResponder {
 	private boolean _writingCommand = false;
 	private BufferWindow _window;
 	
@@ -16,8 +16,8 @@ public class CommandInputResponder implements IRawInputResponder {
 		if (_writingCommand) {
 			if (!_window.getCommandController().handleInput(input)) {
 				_writingCommand = false;
-				return true;
 			}
+			return true;
 		}
 		_window.getCommandController().setCommandFeedback(null);
 		if (input.getCharacter() == ':') {

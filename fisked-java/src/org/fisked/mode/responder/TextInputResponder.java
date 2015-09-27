@@ -3,9 +3,9 @@ package org.fisked.mode.responder;
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.responder.Event;
-import org.fisked.responder.IRawInputResponder;
+import org.fisked.responder.IInputResponder;
 
-public class TextInputResponder implements IRawInputResponder {
+public class TextInputResponder implements IInputResponder {
 	private BufferWindow _window;
 	
 	public TextInputResponder(BufferWindow window) {

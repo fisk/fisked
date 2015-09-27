@@ -5,7 +5,7 @@ import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.services.ServiceManager;
 
 public class EventLoop {
-	private IRawInputResponder _primaryResponder;
+	private IInputResponder _primaryResponder;
 	
 	public void start() {
 		while (true) {
@@ -18,11 +18,11 @@ public class EventLoop {
 		}
 	}
 	
-	public IRawInputResponder getPrimaryResponder() {
+	public IInputResponder getPrimaryResponder() {
 		return _primaryResponder;
 	}
 	
-	public void setPrimaryResponder(IRawInputResponder _primaryResponder) {
+	public void setPrimaryResponder(IInputResponder _primaryResponder) {
 		this._primaryResponder = _primaryResponder;
 	}
 }

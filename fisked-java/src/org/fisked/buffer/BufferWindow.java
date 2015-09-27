@@ -12,6 +12,7 @@ import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
+import org.fisked.text.TextLayout;
 
 public class BufferWindow extends Window {
 	private ModeLineController _modeLineController;
@@ -42,7 +43,6 @@ public class BufferWindow extends Window {
 				rootViewRect.getSize().getWidth(), rootViewRect.getSize().getHeight() - 2
 				);
 		_rootView = new View(rootViewRect);
-		_currentMode = new NormalMode(this);
 		
 		_modeLineController = new ModeLineController(this);
 		_modeLineView = new ModeLineView(modeLineRect, _modeLineController);
@@ -57,6 +57,8 @@ public class BufferWindow extends Window {
 		_rootView.addSubview(_bufferView);
 		_rootView.addSubview(_modeLineView);
 		_rootView.addSubview(_commandView);
+
+		_currentMode = new NormalMode(this);
 	}
 	
 	@Override
@@ -103,6 +105,10 @@ public class BufferWindow extends Window {
 	
 	public void refresh() {
 		draw();
+	}
+
+	public TextLayout getTextLayout() {
+		return _bufferController.getTextLayout();
 	}
 
 }

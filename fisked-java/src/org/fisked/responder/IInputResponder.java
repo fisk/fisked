@@ -1,5 +1,5 @@
 package org.fisked.responder;
 
-public interface IRawInputResponder {
+public interface IInputResponder {
 	boolean handleInput(Event nextEvent);
 }

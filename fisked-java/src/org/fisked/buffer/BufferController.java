@@ -1,7 +1,6 @@
 package org.fisked.buffer;
 
 import org.fisked.renderingengine.service.models.Point;
-import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.renderingengine.service.models.Size;
 import org.fisked.text.TextLayout;
@@ -10,11 +9,17 @@ public class BufferController {
 	private Buffer _buffer;
 	private BufferView _bufferView;
 	private TextLayout _layout;
+	private Size _size;
 	
 	public BufferController(BufferView bufferView, Size size) {
 		_buffer = new Buffer();
 		_bufferView = bufferView;
-		_layout = new TextLayout(_buffer.getStringBuilder(), size);
+		_size = size;
+		_layout = new TextLayout(_buffer, _size);
+	}
+	
+	public TextLayout getTextLayout() {
+		return _layout;
 	}
 	
 	public Buffer getBuffer() {
@@ -37,7 +42,7 @@ public class BufferController {
 
 	public void setBuffer(Buffer buffer) {
 		_buffer = buffer;
-		_layout.setText(_buffer.getStringBuilder());
+		_layout = new TextLayout(_buffer, _size);
 	}
 	
 	public interface IStringDecorator {

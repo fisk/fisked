@@ -3,12 +3,15 @@ package org.fisked.text;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.fisked.buffer.Buffer;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.renderingengine.service.models.Size;
 
+//TODO: This file needs a lot more logic
+
 public class TextLayout {
-	private StringBuilder _string;
+	private Buffer _buffer;
 	private List<Line> _physicalLines = null;
 	private List<Line> _logicalLines = null;
 	private Rectangle _rect = null;
@@ -22,9 +25,9 @@ public class TextLayout {
 		}
 	}
 
-	public TextLayout(StringBuilder string, Size size) {
+	public TextLayout(Buffer buffer, Size size) {
 		_rect = new Rectangle(new Point(0, 0), size);
-		_string = string;
+		_buffer = buffer;
 		layoutText();
 	}
 
@@ -34,11 +37,6 @@ public class TextLayout {
 	
 	public void setClippingRect(Rectangle rect) {
 		_rect = rect;
-	}
-	
-	public void setText(StringBuilder string) {
-		_string = string;
-		layoutText();
 	}
 
 	public void layoutText() {
@@ -51,7 +49,7 @@ public class TextLayout {
 		StringBuilder currentLogicalLine = new StringBuilder();
 		StringBuilder currentPhysicalLine = new StringBuilder();
 
-		for (char character : _string.toString().toCharArray()) {
+		for (char character : _buffer.getStringBuilder().toString().toCharArray()) {
 			if (character == '\n') {
 				_physicalLines.add(new Line(currentPhysicalLine.toString(), true));
 				_logicalLines.add(new Line(currentLogicalLine.toString(), true));

@@ -3,9 +3,9 @@ package org.fisked.command;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
-import org.fisked.responder.IRawInputResponder;
+import org.fisked.responder.IInputResponder;
 
-public class CommandController implements IRawInputResponder {
+public class CommandController implements IInputResponder {
 	private BufferWindow _window;
 	private StringBuilder _command;
 	private boolean _writingCommand;

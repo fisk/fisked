@@ -27,6 +27,7 @@ public class OpenFileCommand implements ICommandHandler {
 			file.createNewFile();
 			Buffer buffer = new Buffer(file);
 			window.setBuffer(buffer);
+			window.switchToNormalMode();
 		} catch (IOException e) {
 			window.getCommandController().setCommandFeedback("Could not open file: " + argv[1] + ".");
 			window.refresh();

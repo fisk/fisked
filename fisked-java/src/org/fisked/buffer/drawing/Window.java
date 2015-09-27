@@ -4,12 +4,12 @@ import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
-import org.fisked.responder.IRawInputResponder;
+import org.fisked.responder.IInputResponder;
 import org.fisked.services.ServiceManager;
 import org.fisked.theme.ITheme;
 import org.fisked.theme.ThemeManager;
 
-public class Window implements IRawInputResponder, IDrawable {
+public class Window implements IInputResponder, IDrawable {
 	protected View _rootView;
 	
 	public Window(Rectangle windowRect) {}

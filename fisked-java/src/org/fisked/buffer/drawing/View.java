@@ -8,11 +8,11 @@ import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
-import org.fisked.responder.IRawInputResponder;
+import org.fisked.responder.IInputResponder;
 import org.fisked.services.ServiceManager;
 import org.fisked.theme.ThemeManager;
 
-public class View implements IRawInputResponder, IDrawable {
+public class View implements IInputResponder, IDrawable {
 	private Rectangle _bounds;
 	private View _parent;
 	private List<View> _subviews = new ArrayList<>();

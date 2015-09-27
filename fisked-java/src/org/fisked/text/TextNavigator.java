@@ -4,6 +4,8 @@ import org.fisked.buffer.Buffer;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Rectangle;
 
+// TODO: This file needs a lot more logic
+
 public class TextNavigator {
 	private int lastColumn;
 	private TextLayout _layout;
@@ -25,8 +27,9 @@ public class TextNavigator {
 		getBuffer().setPointIndex(index);
 	}
 	
-	public TextNavigator(Buffer buffer) {
+	public TextNavigator(Buffer buffer, TextLayout layout) {
 		_buffer = buffer;
+		_layout = layout;
 	}
 	
 	public void scrollUp() {
@@ -43,19 +46,49 @@ public class TextNavigator {
 		_layout.setClippingRect(newRect);
 	}
 	
-	public void moveUp() {
-		
-	}
-	
-	public void moveDown() {
-		
-	}
-	
 	public void moveLeft() {
-		
+		setIndex(getIndex() - 1);
 	}
 	
 	public void moveRight() {
-		
+		setIndex(getIndex() + 1);
+	}
+	
+	public void moveDown() {
+		Buffer buff = getBuffer();
+		int pos = getIndex();
+		int offset = 0;
+		while (pos >= 0) {
+			if (buff.getStringBuilder().charAt(pos) == '\n') {
+				offset = getIndex() - pos;
+				break;
+			}
+			pos--;
+		}
+		if (pos == -1) { offset = getIndex() + 1; }
+		int lineEndsAt = buff.getStringBuilder().indexOf("\n", getIndex());
+		if (lineEndsAt != -1) {
+			buff.setPointIndex(lineEndsAt + offset);
+		}
+	}
+	
+	public void moveUp() {
+		Buffer buff = getBuffer();
+		int pos = getIndex();
+		int offset = 0;
+		boolean foundFirstLinebreak = false;
+		while (pos >= 0) {
+			if (buff.getStringBuilder().charAt(pos) == '\n') {
+				if (!foundFirstLinebreak) {
+					offset = getIndex() - pos;
+					foundFirstLinebreak = true;
+				} else {
+					break;
+				}
+			}
+			pos--;
+		}
+
+		setIndex(pos + offset);
 	}
 }

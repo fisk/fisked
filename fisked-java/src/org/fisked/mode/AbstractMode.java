@@ -2,10 +2,10 @@ package org.fisked.mode;
 
 import org.fisked.buffer.BufferWindow;
 import org.fisked.responder.Event;
-import org.fisked.responder.IRawInputResponder;
+import org.fisked.responder.IInputResponder;
 import org.fisked.responder.InputResponderChain;
 
-public abstract class AbstractMode implements IRawInputResponder {
+public abstract class AbstractMode implements IInputResponder {
 	protected BufferWindow _window;
 	protected InputResponderChain _recognizers = new InputResponderChain();
 	
@@ -15,7 +15,7 @@ public abstract class AbstractMode implements IRawInputResponder {
 	
 	abstract public String getModeName();
 	
-	protected void addRecognizer(IRawInputResponder recognizer) {
+	protected void addRecognizer(IInputResponder recognizer) {
 		_recognizers.addRecognizer(recognizer);
 	}
 	

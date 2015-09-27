@@ -5,9 +5,9 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 
 import org.fisked.buffer.BufferWindow;
+import org.fisked.mode.responder.BasicNavigationResponder;
 import org.fisked.mode.responder.CommandInputResponder;
 import org.fisked.mode.responder.NormalModeSwitchResponder;
-import org.fisked.responder.Event;
 
 public class VisualMode extends AbstractMode {
 	
@@ -21,6 +21,7 @@ public class VisualMode extends AbstractMode {
 	
 	public VisualMode(BufferWindow window) {
 		super(window);
+		addRecognizer(new BasicNavigationResponder(_window));
 		addRecognizer(new CommandInputResponder(_window));
 		addRecognizer(new NormalModeSwitchResponder(_window));
 	}
