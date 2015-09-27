@@ -11,7 +11,7 @@ public class BasicNavigationResponder implements IInputResponder {
 	
 	public BasicNavigationResponder(BufferWindow window) {
 		_window = window;
-		_navigator = new TextNavigator(_window.getBuffer(), _window.getTextLayout());
+		_navigator = new TextNavigator(_window.getBuffer());
 	}
 	
 	@Override

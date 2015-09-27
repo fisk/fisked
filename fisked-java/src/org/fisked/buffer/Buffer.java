@@ -5,12 +5,32 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import org.fisked.text.TextLayout;
+
 public class Buffer {
 	private File _file = null;
 	private StringBuilder _buffer = new StringBuilder();
-	private int _pointIndex = 0;
+	private TextLayout _layout;
+	private Cursor _cursor;
 	
 	public Buffer() {}
+
+	public Cursor getCursor() {
+		return _cursor;
+	}
+
+	public void setCursor(Cursor cursor) {
+		_cursor = cursor;
+	}
+	
+	public void setTextLayout(TextLayout layout) {
+		_layout = layout;
+		_cursor = new Cursor(layout);
+	}
+	
+	public TextLayout getTextLayout() {
+		return _layout;
+	}
 	
 	public Buffer(File file) throws IOException {
 		_file = file;
@@ -24,29 +44,29 @@ public class Buffer {
 	}
 	
 	public void removeCharAtPoint() {
-		if (_pointIndex > 0 && _buffer.length() > 0) {
-			_buffer.deleteCharAt(_pointIndex - 1);
-			_pointIndex--;
+		if (_cursor.getCharIndex() > 0 && _buffer.length() > 0) {
+			_buffer.deleteCharAt(_cursor.getCharIndex() - 1);
+			_cursor.setCharIndex(_cursor.getCharIndex() - 1, true);
 		}
 	}
 	
 	public void appendCharAtPoint(char character) {
-		if (_pointIndex == _buffer.length()) {
+		if (_cursor.getCharIndex() == _buffer.length()) {
 			_buffer.append(character);
-			_pointIndex++;
+			_cursor.setCharIndex(_cursor.getCharIndex() + 1, true);
 		} else {
-			_buffer.insert(_pointIndex, character);
-			_pointIndex++;
+			_buffer.insert(_cursor.getCharIndex(), character);
+			_cursor.setCharIndex(_cursor.getCharIndex() + 1, true);
 		}
 	}
 	
 	public int getPointIndex() {
-		return _pointIndex;
+		return _cursor.getCharIndex();
 	}
 	
 	public void setPointIndex(int pointIndex) {
 		if (pointIndex >= 0 && pointIndex <= _buffer.length()) {
-			_pointIndex = pointIndex;
+			_cursor.setCharIndex(pointIndex, true);
 		}
 	}
 	
@@ -59,7 +79,13 @@ public class Buffer {
 	}
 
 	public void appendStringAtPoint(String string) {
-		_buffer.append(string);
-		_pointIndex += string.length();
+		if (_cursor.getCharIndex() == _buffer.length()) {
+			_buffer.append(string);
+			_cursor.setCharIndex(_cursor.getCharIndex() + string.length(), true);
+		} else {
+			_buffer.insert(_cursor.getCharIndex(), string);
+			_cursor.setCharIndex(_cursor.getCharIndex() + string.length(), true);
+		}
+		
 	}
 }

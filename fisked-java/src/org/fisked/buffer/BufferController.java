@@ -16,6 +16,7 @@ public class BufferController {
 		_bufferView = bufferView;
 		_size = size;
 		_layout = new TextLayout(_buffer, _size);
+		_buffer.setTextLayout(_layout);
 	}
 	
 	public TextLayout getTextLayout() {
@@ -37,7 +38,7 @@ public class BufferController {
 	
 	public Point getLogicalPoint() {
 		int index = _buffer.getPointIndex();
-		return _layout.getLogicalPointForCharIndex(index);
+		return _layout.getRelativePointForCharIndex(index);
 	}
 
 	public void setBuffer(Buffer buffer) {
