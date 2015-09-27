@@ -2,20 +2,33 @@ package org.fisked.mode;
 
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
-import org.fisked.mode.util.InputController;
-import org.fisked.mode.util.InputController.CommandControllerDelegate;
+import org.fisked.mode.responder.CommandInputResponder;
+import org.fisked.mode.responder.InputModeSwitchResponder;
+import org.fisked.mode.responder.VisualModeSwitchResponder;
 import org.fisked.responder.Event;
 
-public class NormalMode extends AbstractMode implements CommandControllerDelegate {
-	private InputController _commandController = new InputController();
+public class NormalMode extends AbstractMode {
 
 	public NormalMode(BufferWindow window) {
 		super(window);
+		addRecognizer(new CommandInputResponder(_window));
+		addRecognizer(new InputModeSwitchResponder(_window));
+		addRecognizer(new VisualModeSwitchResponder(_window));
 	}
 
 	@Override
 	public boolean handleInput(Event input) {
-		_commandController.handleInput(input, _window, this);
+		if (input.getCharacter() == 'h') {
+			moveLeft();
+		} else if (input.getCharacter() == 'l') {
+			moveRight();
+		} else if (input.getCharacter() == 'j') {
+			moveDown();
+		} else if (input.getCharacter() == 'k') {
+			moveUp();
+		} else {
+			return super.handleInput(input);
+		}
 		return true;
 	}
 	
@@ -70,23 +83,6 @@ public class NormalMode extends AbstractMode implements CommandControllerDelegat
 	@Override
 	public String getModeName() {
 		return "normal";
-	}
-
-	@Override
-	public void handleCommand(Event input) {
-		if (input.getCharacter() == 'i') {
-			_window.switchToInputMode();
-		} else if (input.getCharacter() == 'v') {
-			_window.switchToVisualMode();
-		} else if (input.getCharacter() == 'h') {
-			moveLeft();
-		} else if (input.getCharacter() == 'l') {
-			moveRight();
-		} else if (input.getCharacter() == 'j') {
-			moveDown();
-		} else if (input.getCharacter() == 'k') {
-			moveUp();
-		}
 	}
 
 }

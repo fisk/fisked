@@ -62,6 +62,7 @@ public class BufferWindow extends Window {
 	@Override
 	public boolean handleInput(Event input) {
 		boolean result = _currentMode.handleInput(input);
+		refresh();
 		return result;
 	}
 
@@ -86,17 +87,14 @@ public class BufferWindow extends Window {
 
 	public void switchToInputMode() {
 		_currentMode = new InputMode(this);
-		refresh();
 	}
 
 	public void switchToNormalMode() {
 		_currentMode = new NormalMode(this);
-		refresh();
 	}
 
 	public void switchToVisualMode() {
 		_currentMode = new VisualMode(this);
-		refresh();
 	}
 	
 	public AbstractMode getCurrentMode() {

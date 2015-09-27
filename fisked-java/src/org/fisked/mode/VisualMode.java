@@ -5,13 +5,11 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 
 import org.fisked.buffer.BufferWindow;
-import org.fisked.mode.util.InputController;
-import org.fisked.mode.util.InputController.CommandControllerDelegate;
-import org.fisked.renderingengine.service.models.Point;
+import org.fisked.mode.responder.CommandInputResponder;
+import org.fisked.mode.responder.NormalModeSwitchResponder;
 import org.fisked.responder.Event;
 
-public class VisualMode extends AbstractMode implements CommandControllerDelegate {
-	private InputController _inputController = new InputController();
+public class VisualMode extends AbstractMode {
 	
 	private class Cursor {
 		int _charIndex;
@@ -23,6 +21,8 @@ public class VisualMode extends AbstractMode implements CommandControllerDelegat
 	
 	public VisualMode(BufferWindow window) {
 		super(window);
+		addRecognizer(new CommandInputResponder(_window));
+		addRecognizer(new NormalModeSwitchResponder(_window));
 	}
 
 	public void setClipboard(String text) {
@@ -32,21 +32,8 @@ public class VisualMode extends AbstractMode implements CommandControllerDelegat
 	}
 
 	@Override
-	public boolean handleInput(Event nextEvent) {
-		_inputController.handleInput(nextEvent, _window, this);
-		return true;
-	}
-
-	@Override
 	public String getModeName() {
 		return "visual";
-	}
-
-	@Override
-	public void handleCommand(Event input) {
-		if (input.isEscape()) {
-			_window.switchToNormalMode();
-		}
 	}
 
 }

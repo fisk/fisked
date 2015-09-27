@@ -14,6 +14,7 @@ public class AttributedString {
 			return "" + (base + _color.getRawColor());
 		}
 	}
+	
 	private static class ForegroundColorAttribute extends ColorAttribute {
 		public ForegroundColorAttribute(Color color) {
 			super(color);
@@ -22,6 +23,7 @@ public class AttributedString {
 			return super.toString(30);
 		}
 	}
+	
 	private static class BackgroundColorAttribute extends ColorAttribute {
 		public BackgroundColorAttribute(Color color) {
 			super(color);
@@ -30,11 +32,13 @@ public class AttributedString {
 			return super.toString(40);
 		}
 	}
+	
 	private static class BoldAttribute extends Attribute {
 		public String toString() {
 			return "1";
 		}
 	}
+	
 	private CharSequence _string;
 	private List<Attribute> _attributes = new ArrayList<>();
 	
@@ -57,7 +61,7 @@ public class AttributedString {
 	public String toString() {
 		StringBuilder str = new StringBuilder();
 		if (_attributes.size() != 0) {
-			str.append("\u001B[");
+			str.append("\u001b[");
 			int i = 0;
 			for (Attribute attr : _attributes) {
 				if (i++ != 0) {
