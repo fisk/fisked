@@ -1,9 +1,9 @@
 package org.fisked.mode;
 
 import org.fisked.buffer.BufferWindow;
-import org.fisked.mode.responder.InputResponderChain;
 import org.fisked.responder.Event;
 import org.fisked.responder.IRawInputResponder;
+import org.fisked.responder.InputResponderChain;
 
 public abstract class AbstractMode implements IRawInputResponder {
 	protected BufferWindow _window;

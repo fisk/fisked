@@ -1,35 +1,15 @@
 package org.fisked.mode;
 
-import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
-import org.fisked.responder.Event;
+import org.fisked.mode.responder.NormalModeSwitchResponder;
+import org.fisked.mode.responder.TextInputResponder;
 
 public class InputMode extends AbstractMode {
 	
 	public InputMode(BufferWindow window) {
 		super(window);
-	}
-
-	@Override
-	public boolean handleInput(Event input) {
-		try {
-			if (input.isBackspace()) {
-				_window.getBuffer().removeCharAtPoint();
-				return true;
-			} else if (input.isEscape()) {
-				_window.switchToNormalMode();
-				return true;
-			}
-			Buffer buffer = _window.getBuffer();
-			if (input.isReturn()) {
-				buffer.appendCharAtPoint('\n');
-			} else {
-				buffer.appendCharAtPoint(input.getCharacter());
-			}
-			return true;
-		} finally {
-			_window.refresh();
-		}
+		addRecognizer(new NormalModeSwitchResponder(_window));
+		addRecognizer(new TextInputResponder(_window));
 	}
 
 	@Override

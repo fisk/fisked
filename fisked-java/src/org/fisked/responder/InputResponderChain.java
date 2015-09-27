@@ -1,10 +1,7 @@
-package org.fisked.mode.responder;
+package org.fisked.responder;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.fisked.responder.Event;
-import org.fisked.responder.IRawInputResponder;
 
 public class InputResponderChain implements IRawInputResponder {
 	private List<IRawInputResponder> _responders = new ArrayList<IRawInputResponder>();
