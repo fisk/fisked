@@ -39,6 +39,12 @@ public class Buffer {
 		return _pointIndex;
 	}
 	
+	public void setPointIndex(int pointIndex) {
+		if (pointIndex >= 0 && pointIndex < _buffer.length()) {
+			_pointIndex = pointIndex;
+		}
+	}
+	
 	public String toString() {
 		return _buffer.toString();
 	}
@@ -50,9 +56,5 @@ public class Buffer {
 	public void appendStringAtPoint(String string) {
 		_buffer.append(string);
 		_pointIndex += string.length();
-	}
-
-	public void setPointIndex(int index) {
-		_pointIndex = index;
 	}
 }

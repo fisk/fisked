@@ -116,7 +116,7 @@ public class TextLayout {
 	public String getLogicalString() {
 		layoutText();
 		int fromY = _rect.getOrigin().getY();
-		int toY = fromY + _rect.getSize().getHeight();
+		int toY = Math.min(fromY + _rect.getSize().getHeight(), _logicalLines.size());
 		StringBuilder result = new StringBuilder();
 
 		for (int line = fromY; line < toY; line++) {
