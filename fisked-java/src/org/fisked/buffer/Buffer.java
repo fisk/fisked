@@ -31,8 +31,13 @@ public class Buffer {
 	}
 	
 	public void appendCharAtPoint(char character) {
-		_buffer.append(character);
-		_pointIndex++;
+		if (_pointIndex == _buffer.length()) {
+			_buffer.append(character);
+			_pointIndex++;
+		} else {
+			_buffer.insert(_pointIndex, character);
+			_pointIndex++;
+		}
 	}
 	
 	public int getPointIndex() {
@@ -40,7 +45,7 @@ public class Buffer {
 	}
 	
 	public void setPointIndex(int pointIndex) {
-		if (pointIndex >= 0 && pointIndex < _buffer.length()) {
+		if (pointIndex >= 0 && pointIndex <= _buffer.length()) {
 			_pointIndex = pointIndex;
 		}
 	}
