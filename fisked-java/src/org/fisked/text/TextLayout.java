@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.fisked.renderingengine.service.models.Point;
-import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;
+import org.fisked.renderingengine.service.models.Size;
 
 public class TextLayout {
 	private StringBuilder _string;
-	private int _width;
 	private List<Line> _physicalLines = null;
 	private List<Line> _logicalLines = null;
+	private Rectangle _rect = null;
 	
 	private static class Line {
 		public final String _value;
@@ -22,12 +22,20 @@ public class TextLayout {
 		}
 	}
 
-	public TextLayout(StringBuilder string, int width) {
+	public TextLayout(StringBuilder string, Size size) {
+		_rect = new Rectangle(new Point(0, 0), size);
 		_string = string;
-		_width = width;
 		layoutText();
 	}
 
+	public Rectangle getClippingRect() {
+		return _rect;
+	}
+	
+	public void setClippingRect(Rectangle rect) {
+		_rect = rect;
+	}
+	
 	public void setText(StringBuilder string) {
 		_string = string;
 		layoutText();
@@ -36,6 +44,8 @@ public class TextLayout {
 	public void layoutText() {
 		_physicalLines = new ArrayList<>();
 		_logicalLines = new ArrayList<>();
+		
+		final int width = _rect.getSize().getWidth();
 
 		int currentLineIndex = 0;
 		StringBuilder currentLogicalLine = new StringBuilder();
@@ -53,7 +63,7 @@ public class TextLayout {
 				currentPhysicalLine.append(character);
 				currentLogicalLine.append(character);
 				
-				if (++currentLineIndex == _width) {
+				if (++currentLineIndex == width) {
 					_logicalLines.add(new Line(currentLogicalLine.toString(), false));
 					currentLineIndex = 0;
 					currentLogicalLine = new StringBuilder();
@@ -65,7 +75,7 @@ public class TextLayout {
 		_logicalLines.add(new Line(currentLogicalLine.toString(), false));
 	}
 
-	public Point getLogicalPointForCharIndex(int charIndex, Rectangle rect) {
+	public Point getLogicalPointForCharIndex(int charIndex) {
 		int line = 0;
 		int column = 0;
 		
@@ -91,22 +101,22 @@ public class TextLayout {
 			line++;
 		}
 		
-		if (column >= rect.getSize().getWidth()) {
+		if (column >= _rect.getSize().getWidth()) {
 			column = 0;
 			line++;
 		}
 		
-		if (line >= rect.getOrigin().getY() && line < rect.getOrigin().getY() + rect.getSize().getWidth()) {
+		if (line >= _rect.getOrigin().getY() && line < _rect.getOrigin().getY() + _rect.getSize().getWidth()) {
 			return new Point(column, line);
 		}
 		
 		return new Point(0, 0);
 	}
 
-	public String getLogicalString(Range range) {
+	public String getLogicalString() {
 		layoutText();
-		int fromY = range.getFrom();
-		int toY = Math.min(range.getTo(), _logicalLines.size());
+		int fromY = _rect.getOrigin().getY();
+		int toY = fromY + _rect.getSize().getHeight();
 		StringBuilder result = new StringBuilder();
 
 		for (int line = fromY; line < toY; line++) {
@@ -115,5 +125,9 @@ public class TextLayout {
 		}
 
 		return result.toString();
+	}
+	
+	public int getColumnAtCharIndex(int index) {
+		return getLogicalPointForCharIndex(index).getX();
 	}
 }

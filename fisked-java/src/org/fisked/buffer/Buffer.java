@@ -51,4 +51,8 @@ public class Buffer {
 		_buffer.append(string);
 		_pointIndex += string.length();
 	}
+
+	public void setPointIndex(int index) {
+		_pointIndex = index;
+	}
 }

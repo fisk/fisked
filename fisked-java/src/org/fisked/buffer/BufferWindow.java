@@ -7,6 +7,7 @@ import org.fisked.command.CommandView;
 import org.fisked.mode.AbstractMode;
 import org.fisked.mode.InputMode;
 import org.fisked.mode.NormalMode;
+import org.fisked.mode.VisualMode;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Rectangle;
@@ -50,7 +51,7 @@ public class BufferWindow extends Window {
 		_commandView = new CommandView(commandLineRect, _commandController);
 		
 		_bufferView = new BufferView(bufferViewRect);
-		_bufferController = new BufferController(_bufferView);
+		_bufferController = new BufferController(_bufferView, bufferViewRect.getSize());
 		_bufferView.setBufferController(_bufferController);
 		
 		_rootView.addSubview(_bufferView);
@@ -90,6 +91,11 @@ public class BufferWindow extends Window {
 
 	public void switchToNormalMode() {
 		_currentMode = new NormalMode(this);
+		refresh();
+	}
+
+	public void switchToVisualMode() {
+		_currentMode = new VisualMode(this);
 		refresh();
 	}
 	

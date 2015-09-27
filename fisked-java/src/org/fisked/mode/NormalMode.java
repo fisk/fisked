@@ -1,42 +1,35 @@
 package org.fisked.mode;
 
 import org.fisked.buffer.BufferWindow;
+import org.fisked.mode.util.InputController;
+import org.fisked.mode.util.InputController.CommandControllerDelegate;
 import org.fisked.responder.Event;
 
-public class NormalMode extends AbstractMode {
-
-	private boolean _writingCommand;
+public class NormalMode extends AbstractMode implements CommandControllerDelegate {
+	private InputController _commandController = new InputController();
 
 	public NormalMode(BufferWindow window) {
 		super(window);
-		_writingCommand = false;
 	}
 
 	@Override
 	public boolean handleInput(Event input) {
-		try {
-			if (_writingCommand) {
-				if (!_window.getCommandController().handleInput(input)) {
-					_writingCommand = false;
-				}
-				return true;
-			}
-			_window.getCommandController().setCommandFeedback(null);
-			if (input.getCharacter() == 'i') {
-				_window.switchToInputMode();
-			} else if (input.getCharacter() == ':') {
-				_writingCommand = true;
-				_window.getCommandController().startCommand();
-			}
-			return true;
-		} finally {
-			_window.refresh();
-		}
+		_commandController.handleInput(input, _window, this);
+		return true;
 	}
 
 	@Override
 	public String getModeName() {
 		return "normal";
+	}
+
+	@Override
+	public void handleCommand(Event input) {
+		if (input.getCharacter() == 'i') {
+			_window.switchToInputMode();
+		} else if (input.getCharacter() == 'v') {
+			_window.switchToVisualMode();
+		}
 	}
 
 }

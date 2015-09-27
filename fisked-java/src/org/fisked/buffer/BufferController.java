@@ -3,6 +3,7 @@ package org.fisked.buffer;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;
+import org.fisked.renderingengine.service.models.Size;
 import org.fisked.text.TextLayout;
 
 public class BufferController {
@@ -10,10 +11,10 @@ public class BufferController {
 	private BufferView _bufferView;
 	private TextLayout _layout;
 	
-	public BufferController(BufferView bufferView) {
+	public BufferController(BufferView bufferView, Size size) {
 		_buffer = new Buffer();
 		_bufferView = bufferView;
-		_layout = new TextLayout(_buffer.getStringBuilder(), bufferView.getClippingRect().getSize().getWidth());
+		_layout = new TextLayout(_buffer.getStringBuilder(), size);
 	}
 	
 	public Buffer getBuffer() {
@@ -25,16 +26,13 @@ public class BufferController {
 	}
 	
 	public String getString(Rectangle clipRect) {
-		int offsetY = clipRect.getOrigin().getY();
-		int maxY = offsetY + clipRect.getSize().getHeight();
-		Range range = new Range(offsetY, maxY);
-		String str = _layout.getLogicalString(range);
+		String str = _layout.getLogicalString();
 		return str;
 	}
 	
 	public Point getLogicalPoint() {
 		int index = _buffer.getPointIndex();
-		return _layout.getLogicalPointForCharIndex(index, _bufferView.getClippingRect());
+		return _layout.getLogicalPointForCharIndex(index);
 	}
 
 	public void setBuffer(Buffer buffer) {

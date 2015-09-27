@@ -1,8 +1,8 @@
 package org.fisked.renderingengine.service.models;
 
 public class Size {
-	private int _width;
-	private int _height;
+	private final int _width;
+	private final int _height;
 	
 	public Size(int width, int height) {
 		_width = width;
@@ -15,13 +15,5 @@ public class Size {
 	
 	public int getHeight() {
 		return _height;
-	}
-	
-	public void setWidth(int width) {
-		_width = width;
-	}
-	
-	public void setHeight(int height) {
-		_height = height;
 	}
 }
