@@ -2,7 +2,7 @@ package org.fisked.buffer;
 
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.text.TextLayout;
-import org.fisked.text.TextLayout.OutOfBoundsException;
+import org.fisked.text.TextLayout.InvalidLocationException;
 
 public class Cursor {
 	private int _charIndex;
@@ -57,7 +57,7 @@ public class Cursor {
 		}
 	}
 	
-	public void setRelativePoint(Point relativePoint, boolean changeLastColumn) throws OutOfBoundsException {
+	public void setRelativePoint(Point relativePoint, boolean changeLastColumn) throws InvalidLocationException {
 		int index = _layout.getCharIndexForRelativePoint(relativePoint);
 		Point absolutePoint = _layout.getAbsolutePointForCharIndex(index);
 		_charIndex = index;
@@ -68,7 +68,7 @@ public class Cursor {
 		}
 	}
 	
-	public void setAbsolutePoint(Point absolutePoint, boolean changeLastColumn) throws OutOfBoundsException {
+	public void setAbsolutePoint(Point absolutePoint, boolean changeLastColumn) throws InvalidLocationException {
 		int index = _layout.getCharIndexForAbsolutePoint(absolutePoint);
 		Point relativePoint = _layout.getRelativePointForCharIndex(index);
 		_charIndex = index;

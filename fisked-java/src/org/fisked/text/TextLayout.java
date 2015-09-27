@@ -15,6 +15,7 @@ public class TextLayout {
 	private List<Line> _physicalLines = null;
 	private List<Line> _logicalLines = null;
 	private Rectangle _rect = null;
+	private boolean _needsLayout;
 	
 	private static class Line {
 		public final String _value;
@@ -24,11 +25,15 @@ public class TextLayout {
 			_value = value;
 		}
 	}
+	
+	public void setNeedsLayout() {
+		_needsLayout = true;
+	}
 
 	public TextLayout(Buffer buffer, Size size) {
 		_rect = new Rectangle(new Point(0, 0), size);
 		_buffer = buffer;
-		layoutText();
+		setNeedsLayout();
 	}
 
 	public Rectangle getClippingRect() {
@@ -39,7 +44,14 @@ public class TextLayout {
 		_rect = rect;
 	}
 
-	public void layoutText() {
+	private void layoutIfNeeded() {
+		if (_needsLayout) {
+			layoutText();
+			_needsLayout = false;
+		}
+	}
+
+	private void layoutText() {
 		_physicalLines = new ArrayList<>();
 		_logicalLines = new ArrayList<>();
 		
@@ -72,29 +84,38 @@ public class TextLayout {
 		_physicalLines.add(new Line(currentPhysicalLine.toString(), false));
 		_logicalLines.add(new Line(currentLogicalLine.toString(), false));
 	}
+
+	public String getLogicalString() {
+		layoutIfNeeded();
+		int fromY = _rect.getOrigin().getY();
+		int toY = Math.min(fromY + _rect.getSize().getHeight(), _logicalLines.size());
+		StringBuilder result = new StringBuilder();
+
+		for (int line = fromY; line < toY; line++) {
+			result.append(_logicalLines.get(line)._value);
+			result.append("\n");
+		}
+
+		return result.toString();
+	}
 	
 	public Point getAbsolutePointForCharIndex(int charIndex) {
+		layoutIfNeeded();
 		int line = 0;
 		int column = 0;
 		
 		int i = 0;
 
-		exit:
 		for (Line currentLine : _logicalLines) {
-			for (column = 0; column < currentLine._value.length(); column++) {
-				if (i == charIndex) {
-					break;
-				}
-				i++;
+			if (i + currentLine._value.length() >= charIndex) {
+				column = charIndex - i;
+				break;
+			} else {
+				i += currentLine._value.length();
 			}
+			
 			if (currentLine._trailingEndline) {
-				if (i == charIndex) {
-					break exit;
-				}
 				i++;
-			}
-			if (i == charIndex) {
-				break exit;
 			}
 			line++;
 		}
@@ -112,69 +133,46 @@ public class TextLayout {
 	}
 
 	public Point getRelativePointForCharIndex(int charIndex) {
+		layoutIfNeeded();
 		return getAbsolutePointForCharIndex(charIndex); // TODO: make it relative instead
-	}
-
-	public String getLogicalString() {
-		layoutText();
-		int fromY = _rect.getOrigin().getY();
-		int toY = Math.min(fromY + _rect.getSize().getHeight(), _logicalLines.size());
-		StringBuilder result = new StringBuilder();
-
-		for (int line = fromY; line < toY; line++) {
-			result.append(_logicalLines.get(line)._value);
-			result.append("\n");
-		}
-
-		return result.toString();
 	}
 	
 	public int getColumnAtCharIndex(int index) {
 		return getRelativePointForCharIndex(index).getX();
 	}
 	
-	public class OutOfBoundsException extends Exception {}
+	public class InvalidLocationException extends Exception {}
 	
 	// TODO: make this actually relative
-	public int getCharIndexForRelativePoint(Point point) throws OutOfBoundsException {
+	public int getCharIndexForRelativePoint(Point point) throws InvalidLocationException {
+		layoutIfNeeded();
 		return getCharIndexForAbsolutePoint(point);
 	}
 
-	public int getCharIndexForAbsolutePoint(Point point) throws OutOfBoundsException {
+	public int getCharIndexForAbsolutePoint(Point point) throws InvalidLocationException {
+		layoutIfNeeded();
 		int line = 0;
-		int column = 0;
 		
 		int i = 0;
 		
 		String lastLine = null;
 
-		exit:
 		for (Line currentLine : _logicalLines) {
-			for (column = 0; column < currentLine._value.length(); column++) {
-				if (line == point.getY()) {
-					lastLine = currentLine._value;
-					break;
-				}
-				i++;
-			}
-			if (currentLine._trailingEndline) {
-				if (line == point.getY()) {
-					lastLine = currentLine._value;
-					break exit;
-				}
-				i++;
-			}
 			if (line == point.getY()) {
 				lastLine = currentLine._value;
-				break exit;
+				break;
+			}
+			i += currentLine._value.length();
+			if (currentLine._trailingEndline) {
+				i++;
 			}
 			line++;
 		}
 		
 		if (lastLine == null) {
-			throw new OutOfBoundsException();
+			throw new InvalidLocationException();
 		}
-
+		
 		int lineExcess = Math.min(point.getX(), lastLine.length());
 		
 		return i + lineExcess;

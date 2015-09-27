@@ -46,6 +46,7 @@ public class Buffer {
 	public void removeCharAtPoint() {
 		if (_cursor.getCharIndex() > 0 && _buffer.length() > 0) {
 			_buffer.deleteCharAt(_cursor.getCharIndex() - 1);
+			_layout.setNeedsLayout();
 			_cursor.setCharIndex(_cursor.getCharIndex() - 1, true);
 		}
 	}
@@ -53,9 +54,11 @@ public class Buffer {
 	public void appendCharAtPoint(char character) {
 		if (_cursor.getCharIndex() == _buffer.length()) {
 			_buffer.append(character);
+			_layout.setNeedsLayout();
 			_cursor.setCharIndex(_cursor.getCharIndex() + 1, true);
 		} else {
 			_buffer.insert(_cursor.getCharIndex(), character);
+			_layout.setNeedsLayout();
 			_cursor.setCharIndex(_cursor.getCharIndex() + 1, true);
 		}
 	}
@@ -81,9 +84,11 @@ public class Buffer {
 	public void appendStringAtPoint(String string) {
 		if (_cursor.getCharIndex() == _buffer.length()) {
 			_buffer.append(string);
+			_layout.setNeedsLayout();
 			_cursor.setCharIndex(_cursor.getCharIndex() + string.length(), true);
 		} else {
 			_buffer.insert(_cursor.getCharIndex(), string);
+			_layout.setNeedsLayout();
 			_cursor.setCharIndex(_cursor.getCharIndex() + string.length(), true);
 		}
 		

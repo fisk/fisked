@@ -1,9 +1,10 @@
 package org.fisked.text;
 
 import org.fisked.buffer.Buffer;
+import org.fisked.log.Log;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Rectangle;
-import org.fisked.text.TextLayout.OutOfBoundsException;
+import org.fisked.text.TextLayout.InvalidLocationException;
 
 public class TextNavigator {
 	private TextLayout _layout;
@@ -24,7 +25,9 @@ public class TextNavigator {
 	private void setAbsolutePoint(Point point, boolean updateLastColumn) {
 		try {
 			getBuffer().getCursor().setAbsolutePoint(point, updateLastColumn);
-		} catch (OutOfBoundsException e) {}
+		} catch (InvalidLocationException e) {
+			Log.println(e.getMessage());
+		}
 	}
 
 	private void setIndex(int index, boolean updateLastColumn) {
@@ -64,13 +67,13 @@ public class TextNavigator {
 
 	public void moveDown() {
 		Point point = getAbsolutePoint();
-		Point newPoint = new Point(point.getY() + 1, getLastColumn());
+		Point newPoint = new Point(getLastColumn(), point.getY() + 1);
 		setAbsolutePoint(newPoint, false);
 	}
 
 	public void moveUp() {
 		Point point = getAbsolutePoint();
-		Point newPoint = new Point(point.getY() - 1, getLastColumn());
+		Point newPoint = new Point(getLastColumn(), point.getY() - 1);
 		setAbsolutePoint(newPoint, false);
 	}
 }
