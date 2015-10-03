@@ -8,13 +8,15 @@ Run with $ ./fisked
 Current features:
 * Input mode (enter with i, exit with escape)
   - write text
-  
+
 * Normal mode
   - enter input mode with i
   - write command with :
- 
+  - navigate with hjkl vim-style
+  - scroll with <CTRL>-E and <CTRL>-Y
+
 * Commands (enter by writing colon)
   - :e <file> opens file
   - :w saves current file
   - :r runs command and inserts text into current buffer
-  
+
