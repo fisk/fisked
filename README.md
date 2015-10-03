@@ -13,7 +13,7 @@ Current features:
   - enter input mode with i
   - write command with :
   - navigate with hjkl vim-style
-  - scroll with <CTRL>-E and <CTRL>-Y
+  - scroll with CTRL-E and CTRL-Y
 
 * Commands (enter by writing colon)
   - :e <file> opens file
