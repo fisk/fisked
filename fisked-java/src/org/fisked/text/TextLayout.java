@@ -99,7 +99,7 @@ public class TextLayout {
 		return result.toString();
 	}
 	
-	public Point getAbsolutePointForCharIndex(int charIndex) {
+	private Point getPointForCharIndexAtOffset(int charIndex, int yOffset) {
 		layoutIfNeeded();
 		int line = 0;
 		int column = 0;
@@ -126,15 +126,18 @@ public class TextLayout {
 		}
 		
 		if (line >= _rect.getOrigin().getY() && line < _rect.getOrigin().getY() + _rect.getSize().getWidth()) {
-			return new Point(column, line);
+			return new Point(column, line - yOffset);
 		}
 		
 		return new Point(0, 0);
 	}
+	
+	public Point getAbsolutePointForCharIndex(int charIndex) {
+		return getPointForCharIndexAtOffset(charIndex, 0);
+	}
 
 	public Point getRelativePointForCharIndex(int charIndex) {
-		layoutIfNeeded();
-		return getAbsolutePointForCharIndex(charIndex); // TODO: make it relative instead
+		return getPointForCharIndexAtOffset(charIndex, _rect.getOrigin().getY());
 	}
 	
 	public int getColumnAtCharIndex(int index) {

@@ -16,7 +16,11 @@ public class BasicNavigationResponder implements IInputResponder {
 	
 	@Override
 	public boolean handleInput(Event input) {
-		if (input.getCharacter() == 'h') {
+		if (input.isControl() && input.getControlChar() == 'e') {
+			_navigator.scrollDown();
+		} else if (input.isControl() && input.getControlChar() == 'y') {
+			_navigator.scrollUp();
+		} else if (input.getCharacter() == 'h') {
 			_navigator.moveLeft();
 		} else if (input.getCharacter() == 'l') {
 			_navigator.moveRight();

@@ -6,7 +6,6 @@ import org.fisked.command.CommandManager;
 import org.fisked.command.OpenFileCommand;
 import org.fisked.log.Log;
 import org.fisked.renderingengine.service.IConsoleService;
-import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.EventLoop;
 import org.fisked.services.ServiceManager;

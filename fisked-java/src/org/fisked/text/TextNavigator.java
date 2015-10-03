@@ -46,15 +46,17 @@ public class TextNavigator {
 	public void scrollUp() {
 		Rectangle rect = _layout.getClippingRect();
 		int y = Math.max(rect.getOrigin().getY() - 1, 0);
-		Rectangle newRect = new Rectangle(new Point(y, rect.getOrigin().getX()), rect.getSize());
+		Rectangle newRect = new Rectangle(new Point(rect.getOrigin().getX(), y), rect.getSize());
 		_layout.setClippingRect(newRect);
+		_layout.setNeedsLayout();
 	}
 
 	public void scrollDown() {
 		Rectangle rect = _layout.getClippingRect();
 		int y = rect.getOrigin().getY() + 1;
-		Rectangle newRect = new Rectangle(new Point(y, rect.getOrigin().getX()), rect.getSize());
+		Rectangle newRect = new Rectangle(new Point(rect.getOrigin().getX(), y), rect.getSize());
 		_layout.setClippingRect(newRect);
+		_layout.setNeedsLayout();
 	}
 
 	public void moveLeft() {

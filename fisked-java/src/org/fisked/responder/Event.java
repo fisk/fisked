@@ -15,6 +15,14 @@ public class Event {
 		return _input;
 	}
 	
+	public boolean isControl() {
+		return _input < 32;
+	}
+	
+	public char getControlChar() {
+		return (char)(((int)'a') + _input - 1);
+	}
+	
 	public boolean isEscape() {
 		return _input == 27;
 	}
