@@ -1,5 +1,9 @@
 package org.fisked;
 
+import java.io.File;
+import java.io.IOException;
+
+import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.command.CommandManager;
@@ -10,6 +14,7 @@ import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.EventLoop;
 import org.fisked.services.ServiceManager;
 import org.fisked.shell.ShellCommandHandler;
+import org.fisked.util.FileUtil;
 
 public class Application {
 	private static Application _sharedInstance;
@@ -26,6 +31,7 @@ public class Application {
 	private EventLoop _loop;
 	private Window _primaryWindow;
 	private volatile Throwable _exception;
+	private String[] _argv;
 	
 	private void setupCommands() {
 		CommandManager cm = CommandManager.getSingleton();
@@ -43,7 +49,22 @@ public class Application {
 		cm.registerHandler("r", new ShellCommandHandler());
 	}
 	
-	public void start() {
+	private void processArguments() {
+		BufferWindow window = (BufferWindow)_primaryWindow;
+		if (_argv.length == 1) {
+			String path = _argv[0];
+			File file = FileUtil.getFile(path);
+			try {
+				window.openFile(file);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
+		}
+	}
+	
+	public void start(String[] argv) {
+		_argv = argv;
 		try {
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 			    public void run() {
@@ -66,6 +87,7 @@ public class Application {
 			Rectangle windowRect = new Rectangle(0, 0, cs.getScreenWidth(), cs.getScreenHeight());
 			
 			_primaryWindow = new BufferWindow(windowRect);
+			processArguments();
 
 			_loop.setPrimaryResponder(_primaryWindow);
 			

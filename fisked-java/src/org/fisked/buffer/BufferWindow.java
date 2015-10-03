@@ -1,5 +1,8 @@
 package org.fisked.buffer;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.fisked.buffer.drawing.View;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.command.CommandController;
@@ -75,6 +78,18 @@ public class BufferWindow extends Window {
 	public void setBuffer(Buffer buffer) {
 		_bufferController.setBuffer(buffer);
 		refresh();
+	}
+	
+	public void openFile(File file) throws IOException {
+		try {
+			file.createNewFile();
+			Buffer buffer = new Buffer(file);
+			setBuffer(buffer);
+			switchToNormalMode();
+		} catch (IOException e) {
+			getCommandController().setCommandFeedback("Could not open file: " + file.getCanonicalPath() + ".");
+			refresh();
+		}
 	}
 	
 	public CommandController getCommandController() {
