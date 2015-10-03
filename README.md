@@ -3,7 +3,7 @@ This is going to be the best new text editor in history.
 Completely written in Java.
 
 Build with $ mvn package
-Run with $ ./fisked
+Run with $ ./fisked [FILE]
 
 Current features:
 * Input mode (enter with i, exit with escape)
