@@ -20,3 +20,5 @@ Current features:
   - :w saves current file
   - :r runs command and inserts text into current buffer
 
+This readme file was edited with this text editor because it is awesome.
+DAYUMN!

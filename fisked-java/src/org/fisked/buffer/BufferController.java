@@ -12,11 +12,9 @@ public class BufferController {
 	private Size _size;
 	
 	public BufferController(BufferView bufferView, Size size) {
-		_buffer = new Buffer();
 		_bufferView = bufferView;
 		_size = size;
-		_layout = new TextLayout(_buffer, _size);
-		_buffer.setTextLayout(_layout);
+		setBuffer(new Buffer());
 	}
 	
 	public TextLayout getTextLayout() {
@@ -44,6 +42,7 @@ public class BufferController {
 	public void setBuffer(Buffer buffer) {
 		_buffer = buffer;
 		_layout = new TextLayout(_buffer, _size);
+		_buffer.setTextLayout(_layout);
 	}
 	
 	public interface IStringDecorator {

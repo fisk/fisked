@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 
+import org.apache.commons.io.IOUtils;
 import org.fisked.text.TextLayout;
 
 public class Buffer {
@@ -35,6 +37,7 @@ public class Buffer {
 	public Buffer(File file) throws IOException {
 		_file = file;
 		file.createNewFile();
+		_buffer.append(IOUtils.toString(_file.toURI(), Charset.forName("UTF-8")));
 	}
 	
 	public void save() throws FileNotFoundException {
