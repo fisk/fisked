@@ -4,6 +4,7 @@ import org.fisked.buffer.drawing.View;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.renderingengine.service.models.Color;
+import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.theme.ThemeManager;
 
@@ -26,6 +27,8 @@ public class CommandView extends View {
 		attrString.setBackgroundColor(backgroundColor);
 		attrString.setForegroundColor(foregroundColor);
 		
+		Point point = getClippingRect().getOrigin();
+		context.moveTo(point.getX(), point.getY());
 		context.printString(attrString);
 	}
 

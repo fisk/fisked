@@ -10,8 +10,13 @@ public class FiskedDefaultTheme implements ITheme {
 	}
 
 	@Override
-	public Color getSelectionColor() {
+	public Color getSelectionBackgroundColor() {
 		return Color.BLUE;
+	}
+
+	@Override
+	public Color getSelectionForegroundColor() {
+		return Color.BLACK;
 	}
 
 	@Override

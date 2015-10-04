@@ -62,7 +62,8 @@ public class BufferView extends View {
 		
 		Color backgroundColor = getBackgroundColor();
 		Color foregroundColor = ThemeManager.getThemeManager().getCurrentTheme().getForegroundColor();
-		Color selectionColor = ThemeManager.getThemeManager().getCurrentTheme().getSelectionColor();
+		Color selectionBackgroundColor = ThemeManager.getThemeManager().getCurrentTheme().getSelectionBackgroundColor();
+		Color selectionForegroundColor = ThemeManager.getThemeManager().getCurrentTheme().getSelectionForegroundColor();
 		
 		Range selection = _controller.getSelection();
 		
@@ -78,25 +79,27 @@ public class BufferView extends View {
 		} else {
 			_controller.drawBuffer(drawingRect, (Point point, String str, int offset) -> {
 				Color background = backgroundColor;
+				Color foreground = foregroundColor;
 
 				if (selection.getStart() >= offset && selection.getStart() < offset + str.length()) {
 					if (selection.getEnd() >= offset && selection.getEnd() < offset + str.length()) {
-						drawSplitString(context, point, str, new Face(backgroundColor, foregroundColor), new Face(selectionColor, foregroundColor), 
+						drawSplitString(context, point, str, new Face(backgroundColor, foregroundColor), new Face(selectionBackgroundColor, selectionForegroundColor), 
 								new Face(backgroundColor, foregroundColor), selection.getStart() - offset, selection.getEnd() - offset);
 					} else {
 						drawSplitString(context, point, str, new Face(backgroundColor, foregroundColor), 
-								new Face(selectionColor, foregroundColor), selection.getStart() - offset);
+								new Face(selectionBackgroundColor, selectionForegroundColor), selection.getStart() - offset);
 					}
 					return;
 				} else if (selection.getEnd() >= offset && selection.getEnd() < offset + str.length()) {
-					drawSplitString(context, point, str, new Face(selectionColor, foregroundColor), 
+					drawSplitString(context, point, str, new Face(selectionBackgroundColor, selectionForegroundColor), 
 							new Face(backgroundColor, foregroundColor), selection.getEnd() - offset);
 					return;
 				} else if (offset >= selection.getStart() && offset < selection.getEnd()) {
-					background = selectionColor;
+					background = selectionBackgroundColor;
+					foreground = selectionForegroundColor;
 				}
 
-				AttributedString attrString = new AttributedString(str, new Face(background, foregroundColor));
+				AttributedString attrString = new AttributedString(str, new Face(background, foreground));
 				context.moveTo(point.getX(), point.getY());
 				context.printString(attrString);
 			});

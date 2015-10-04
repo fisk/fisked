@@ -15,7 +15,7 @@ public class InputMode extends AbstractMode {
 	}
 	
 	public Face getModelineFace() {
-		return new Face(Color.BLUE, Color.BLACK);
+		return new Face(Color.RED, Color.BLACK);
 	}
 
 	@Override
