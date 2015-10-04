@@ -6,12 +6,17 @@ public class FiskedDefaultTheme implements ITheme {
 
 	@Override
 	public Color getBackgroundColor() {
-		return Color.BLACK;
+		return Color.NORMAL;
+	}
+
+	@Override
+	public Color getSelectionColor() {
+		return Color.BLUE;
 	}
 
 	@Override
 	public Color getForegroundColor() {
-		return Color.GREEN;
+		return Color.NORMAL;
 	}
 
 	@Override

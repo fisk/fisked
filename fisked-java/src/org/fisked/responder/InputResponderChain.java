@@ -5,7 +5,11 @@ import java.util.List;
 
 public class InputResponderChain implements IInputResponder {
 	private List<IInputResponder> _responders = new ArrayList<IInputResponder>();
-	
+
+	public interface OnRecognizeCallback {
+		void onRecognize();
+	}
+
 	public InputResponderChain() {}
 
 	@Override
@@ -16,7 +20,17 @@ public class InputResponderChain implements IInputResponder {
 		return false;
 	}
 
-	public void addRecognizer(IInputResponder recognizer) {
+	public void addResponder(IInputResponder recognizer) {
 		_responders.add(recognizer);
+	}
+
+	public void addResponder(IInputResponder recognizer, OnRecognizeCallback callback) {
+		_responders.add((Event nextEvent) -> {
+			boolean result = recognizer.handleInput(nextEvent);
+			if (result) {
+				callback.onRecognize();
+			}
+			return result;
+		});
 	}
 }

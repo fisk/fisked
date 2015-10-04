@@ -13,6 +13,7 @@ import org.fisked.mode.NormalMode;
 import org.fisked.mode.VisualMode;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.models.Point;
+import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
 import org.fisked.text.TextLayout;
@@ -124,6 +125,10 @@ public class BufferWindow extends Window {
 
 	public TextLayout getTextLayout() {
 		return _bufferController.getTextLayout();
+	}
+
+	public BufferController getBufferController() {
+		return _bufferController;
 	}
 
 }

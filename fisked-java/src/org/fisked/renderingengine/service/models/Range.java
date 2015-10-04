@@ -1,19 +1,23 @@
 package org.fisked.renderingengine.service.models;
 
 public class Range {
-	private int _from;
-	private int _to;
+	private final int _start;
+	private final int _length;
 	
-	public Range(int from, int to) {
-		_from = from;
-		_to = to;
+	public Range(int start, int length) {
+		_start = start;
+		_length = length;
 	}
 	
-	public int getFrom() {
-		return _from;
+	public int getStart() {
+		return _start;
 	}
 	
-	public int getTo() {
-		return _to;
+	public int getLength() {
+		return _length;
+	}
+	
+	public int getEnd() {
+		return _start + _length;
 	}
 }

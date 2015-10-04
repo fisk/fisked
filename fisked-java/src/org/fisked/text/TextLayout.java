@@ -84,19 +84,29 @@ public class TextLayout {
 		_physicalLines.add(new Line(currentPhysicalLine.toString(), false));
 		_logicalLines.add(new Line(currentLogicalLine.toString(), false));
 	}
-
-	public String getLogicalString() {
+	
+	public interface GetStringCallback {
+		void putLine(int offset, String line, Point relativePoint, boolean physicalLine);
+	}
+	
+	public void getLogicalString(GetStringCallback callback) {
 		layoutIfNeeded();
+		int offset = 0;
 		int fromY = _rect.getOrigin().getY();
 		int toY = Math.min(fromY + _rect.getSize().getHeight(), _logicalLines.size());
-		StringBuilder result = new StringBuilder();
-
-		for (int line = fromY; line < toY; line++) {
-			result.append(_logicalLines.get(line)._value);
-			result.append("\n");
+		
+		for (int lineNum = 0; lineNum < fromY; lineNum++) {
+			Line line = _logicalLines.get(lineNum);
+			offset += line._value.length();
+			if (line._trailingEndline) offset++;
 		}
 
-		return result.toString();
+		for (int lineNum = fromY; lineNum < toY; lineNum++) {
+			Line line = _logicalLines.get(lineNum);
+			callback.putLine(offset, line._value, new Point(0, lineNum - _rect.getOrigin().getY()), line._trailingEndline);
+			offset += line._value.length();
+			if (line._trailingEndline) offset++;
+		}
 	}
 	
 	private Point getPointForCharIndexAtOffset(int charIndex, int yOffset) {

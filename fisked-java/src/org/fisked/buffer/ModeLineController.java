@@ -1,5 +1,7 @@
 package org.fisked.buffer;
 
+import org.fisked.renderingengine.service.models.AttributedString;
+
 public class ModeLineController {
 	
 	private BufferWindow _window;
@@ -8,11 +10,12 @@ public class ModeLineController {
 		_window = window;
 	}
 
-	public String getModeLineText() {
+	public AttributedString getModeLineText() {
 		StringBuilder str = new StringBuilder();
 		str.append(_window.getCurrentMode().getModeName().toUpperCase());
 		str.append("> ");
-		return str.toString();
+		
+		return new AttributedString(str.toString(), _window.getCurrentMode().getModelineFace());
 	}
 
 }

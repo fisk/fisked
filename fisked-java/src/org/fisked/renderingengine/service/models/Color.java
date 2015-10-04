@@ -11,6 +11,8 @@ public class Color {
 	public static final Color MAGENTA = new Color((short) 5);
 	public static final Color CYAN = 	new Color((short) 6);
 	public static final Color WHITE = 	new Color((short) 7);
+
+	public static final Color NORMAL =  new Color((short)9);
 	
 	public Color(short color) {
 		_color = color;

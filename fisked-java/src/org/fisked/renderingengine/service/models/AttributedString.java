@@ -46,12 +46,23 @@ public class AttributedString {
 		_string = string;
 	}
 	
+	public AttributedString(CharSequence string, Face face) {
+		this(string);
+		setFace(face);
+	}
+	
 	public void setForegroundColor(Color color) {
 		_attributes.add(new ForegroundColorAttribute(color));
 	}
 	
 	public void setBackgroundColor(Color color) {
 		_attributes.add(new BackgroundColorAttribute(color));
+	}
+	
+	public void setFace(Face face) {
+		if (face.getBackgroundColor() != null) setBackgroundColor(face.getBackgroundColor());
+		if (face.getForegroundColor() != null) setForegroundColor(face.getForegroundColor());
+		if (face.getBold()) setBold();
 	}
 	
 	public void setBold() {

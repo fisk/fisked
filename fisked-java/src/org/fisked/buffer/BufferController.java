@@ -1,6 +1,7 @@
 package org.fisked.buffer;
 
 import org.fisked.renderingengine.service.models.Point;
+import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.renderingengine.service.models.Size;
 import org.fisked.text.TextLayout;
@@ -10,6 +11,15 @@ public class BufferController {
 	private BufferView _bufferView;
 	private TextLayout _layout;
 	private Size _size;
+	private Range _selection;
+	
+	public Range getSelection() {
+		return _selection;
+	}
+	
+	public void setSelection(Range range) {
+		_selection = range;
+	}
 	
 	public BufferController(BufferView bufferView, Size size) {
 		_bufferView = bufferView;
@@ -29,11 +39,6 @@ public class BufferController {
 		return _bufferView;
 	}
 	
-	public String getString(Rectangle clipRect) {
-		String str = _layout.getLogicalString();
-		return str;
-	}
-	
 	public Point getLogicalPoint() {
 		int index = _buffer.getPointIndex();
 		return _layout.getRelativePointForCharIndex(index);
@@ -50,15 +55,8 @@ public class BufferController {
 	}
 	
 	public void drawBuffer(Rectangle drawingRect, IStringDecorator decorator) {
-		String string = getString(drawingRect);
-		String[] lines = string.split("\n");
-		int i = 0;
-		int offset = 0;
-		for (String line : lines) {
-			Point point = new Point(drawingRect.getOrigin().getX(), drawingRect.getOrigin().getY() + i);
-			decorator.draw(point, line, offset);
-			offset += line.length() + 1;
-			i++;
-		}
+		_layout.getLogicalString((int offset, String line, Point relativePoint, boolean physicalLine) -> {
+			decorator.draw(relativePoint, line, offset);
+		});
 	}
 }

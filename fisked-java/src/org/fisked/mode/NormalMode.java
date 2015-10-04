@@ -5,15 +5,21 @@ import org.fisked.mode.responder.BasicNavigationResponder;
 import org.fisked.mode.responder.CommandInputResponder;
 import org.fisked.mode.responder.InputModeSwitchResponder;
 import org.fisked.mode.responder.VisualModeSwitchResponder;
+import org.fisked.renderingengine.service.models.Color;
+import org.fisked.renderingengine.service.models.Face;
 
 public class NormalMode extends AbstractMode {
 
 	public NormalMode(BufferWindow window) {
 		super(window);
-		addRecognizer(new CommandInputResponder(_window));
-		addRecognizer(new InputModeSwitchResponder(_window));
-		addRecognizer(new VisualModeSwitchResponder(_window));
-		addRecognizer(new BasicNavigationResponder(_window));
+		addResponder(new CommandInputResponder(_window));
+		addResponder(new InputModeSwitchResponder(_window));
+		addResponder(new VisualModeSwitchResponder(_window));
+		addResponder(new BasicNavigationResponder(_window));
+	}
+	
+	public Face getModelineFace() {
+		return new Face(Color.GREEN, Color.BLACK);
 	}
 
 	@Override
