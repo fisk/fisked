@@ -65,7 +65,7 @@ public class ModeLineController {
 		return result;
 	}
 	
-	SimpleDateFormat dt = new SimpleDateFormat("yyyy-mm-dd"); 
+	SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd"); 
 	
 	private String getDateString() {
 		return dt.format(new Date());
