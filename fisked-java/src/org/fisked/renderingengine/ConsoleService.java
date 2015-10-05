@@ -17,11 +17,17 @@ public class ConsoleService implements IConsoleService {
 	public ConsoleService() {
 		try {
 			_reader = new ConsoleReader();
-		} catch (IOException e) {}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	private void print(String string) {
-		System.out.print(string);
+		try {
+			_reader.print(string);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private void csi() {
@@ -32,7 +38,9 @@ public class ConsoleService implements IConsoleService {
 	public void flush() {
 		try {
 			_reader.flush();
-		} catch (IOException e) {}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
