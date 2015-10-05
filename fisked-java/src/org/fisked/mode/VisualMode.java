@@ -59,7 +59,7 @@ public class VisualMode extends AbstractMode {
 	}
 	
 	public Face getModelineFace() {
-		return new Face(Color.YELLOW, Color.BLACK);
+		return new Face(Color.YELLOW, Color.WHITE);
 	}
 
 	@Override

@@ -18,6 +18,21 @@ public class FiskedDefaultTheme implements ITheme {
 	public Color getSelectionForegroundColor() {
 		return Color.BLACK;
 	}
+	
+	@Override
+	public Color getModelineBackgroundColorDark() {
+		return Color.BLACK;
+	}
+	
+	@Override
+	public Color getModelineBackgroundColorLight() {
+		return Color.BLACK;
+	}
+
+	@Override
+	public Color getModelineForegroundColor() {
+		return Color.WHITE;
+	}
 
 	@Override
 	public Color getForegroundColor() {

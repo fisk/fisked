@@ -26,4 +26,12 @@ public class Face {
 	public Color getForegroundColor() {
 		return _foregroundColor;
 	}
+
+	public Face inverted() {
+		return new Face(_foregroundColor, _backgroundColor, _bold);
+	}
+
+	public Face withBackgroundColor(Color backgroundColor) {
+		return new Face(_foregroundColor, backgroundColor, _bold);
+	}
 }

@@ -19,7 +19,7 @@ public class NormalMode extends AbstractMode {
 	}
 	
 	public Face getModelineFace() {
-		return new Face(Color.GREEN, Color.BLACK);
+		return new Face(Color.MAGENTA, Color.WHITE);
 	}
 
 	@Override

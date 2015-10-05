@@ -1,5 +1,7 @@
 package org.fisked.buffer;
 
+import java.util.List;
+
 import org.fisked.buffer.drawing.View;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.models.AttributedString;
@@ -16,11 +18,12 @@ public class ModeLineView extends View {
 	
 	public void drawInRect(Rectangle drawingRect, IRenderingContext context) {
 		super.drawInRect(drawingRect, context);
-		
-		AttributedString attrString = _controller.getModeLineText();
 
 		context.moveTo(drawingRect.getOrigin().getX(), drawingRect.getOrigin().getY());
-		context.printString(attrString);
+		List<AttributedString> attrStrings = _controller.getModeLineText();
+		for (AttributedString attrString : attrStrings) {
+			context.printString(attrString);
+		}
 	}
 
 }

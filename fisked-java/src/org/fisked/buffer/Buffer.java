@@ -96,4 +96,12 @@ public class Buffer {
 		}
 		
 	}
+
+	public String getFileName() {
+		if (_file != null) {
+			return _file.getName();
+		} else {
+			return "*scratch*";
+		}
+	}
 }

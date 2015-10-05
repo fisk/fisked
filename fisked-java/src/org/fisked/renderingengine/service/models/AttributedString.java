@@ -88,4 +88,8 @@ public class AttributedString {
 		}
 		return str.toString();
 	}
+
+	public CharSequence getCharSequence() {
+		return _string;
+	}
 }

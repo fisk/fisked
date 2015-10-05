@@ -15,12 +15,12 @@ public class InputMode extends AbstractMode {
 	}
 	
 	public Face getModelineFace() {
-		return new Face(Color.RED, Color.BLACK);
+		return new Face(Color.RED, Color.WHITE);
 	}
 
 	@Override
 	public String getModeName() {
-		return "input";
+		return "insert";
 	}
 
 }
