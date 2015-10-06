@@ -62,12 +62,13 @@ public class BufferWindow extends Window {
 		_rootView.addSubview(_commandView);
 
 		_currentMode = new NormalMode(this);
+		_currentMode.activate();
 	}
 	
 	@Override
 	public boolean handleInput(Event input) {
 		boolean result = _currentMode.handleInput(input);
-		refresh();
+		setNeedsRedraw();
 		return result;
 	}
 
@@ -77,7 +78,7 @@ public class BufferWindow extends Window {
 	
 	public void setBuffer(Buffer buffer) {
 		_bufferController.setBuffer(buffer);
-		refresh();
+		setNeedsRedraw();
 	}
 	
 	public void openFile(File file) throws IOException {
@@ -86,9 +87,10 @@ public class BufferWindow extends Window {
 			Buffer buffer = new Buffer(file);
 			setBuffer(buffer);
 			switchToNormalMode();
+			setNeedsRedraw();
 		} catch (IOException e) {
 			getCommandController().setCommandFeedback("Could not open file: " + file.getCanonicalPath() + ".");
-			refresh();
+			setNeedsRedraw();
 		}
 	}
 	
@@ -104,22 +106,21 @@ public class BufferWindow extends Window {
 
 	public void switchToInputMode() {
 		_currentMode = new InputMode(this);
+		_currentMode.activate();
 	}
 
 	public void switchToNormalMode() {
 		_currentMode = new NormalMode(this);
+		_currentMode.activate();
 	}
 
 	public void switchToVisualMode() {
 		_currentMode = new VisualMode(this);
+		_currentMode.activate();
 	}
 	
 	public AbstractMode getCurrentMode() {
 		return _currentMode;
-	}
-	
-	public void refresh() {
-		draw();
 	}
 
 	public TextLayout getTextLayout() {

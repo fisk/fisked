@@ -19,15 +19,19 @@ public class VisualMode extends AbstractMode {
 	private Cursor _activeCursor = _window.getBuffer().getCursor();
 	private Cursor _inactiveCursor = Cursor.makeCursorFromCharIndex(_activeCursor.getCharIndex(), _window.getTextLayout());
 
-	private void setSelection() {
+	private Range getSelectionRange() {
 		int cursor1 = _activeCursor.getCharIndex();
 		int cursor2 = _inactiveCursor.getCharIndex();
 		int minCursor = Math.min(cursor1, cursor2);
 		int maxCursor = Math.max(cursor1, cursor2);
 		int length = maxCursor - minCursor;
 		Range selection = new Range(minCursor, length);
+		return selection;
+	}
+	
+	private void setSelection() {
 		BufferController controller = _window.getBufferController();
-		controller.setSelection(selection);
+		controller.setSelection(getSelectionRange());
 	}
 	
 	private void clearSelection() {
@@ -50,12 +54,26 @@ public class VisualMode extends AbstractMode {
 			}
 			return false;
 		});
+		addResponder((Event nextEvent) -> {
+			if (nextEvent.isCharacter() && nextEvent.getCharacter() == 'd') {
+				Range selection = getSelectionRange();
+				_window.getBuffer().removeCharsInRange(selection);
+				clearSelection();
+				_window.switchToNormalMode();
+				return true;
+			}
+			return false;
+		});
 	}
 
 	public void setClipboard(String text) {
 		StringSelection selection = new StringSelection(text);
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents(selection, selection);
+	}
+	
+	public void activate() {
+		changeCursor(CURSOR_UNDERLINE);
 	}
 	
 	public Face getModelineFace() {

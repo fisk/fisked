@@ -19,6 +19,7 @@ Current features:
 
 * Visual mode
   - select text with basic navigations
+  - delete selected text with d
   - switch selection endpoints with o
   - exit with ESC
 

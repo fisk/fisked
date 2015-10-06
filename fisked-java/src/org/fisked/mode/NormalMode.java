@@ -21,6 +21,10 @@ public class NormalMode extends AbstractMode {
 	public Face getModelineFace() {
 		return new Face(Color.MAGENTA, Color.WHITE);
 	}
+	
+	public void activate() {
+		changeCursor(CURSOR_UNDERLINE);
+	}
 
 	@Override
 	public String getModeName() {

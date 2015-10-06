@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
+import org.fisked.renderingengine.service.models.Range;
 import org.fisked.text.TextLayout;
 
 public class Buffer {
@@ -52,6 +53,12 @@ public class Buffer {
 			_layout.setNeedsLayout();
 			_cursor.setCharIndex(_cursor.getCharIndex() - 1, true);
 		}
+	}
+
+	public void removeCharsInRange(Range selection) {
+		_buffer.delete(selection.getStart(), selection.getEnd());
+		_layout.setNeedsLayout();
+		_cursor.setCharIndex(selection.getStart(), true);
 	}
 	
 	public void appendCharAtPoint(char character) {

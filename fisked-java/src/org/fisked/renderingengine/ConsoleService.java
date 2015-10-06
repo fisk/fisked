@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Stack;
 
 import org.fisked.renderingengine.service.IConsoleService;
+import org.fisked.renderingengine.service.ICursorService;
 import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Rectangle;
@@ -17,6 +18,7 @@ public class ConsoleService implements IConsoleService {
 	public ConsoleService() {
 		try {
 			_reader = new ConsoleReader();
+			_reader.getTerminal().setEchoEnabled(false);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -106,11 +108,24 @@ public class ConsoleService implements IConsoleService {
 			csi();
 			print((y + 1) + ";" + (x + 1) + "H");
 		}
+		
+		private void showCursor() {
+			csi();
+			print("?25h");
+			flush();
+		}
+		
+		private void hideCursor() {
+			csi();
+			print("?25l");
+			flush();
+		}
 
 		@Override
 		public void close() {
 			_renderingContexts.pop();
 			if (_renderingContexts.isEmpty()) {
+				showCursor();
 				flush();
 			}
 		}
@@ -121,6 +136,9 @@ public class ConsoleService implements IConsoleService {
 	public IRenderingContext getRenderingContext() {
 		RenderingContext context = new RenderingContext();
 		_renderingContexts.push(context);
+		if (_renderingContexts.size() == 1) {
+			context.hideCursor();
+		}
 		return context;
 	}
 
@@ -136,7 +154,21 @@ public class ConsoleService implements IConsoleService {
 	public void deactivate() {
 		csi();
 		print("?1049l");
+		_reader.shutdown();
 		flush();
+	}
+	
+	private ICursorService _cursor = null;
+	
+	@Override
+	public ICursorService getCursorService() {
+		if (_cursor != null) return _cursor;
+		if (System.getenv().containsKey("ITERM_PROFILE")) {
+			_cursor = new ItermCursorService(this);
+		} else {
+			_cursor = new DefaultCursorService();
+		}
+		return _cursor;
 	}
 
 }

@@ -3,13 +3,13 @@ package org.fisked;
 import java.io.File;
 import java.io.IOException;
 
-import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.command.CommandManager;
 import org.fisked.command.OpenFileCommand;
 import org.fisked.log.Log;
 import org.fisked.renderingengine.service.IConsoleService;
+import org.fisked.renderingengine.service.ICursorService;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.EventLoop;
 import org.fisked.services.ServiceManager;
@@ -42,6 +42,7 @@ public class Application {
 		cm.registerHandler("w", (BufferWindow window, String[] argv) -> { 
 			try {
 				window.getBuffer().save();
+				window.getCommandController().setCommandFeedback("Saved file.");
 			} catch (Exception e) {
 				window.getCommandController().setCommandFeedback("Couldn't save.");
 			}
@@ -70,6 +71,7 @@ public class Application {
 			    public void run() {
 					ServiceManager sm = ServiceManager.getInstance();
 					IConsoleService cs = sm.getConsoleService();
+					cs.getCursorService().changeCursor(ICursorService.CURSOR_BLOCK);
 					cs.deactivate();
 					if (_exception != null) {
 						_exception.printStackTrace();
