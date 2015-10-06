@@ -42,5 +42,18 @@ public class Window implements IInputResponder, IDrawable {
 	public void drawPoint(IRenderingContext context) {
 		
 	}
+
+	private boolean _needsRedraw = true;
+	
+	public void setNeedsRedraw() {
+		_needsRedraw = true;
+	}
+	
+	public void refresh() {
+		if (_needsRedraw) {
+			_needsRedraw = false;
+			draw();
+		}
+	}
 	
 }

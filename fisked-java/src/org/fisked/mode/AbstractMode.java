@@ -1,11 +1,14 @@
 package org.fisked.mode;
 
 import org.fisked.buffer.BufferWindow;
+import org.fisked.renderingengine.service.IConsoleService;
+import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.models.Face;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.InputResponderChain;
 import org.fisked.responder.InputResponderChain.OnRecognizeCallback;
+import org.fisked.services.ServiceManager;
 
 public abstract class AbstractMode implements IInputResponder {
 	protected BufferWindow _window;
@@ -26,6 +29,18 @@ public abstract class AbstractMode implements IInputResponder {
 	}
 	
 	public abstract Face getModelineFace();
+	
+	public abstract void activate();
+
+	protected final int CURSOR_BLOCK = 0;
+	protected final int CURSOR_VERTICAL_BAR = 1;
+	protected final int CURSOR_UNDERLINE = 2;
+	
+	protected void changeCursor(int cursor) {
+		ServiceManager sm = ServiceManager.getInstance();
+		IConsoleService cs = sm.getConsoleService();
+		cs.getCursorService().changeCursor(cursor);
+	}
 	
 	@Override
 	public boolean handleInput(Event input) {

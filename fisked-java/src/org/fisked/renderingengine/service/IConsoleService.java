@@ -21,4 +21,5 @@ public interface IConsoleService {
 		void close();
 	}
 	IRenderingContext getRenderingContext();
+	ICursorService getCursorService();
 }

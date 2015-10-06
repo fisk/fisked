@@ -58,6 +58,10 @@ public class VisualMode extends AbstractMode {
 		clipboard.setContents(selection, selection);
 	}
 	
+	public void activate() {
+		changeCursor(CURSOR_UNDERLINE);
+	}
+	
 	public Face getModelineFace() {
 		return new Face(Color.YELLOW, Color.WHITE);
 	}

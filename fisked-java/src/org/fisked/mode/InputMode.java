@@ -17,6 +17,10 @@ public class InputMode extends AbstractMode {
 	public Face getModelineFace() {
 		return new Face(Color.RED, Color.WHITE);
 	}
+	
+	public void activate() {
+		changeCursor(CURSOR_VERTICAL_BAR);
+	}
 
 	@Override
 	public String getModeName() {
