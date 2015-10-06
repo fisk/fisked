@@ -98,4 +98,18 @@ public class TextNavigator {
 		}
 		setIndex(++newIndex, true);
 	}
+
+	public void moveToTheEndOfLine() {
+		int newIndex = getIndex();
+		if (newIndex == _buffer.getStringBuilder().length()) { return; }
+		if (!String.valueOf(_buffer.getStringBuilder().charAt(newIndex)).matches(".") && 
+			!String.valueOf(_buffer.getStringBuilder().charAt(newIndex+1)).matches(".")) {
+			return;
+		}
+		newIndex++;
+		while (newIndex >= 0 && String.valueOf(_buffer.getStringBuilder().charAt(newIndex)).matches(".")) {
+			newIndex++;
+		}
+		setIndex(newIndex, true);
+	}
 }
