@@ -15,6 +15,11 @@ Current features:
   - write command with :
   - navigate with hjkl vim-style
   - scroll with CTRL-E and CTRL-Y
+  - move to next word with w, the end of the word with e and previous word with b
+  - enter input mode at point + 1 with a
+  - enter input mode at end of line with A
+  - enter input mode on new line under current line with o
+  - enter input mode on new line on previous line with O
   - navigate to the beginning of the line with 0 and end of line with $
 
 * Visual mode
