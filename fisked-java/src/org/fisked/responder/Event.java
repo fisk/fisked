@@ -15,7 +15,7 @@ public class Event {
 		return _input;
 	}
 	
-	public boolean isControl() {
+	public boolean isControlChar() {
 		return _input < 32;
 	}
 	
@@ -42,9 +42,23 @@ public class Event {
 	public char getCharacter() {
 		return (char)_input;
 	}
+	
+	public boolean matchesCharacter(boolean control, boolean meta, char character) {
+		if (!control && !meta && isCharacter() && getCharacter() == character) return true;
+		if (control && !meta && isControlChar() && getControlChar() == character) return true;
+		return false;
+	}
 
 	public boolean isSpecialCode() {
 		return Character.isISOControl(_input);
+	}
+	
+	public boolean isCharacter(char character) {
+		return matchesCharacter(false, false, character);
+	}
+
+	public boolean isControlChar(char character) {
+		return matchesCharacter(true, false, character);
 	}
 
 }
