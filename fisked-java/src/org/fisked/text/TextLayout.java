@@ -154,9 +154,10 @@ public class TextLayout {
 		return getRelativePointForCharIndex(index).getX();
 	}
 	
-	public class InvalidLocationException extends Exception {}
+	public class InvalidLocationException extends Exception {
+		private static final long serialVersionUID = 1L;
+	}
 	
-	// TODO: make this actually relative
 	public int getCharIndexForRelativePoint(Point point) throws InvalidLocationException {
 		layoutIfNeeded();
 		return getCharIndexForAbsolutePoint(point);

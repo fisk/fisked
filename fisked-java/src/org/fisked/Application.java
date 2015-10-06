@@ -42,6 +42,7 @@ public class Application {
 		cm.registerHandler("w", (BufferWindow window, String[] argv) -> { 
 			try {
 				window.getBuffer().save();
+				window.getCommandController().setCommandFeedback("Saved file.");
 			} catch (Exception e) {
 				window.getCommandController().setCommandFeedback("Couldn't save.");
 			}
