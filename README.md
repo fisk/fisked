@@ -15,6 +15,7 @@ Current features:
   - write command with :
   - navigate with hjkl vim-style
   - scroll with CTRL-E and CTRL-Y
+  - navigate to the beginning of the line with 0
 
 * Visual mode
   - select text with basic navigations
