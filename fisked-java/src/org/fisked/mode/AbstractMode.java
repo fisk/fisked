@@ -2,7 +2,6 @@ package org.fisked.mode;
 
 import org.fisked.buffer.BufferWindow;
 import org.fisked.renderingengine.service.IConsoleService;
-import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.models.Face;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;

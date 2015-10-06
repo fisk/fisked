@@ -13,7 +13,7 @@ public class VisualModeSwitchResponder implements IInputResponder {
 
 	@Override
 	public boolean handleInput(Event input) {
-		if (input.getCharacter() == 'v') {
+		if (input.isCharacter('v')) {
 			_window.switchToVisualMode();
 			return true;
 		}

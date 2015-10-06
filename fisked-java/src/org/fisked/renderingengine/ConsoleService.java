@@ -168,6 +168,7 @@ public class ConsoleService implements IConsoleService {
 		} else {
 			_cursor = new DefaultCursorService();
 		}
+
 		return _cursor;
 	}
 

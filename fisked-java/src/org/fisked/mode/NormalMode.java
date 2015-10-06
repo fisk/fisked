@@ -7,8 +7,15 @@ import org.fisked.mode.responder.InputModeSwitchResponder;
 import org.fisked.mode.responder.VisualModeSwitchResponder;
 import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Face;
+import org.fisked.responder.Event;
+import org.fisked.services.ServiceManager;
+import org.fisked.text.TextNavigator;
 
 public class NormalMode extends AbstractMode {
+
+	public String getClipboard() {
+		return ServiceManager.getInstance().getClipboardService().getClipboard();
+	}
 
 	public NormalMode(BufferWindow window) {
 		super(window);
@@ -16,12 +23,30 @@ public class NormalMode extends AbstractMode {
 		addResponder(new InputModeSwitchResponder(_window));
 		addResponder(new VisualModeSwitchResponder(_window));
 		addResponder(new BasicNavigationResponder(_window));
+		addResponder((Event nextEvent) -> {
+			if (nextEvent.isCharacter('p')) {
+				_window.getBuffer().appendStringAtPoint(getClipboard());
+				_window.switchToNormalMode();
+				return true;
+			}
+			return false;
+		});
+		addResponder((Event nextEvent) -> {
+			if (nextEvent.isCharacter('P')) {
+				TextNavigator navigator = new TextNavigator(_window.getBuffer());
+				navigator.moveLeft();
+				_window.getBuffer().appendStringAtPoint(getClipboard());
+				_window.switchToNormalMode();
+				return true;
+			}
+			return false;
+		});
 	}
-	
+
 	public Face getModelineFace() {
 		return new Face(Color.MAGENTA, Color.WHITE);
 	}
-	
+
 	public void activate() {
 		changeCursor(CURSOR_UNDERLINE);
 	}

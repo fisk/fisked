@@ -20,12 +20,14 @@ Current features:
   - enter input mode at end of line with A
   - enter input mode on new line under current line with o
   - enter input mode on new line on previous line with O
+  - paste after with p and before cursor with P
   - navigate to the beginning of the line with 0 and end of line with $
 
 * Visual mode
   - select text with basic navigations
   - delete selected text with d
   - switch selection endpoints with o
+  - copy selection with y
   - exit with ESC
 
 * Commands (enter by writing colon)

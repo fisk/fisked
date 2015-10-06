@@ -1,7 +1,10 @@
 package org.fisked.services;
 
 import org.fisked.Application;
+import org.fisked.renderingengine.ClipboardService;
 import org.fisked.renderingengine.ConsoleService;
+import org.fisked.renderingengine.ItermConsoleService;
+import org.fisked.renderingengine.service.IClipboardService;
 import org.fisked.renderingengine.service.IConsoleService;
 
 public class ServiceManager {
@@ -17,6 +20,14 @@ public class ServiceManager {
 	}
 	
 	private IConsoleService _consoleService = new ConsoleService();
+	private IClipboardService _clipboardService = new ClipboardService();
+	
+	public ServiceManager() {
+	}
+	
+	public IClipboardService getClipboardService() {
+		return _clipboardService;
+	}
 	
 	public IConsoleService getConsoleService() {
 		return _consoleService;

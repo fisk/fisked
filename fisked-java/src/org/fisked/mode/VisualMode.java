@@ -14,6 +14,7 @@ import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Face;
 import org.fisked.renderingengine.service.models.Range;
 import org.fisked.responder.Event;
+import org.fisked.services.ServiceManager;
 
 public class VisualMode extends AbstractMode {
 	private Cursor _activeCursor = _window.getBuffer().getCursor();
@@ -64,12 +65,21 @@ public class VisualMode extends AbstractMode {
 			}
 			return false;
 		});
+		addResponder((Event nextEvent) -> {
+			if (nextEvent.isCharacter() && nextEvent.getCharacter() == 'y') {
+				Range selection = getSelectionRange();
+				String string = _window.getBuffer().getStringBuilder().substring(selection.getStart(), selection.getEnd());
+				setClipboard(string);
+				clearSelection();
+				_window.switchToNormalMode();
+				return true;
+			}
+			return false;
+		});
 	}
 
 	public void setClipboard(String text) {
-		StringSelection selection = new StringSelection(text);
-		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-		clipboard.setContents(selection, selection);
+		ServiceManager.getInstance().getClipboardService().setClipboard(text);
 	}
 	
 	public void activate() {
