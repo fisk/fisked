@@ -88,8 +88,7 @@ public class TextNavigator {
 	public void moveToTheBeginningOfLine() {
 		int newIndex = getIndex();
 		if (newIndex == 0) { return; }
-		if (!String.valueOf(_buffer.getStringBuilder().charAt(newIndex)).matches(".") && 
-			!String.valueOf(_buffer.getStringBuilder().charAt(newIndex-1)).matches(".")) {
+		if (!String.valueOf(_buffer.getStringBuilder().charAt(newIndex - 1)).matches(".")) {
 			return;
 		}
 		newIndex--;
@@ -102,12 +101,11 @@ public class TextNavigator {
 	public void moveToTheEndOfLine() {
 		int newIndex = getIndex();
 		if (newIndex == _buffer.getStringBuilder().length()) { return; }
-		if (!String.valueOf(_buffer.getStringBuilder().charAt(newIndex)).matches(".") && 
-			!String.valueOf(_buffer.getStringBuilder().charAt(newIndex+1)).matches(".")) {
+		if (!String.valueOf(_buffer.getStringBuilder().charAt(newIndex)).matches(".")) {
 			return;
 		}
 		newIndex++;
-		while (newIndex >= 0 && String.valueOf(_buffer.getStringBuilder().charAt(newIndex)).matches(".")) {
+		while (newIndex < _buffer.getStringBuilder().length() && String.valueOf(_buffer.getStringBuilder().charAt(newIndex)).matches(".")) {
 			newIndex++;
 		}
 		setIndex(newIndex, true);
