@@ -84,4 +84,18 @@ public class TextNavigator {
 		Point newPoint = new Point(getLastColumn(), point.getY() - 1);
 		setAbsolutePoint(newPoint, false);
 	}
+	
+	public void moveToTheBeginningOfLine() {
+		int newIndex = getIndex();
+		if (newIndex == 0) { return; }
+		if (!String.valueOf(_buffer.getStringBuilder().charAt(newIndex)).matches(".") && 
+			!String.valueOf(_buffer.getStringBuilder().charAt(newIndex-1)).matches(".")) {
+			return;
+		}
+		newIndex--;
+		while (newIndex >= 0 && String.valueOf(_buffer.getStringBuilder().charAt(newIndex)).matches(".")) {
+			newIndex--;
+		}
+		setIndex(++newIndex, true);
+	}
 }
