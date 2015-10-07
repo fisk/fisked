@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.fisked.buffer.Buffer;
+import org.fisked.log.Log;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.renderingengine.service.models.Size;

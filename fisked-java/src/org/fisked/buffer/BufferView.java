@@ -73,7 +73,7 @@ public class BufferView extends View {
 				Color background = backgroundColor;
 				attrString.setBackgroundColor(background);
 				attrString.setForegroundColor(foregroundColor);
-				context.moveTo(point.getX(), point.getY());
+				context.moveTo(drawingRect.getOrigin().getX(), point.getY());
 				context.printString(str);
 			});
 		} else {
@@ -100,7 +100,7 @@ public class BufferView extends View {
 				}
 
 				AttributedString attrString = new AttributedString(str, new Face(background, foreground));
-				context.moveTo(point.getX(), point.getY());
+				context.moveTo(drawingRect.getOrigin().getX(), point.getY());
 				context.printString(attrString);
 			});
 		}

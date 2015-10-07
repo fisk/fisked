@@ -24,6 +24,9 @@ public class BufferWindow extends Window {
 	private CommandController _commandController;
 	private CommandView _commandView;
 	
+	private LineNumberController _lineNumberController;
+	private LineNumberView _lineNumberView;
+	
 	private BufferView _bufferView;
 	private BufferController _bufferController;
 	
@@ -31,6 +34,9 @@ public class BufferWindow extends Window {
 
 	public BufferWindow(Rectangle windowRect) {
 		super(windowRect);
+		
+		// Should be a setting?
+		final int numberOfDigitsForLineNumbers = 4;
 		
 		Rectangle rootViewRect = windowRect;
 		Rectangle modeLineRect = new Rectangle(
@@ -41,9 +47,13 @@ public class BufferWindow extends Window {
 				0, rootViewRect.getSize().getHeight() - 1,
 				rootViewRect.getSize().getWidth(), 1
 				);
-		Rectangle bufferViewRect = new Rectangle(
+		Rectangle lineNumberRect = new Rectangle(
 				0, 0,
-				rootViewRect.getSize().getWidth(), rootViewRect.getSize().getHeight() - 2
+				numberOfDigitsForLineNumbers + 1, rootViewRect.getSize().getHeight() - 2
+				);
+		Rectangle bufferViewRect = new Rectangle(
+				5, 0,
+				rootViewRect.getSize().getWidth() - lineNumberRect.getSize().getWidth(), rootViewRect.getSize().getHeight() - 2
 				);
 		_rootView = new View(rootViewRect);
 		
@@ -57,6 +67,10 @@ public class BufferWindow extends Window {
 		_bufferController = new BufferController(_bufferView, bufferViewRect.getSize());
 		_bufferView.setBufferController(_bufferController);
 		
+		_lineNumberController = new LineNumberController(this, numberOfDigitsForLineNumbers);
+		_lineNumberView = new LineNumberView(lineNumberRect, _lineNumberController);
+		
+		_rootView.addSubview(_lineNumberView);
 		_rootView.addSubview(_bufferView);
 		_rootView.addSubview(_modeLineView);
 		_rootView.addSubview(_commandView);

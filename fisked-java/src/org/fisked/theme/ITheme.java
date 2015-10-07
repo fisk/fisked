@@ -8,6 +8,8 @@ public interface ITheme {
 	Color getModelineBackgroundColorDark();
 	Color getModelineBackgroundColorLight();
 	Color getModelineForegroundColor();
+	Color getLineNumberBackgroundColor();
+	Color getLineNumberForegroundColor();
 	Color getBackgroundColor();
 	Color getForegroundColor();
 	Color getCommandForegroundColor();

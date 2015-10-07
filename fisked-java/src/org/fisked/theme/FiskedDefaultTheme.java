@@ -44,4 +44,14 @@ public class FiskedDefaultTheme implements ITheme {
 		return Color.RED;
 	}
 
+	@Override
+	public Color getLineNumberBackgroundColor() {
+		return Color.BLACK;
+	}
+
+	@Override
+	public Color getLineNumberForegroundColor() {
+		return Color.WHITE;
+	}
+
 }
