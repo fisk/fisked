@@ -17,7 +17,7 @@ public class ShellCommandHandler implements ICommandHandler {
 		Log.println("Command: " + command);
 		
 		ShellCommandExecution execution = new ShellCommandExecution(command);
-		execution.executeIncremental(new CommandResult() {
+		execution.executeAsyncIncremental(new CommandResult() {
 
 			@Override
 			public void call(String string) {

@@ -3,9 +3,10 @@ package org.fisked.services;
 import org.fisked.Application;
 import org.fisked.renderingengine.ClipboardService;
 import org.fisked.renderingengine.ConsoleService;
-import org.fisked.renderingengine.ItermConsoleService;
+import org.fisked.renderingengine.MacClipboardService;
 import org.fisked.renderingengine.service.IClipboardService;
 import org.fisked.renderingengine.service.IConsoleService;
+import org.fisked.util.OSDetector;
 
 public class ServiceManager {
 	private static ServiceManager _sharedInstance;
@@ -23,6 +24,9 @@ public class ServiceManager {
 	private IClipboardService _clipboardService = new ClipboardService();
 	
 	public ServiceManager() {
+		if (OSDetector.isMac()) {
+			_clipboardService = new MacClipboardService();
+		}
 	}
 	
 	public IClipboardService getClipboardService() {
