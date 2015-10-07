@@ -1,5 +1,6 @@
 package org.fisked.buffer;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,6 +10,8 @@ import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Face;
 import org.fisked.renderingengine.service.models.Point;
+import org.fisked.scm.ISCMRepository;
+import org.fisked.scm.SCMRepositoryResolver;
 import org.fisked.theme.ITheme;
 import org.fisked.theme.ThemeManager;
 
@@ -48,6 +51,30 @@ public class ModeLineController {
 		return new AttributedString(text, face);
 	}
 	
+	private RepoInfo _repoInfo = null;
+	
+	private class RepoInfo {
+		String _scm;
+		String _branch;
+		boolean _valid;
+	}
+	
+	private RepoInfo getRepoInfo() {
+		if (_repoInfo == null) {
+			_repoInfo = new RepoInfo();
+			File file = _window.getBuffer().getFile();
+			ISCMRepository repo = SCMRepositoryResolver.getInstance().getRepositoryForFile(file);
+			if (repo == null) {
+				_repoInfo._valid = false;
+			} else {
+				_repoInfo._valid = true;
+				_repoInfo._branch = repo.getBranchName();
+				_repoInfo._scm = repo.getSCMName();
+			}
+		}
+		return _repoInfo;
+	}
+	
 	private List<AttributedString> getLeftModelineText() {
 		ITheme theme = ThemeManager.getThemeManager().getCurrentTheme();
 		Face modeFace = _window.getCurrentMode().getModelineFace();
@@ -59,6 +86,15 @@ public class ModeLineController {
 		List<AttributedString> result = new ArrayList<>();
 		result.add(drawText(" " + _window.getCurrentMode().getModeName().toUpperCase() + "  ", modeFace));
 		result.add(drawFatRightArrow(modeBackgroundColor, modelineBackgroundColor));
+		RepoInfo ri = getRepoInfo();
+		if (ri._valid) {
+			result.add(drawText(" " + ri._scm + " ", modelineFace));
+			result.add(drawSlimRightArrow(modelineFace));
+			result.add(drawText(" ", modelineFace));
+			result.add(drawBranch(modelineFace));
+			result.add(drawText(" " + ri._branch + " ", modelineFace));
+			result.add(drawSlimRightArrow(modelineFace));
+		}
 		result.add(drawText(" " + _window.getBuffer().getFileName() + " ", modelineFace));
 		result.add(drawSlimRightArrow(modelineFace));
 		
@@ -105,7 +141,7 @@ public class ModeLineController {
 		return new AttributedString(str.toString(), modelineFace);
 	}
 
-	// TODO: Allow themes to extend this
+	// TODO: Allow themes to extend this stuff
 	
 	public List<AttributedString> getModeLineText() {
 		List<AttributedString> left = getLeftModelineText();

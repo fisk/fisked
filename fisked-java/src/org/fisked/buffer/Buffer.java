@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.fisked.renderingengine.service.models.Range;
@@ -15,6 +17,15 @@ public class Buffer {
 	private StringBuilder _buffer = new StringBuilder();
 	private TextLayout _layout;
 	private Cursor _cursor;
+	private Map<String, Object> _map = new HashMap<String, Object>();
+	
+	public Object getProperty(String key) {
+		return _map.get(key);
+	}
+	
+	public void setProperty(String key, Object value) {
+		_map.put(key, value);
+	}
 	
 	public Buffer() {}
 
@@ -110,5 +121,9 @@ public class Buffer {
 		} else {
 			return "*scratch*";
 		}
+	}
+
+	public File getFile() {
+		return _file;
 	}
 }
