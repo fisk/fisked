@@ -20,4 +20,8 @@ public class Point {
 	public String toString() {
 		return "{" + _x + ", " + _y + "}";
 	}
+
+	public Point addedBy(Point origin) {
+		return new Point(_x + origin._x, _y + origin._y);
+	}
 }

@@ -115,6 +115,7 @@ public class BufferWindow extends Window {
 	@Override
 	public void drawPoint(IRenderingContext context) {
 		Point point = _bufferController.getLogicalPoint();
+		point = point.addedBy(_bufferView.getClippingRect().getOrigin());
 		context.moveTo(point.getX(), point.getY());
 	}
 

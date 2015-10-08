@@ -4,12 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.fisked.buffer.Buffer;
-import org.fisked.log.Log;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.renderingengine.service.models.Size;
 
-//TODO: This file needs a lot more logic
+// TODO: This file needs a lot more logic, like valid and invalid regions of the layout for lazy layouting
 
 public class TextLayout {
 	private Buffer _buffer;

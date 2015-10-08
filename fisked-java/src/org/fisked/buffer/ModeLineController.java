@@ -111,9 +111,7 @@ public class ModeLineController {
 		ITheme theme = ThemeManager.getThemeManager().getCurrentTheme();
 		Face modeFace = _window.getCurrentMode().getModelineFace();
 		Color modelineBackgroundColor = theme.getModelineBackgroundColorLight();
-		Color modelineForegroundColor = theme.getModelineForegroundColor();
 		Color modeBackgroundColor = modeFace.getBackgroundColor();
-		Face modelineFace = new Face(modelineBackgroundColor, modelineForegroundColor);
 		
 		Point point = _window.getBuffer().getCursor().getAbsolutePoint();
 		

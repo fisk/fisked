@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import org.eclipse.jgit.internal.storage.file.FileRepository;
-import org.fisked.log.Log;
 
 public class GitRepo implements ISCMRepository {
 	private FileRepository _repository;
@@ -20,12 +19,14 @@ public class GitRepo implements ISCMRepository {
 		if (maybeGit.toFile().exists()) {
 			return maybeGit;
 		}
-		Path parent = maybeGit.getParent();
+		if (path.getNameCount() == 0) return null;
+		Path parent = path.getParent();
 		return findGitRoot(parent);
 	}
 	
 	public static GitRepo getRepoForPath(File file) {
 		file = file.getAbsoluteFile();
+		if (!file.exists()) return null;
 		File parent = file.getParentFile();
 		Path path = parent.toPath().normalize();
 		Path gitRoot = findGitRoot(path);

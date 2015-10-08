@@ -1,9 +1,5 @@
 package org.fisked.mode;
 
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
-
 import org.fisked.buffer.BufferController;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.Cursor;
