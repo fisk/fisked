@@ -80,18 +80,20 @@ public class BufferView extends View {
 			_controller.drawBuffer(drawingRect, (Point point, String str, int offset) -> {
 				Color background = backgroundColor;
 				Color foreground = foregroundColor;
+				
+				Point relativePoint = new Point(drawingRect.getOrigin().getX() + point.getX(), drawingRect.getOrigin().getY() + point.getY());
 
 				if (selection.getStart() >= offset && selection.getStart() < offset + str.length()) {
 					if (selection.getEnd() >= offset && selection.getEnd() < offset + str.length()) {
-						drawSplitString(context, point, str, new Face(backgroundColor, foregroundColor), new Face(selectionBackgroundColor, selectionForegroundColor), 
+						drawSplitString(context, relativePoint, str, new Face(backgroundColor, foregroundColor), new Face(selectionBackgroundColor, selectionForegroundColor), 
 								new Face(backgroundColor, foregroundColor), selection.getStart() - offset, selection.getEnd() - offset);
 					} else {
-						drawSplitString(context, point, str, new Face(backgroundColor, foregroundColor), 
+						drawSplitString(context, relativePoint, str, new Face(backgroundColor, foregroundColor), 
 								new Face(selectionBackgroundColor, selectionForegroundColor), selection.getStart() - offset);
 					}
 					return;
 				} else if (selection.getEnd() >= offset && selection.getEnd() < offset + str.length()) {
-					drawSplitString(context, point, str, new Face(selectionBackgroundColor, selectionForegroundColor), 
+					drawSplitString(context, relativePoint, str, new Face(selectionBackgroundColor, selectionForegroundColor), 
 							new Face(backgroundColor, foregroundColor), selection.getEnd() - offset);
 					return;
 				} else if (offset >= selection.getStart() && offset < selection.getEnd()) {

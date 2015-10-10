@@ -59,4 +59,18 @@ public class BufferController {
 			decorator.draw(relativePoint, line, offset);
 		});
 	}
+
+	public String getSelectedText() {
+		Range selection = getSelection();
+		if (selection == null) return null;
+		String result = getBuffer().getStringBuilder().substring(selection.getStart(), selection.getEnd());
+		return result;
+	}
+	
+	public void setSelectionText(String text) {
+		Range selection = getSelection();
+		getBuffer().removeCharsInRange(selection);
+		getBuffer().appendStringAtPoint(text);
+		setSelection(null);
+	}
 }

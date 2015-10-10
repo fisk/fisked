@@ -35,6 +35,8 @@ Current features:
   - :e <file> opens file
   - :w saves current file
   - :r runs command and inserts text into current buffer
+  - :ruby evaluates selected text as ruby and inserts it into the document
+  - :python evaluates selected text as python and inserts it into the document
   - exit with ESC
 
 This readme file was edited with this text editor because it is awesome.

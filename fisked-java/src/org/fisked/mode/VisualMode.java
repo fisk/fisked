@@ -39,8 +39,8 @@ public class VisualMode extends AbstractMode {
 	public VisualMode(BufferWindow window) {
 		super(window);
 
-		addResponder(new BasicNavigationResponder(_window), () -> setSelection());
 		addResponder(new CommandInputResponder(_window));
+		addResponder(new BasicNavigationResponder(_window), () -> setSelection());
 		addResponder(new NormalModeSwitchResponder(_window), () -> clearSelection());
 		addResponder((Event nextEvent) -> {
 			if (nextEvent.isCharacter() && nextEvent.getCharacter() == 'o') {

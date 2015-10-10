@@ -7,6 +7,8 @@ import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.command.CommandManager;
 import org.fisked.command.OpenFileCommand;
+import org.fisked.language.ISourceEvaluator;
+import org.fisked.language.SourceEvaluatorManager;
 import org.fisked.log.Log;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.ICursorService;
@@ -27,17 +29,17 @@ public class Application {
 		}
 		return _sharedInstance;
 	}
-	
+
 	private EventLoop _loop;
 	private Window _primaryWindow;
 	private volatile Throwable _exception;
 	private String[] _argv;
-	
+
 	private void setupCommands() {
 		CommandManager cm = CommandManager.getSingleton();
 		cm.registerHandler("q", (BufferWindow window, String[] argv) -> { 
 			System.exit(0);
-			});
+		});
 		cm.registerHandler("e", new OpenFileCommand());
 		cm.registerHandler("w", (BufferWindow window, String[] argv) -> { 
 			try {
@@ -46,10 +48,32 @@ public class Application {
 			} catch (Exception e) {
 				window.getCommandController().setCommandFeedback("Couldn't save.");
 			}
-			});
+		});
 		cm.registerHandler("r", new ShellCommandHandler());
+		cm.registerHandler("ruby", (BufferWindow window, String[] argv) -> {
+			if (window.getBufferController().getSelection() != null) {
+				String text = window.getBufferController().getSelectedText();
+				ISourceEvaluator evaluator = SourceEvaluatorManager.getInstance().getEvaluator("ruby");
+				String result = evaluator.evaluate(text);
+				window.getBufferController().setSelectionText(result);
+				window.switchToNormalMode();
+			} else {
+				window.getCommandController().setCommandFeedback("Can't evaluate script without selection.");	
+			}
+		});
+		cm.registerHandler("python", (BufferWindow window, String[] argv) -> {
+			if (window.getBufferController().getSelection() != null) {
+				String text = window.getBufferController().getSelectedText();
+				ISourceEvaluator evaluator = SourceEvaluatorManager.getInstance().getEvaluator("python");
+				String result = evaluator.evaluate(text);
+				window.getBufferController().setSelectionText(result);
+				window.switchToNormalMode();
+			} else {
+				window.getCommandController().setCommandFeedback("Can't evaluate script without selection.");	
+			}
+		});
 	}
-	
+
 	private void processArguments() {
 		BufferWindow window = (BufferWindow)_primaryWindow;
 		if (_argv.length == 1) {
@@ -63,12 +87,12 @@ public class Application {
 			}
 		}
 	}
-	
+
 	public void start(String[] argv) {
 		_argv = argv;
 		try {
 			Runtime.getRuntime().addShutdownHook(new Thread() {
-			    public void run() {
+				public void run() {
 					ServiceManager sm = ServiceManager.getInstance();
 					IConsoleService cs = sm.getConsoleService();
 					cs.getCursorService().changeCursor(ICursorService.CURSOR_BLOCK);
@@ -76,23 +100,23 @@ public class Application {
 					if (_exception != null) {
 						_exception.printStackTrace();
 					}
-			    }
+				}
 			});
 
 			setupCommands();
 			_loop = new EventLoop();
 			ServiceManager sm = ServiceManager.getInstance();
 			IConsoleService cs = sm.getConsoleService();
-			
+
 			cs.activate();
-			
+
 			Rectangle windowRect = new Rectangle(0, 0, cs.getScreenWidth(), cs.getScreenHeight());
-			
+
 			_primaryWindow = new BufferWindow(windowRect);
 			processArguments();
 
 			_loop.setPrimaryResponder(_primaryWindow);
-			
+
 			Log.println("Initializing app with window: [" + cs.getScreenWidth() + ", " + cs.getScreenHeight() + "]");
 
 			_primaryWindow.draw();
@@ -104,11 +128,11 @@ public class Application {
 			app.exit();
 		}
 	}
-	
+
 	public void setException(Throwable throwable) {
 		_exception = throwable;
 	}
-	
+
 	public void exit() {
 		System.exit(0);
 	}
