@@ -10,6 +10,7 @@ import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Face;
 import org.fisked.renderingengine.service.models.Range;
 import org.fisked.responder.Event;
+import org.fisked.responder.RecognitionState;
 import org.fisked.services.ServiceManager;
 
 public class VisualMode extends AbstractMode {
@@ -47,9 +48,9 @@ public class VisualMode extends AbstractMode {
 				_window.getBuffer().setCursor(other);
 				_inactiveCursor = _activeCursor;
 				_activeCursor = other;
-				return true;
+				return RecognitionState.Recognized;
 			}
-			return false;
+			return RecognitionState.NotRecognized;
 		});
 		addResponder((Event nextEvent) -> {
 			if (nextEvent.isCharacter() && nextEvent.getCharacter() == 'd') {
@@ -57,9 +58,9 @@ public class VisualMode extends AbstractMode {
 				_window.getBuffer().removeCharsInRange(selection);
 				clearSelection();
 				_window.switchToNormalMode();
-				return true;
+				return RecognitionState.Recognized;
 			}
-			return false;
+			return RecognitionState.NotRecognized;
 		});
 		addResponder((Event nextEvent) -> {
 			if (nextEvent.isCharacter() && nextEvent.getCharacter() == 'y') {
@@ -68,9 +69,9 @@ public class VisualMode extends AbstractMode {
 				setClipboard(string);
 				clearSelection();
 				_window.switchToNormalMode();
-				return true;
+				return RecognitionState.Recognized;
 			}
-			return false;
+			return RecognitionState.NotRecognized;
 		});
 	}
 

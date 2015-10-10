@@ -34,6 +34,7 @@ public class TextNavigator {
 	}
 
 	private void setIndex(int index, boolean updateLastColumn) {
+		Log.println("Set Index: " + index);
 		getBuffer().getCursor().setCharIndex(index, updateLastColumn);
 	}
 	
@@ -186,5 +187,13 @@ public class TextNavigator {
 			point = getBuffer().getCursor().getAbsolutePoint();
 			rect = _layout.getClippingRect();
 		}
+	}
+
+	public void moveToStart() {
+		setIndex(0, true);
+	}
+
+	public void moveToEnd() {
+		setIndex(getBuffer().getStringBuilder().length(), true);
 	}
 }

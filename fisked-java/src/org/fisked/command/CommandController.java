@@ -4,6 +4,7 @@ import org.fisked.buffer.BufferWindow;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
+import org.fisked.responder.RecognitionState;
 
 public class CommandController implements IInputResponder {
 	private BufferWindow _window;
@@ -32,18 +33,18 @@ public class CommandController implements IInputResponder {
 	}
 	
 	@Override
-	public boolean handleInput(Event nextEvent) {
+	public RecognitionState handleInput(Event nextEvent) {
 		if (nextEvent.isBackspace()) {
 			if (_command.length() > 0) {
 				_command.deleteCharAt(_command.length() - 1);
 			}
 		} else if (nextEvent.isReturn()) {
 			finishCommand();
-			return false;
+			return RecognitionState.NotRecognized;
 		} else {
 			_command.append(nextEvent.getCharacter());
 		}
-		return true;
+		return RecognitionState.Recognized;
 	}
 	
 	public void startCommand() {

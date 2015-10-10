@@ -3,6 +3,7 @@ package org.fisked.mode.responder;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
+import org.fisked.responder.RecognitionState;
 
 public class VisualModeSwitchResponder implements IInputResponder {
 	private BufferWindow _window;
@@ -12,12 +13,12 @@ public class VisualModeSwitchResponder implements IInputResponder {
 	}
 
 	@Override
-	public boolean handleInput(Event input) {
+	public RecognitionState handleInput(Event input) {
 		if (input.isCharacter('v')) {
 			_window.switchToVisualMode();
-			return true;
+			return RecognitionState.Recognized;
 		}
-		return false;
+		return RecognitionState.NotRecognized;
 	}
 
 }

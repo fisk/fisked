@@ -62,12 +62,12 @@ public class JavaCompiler implements ISourceCompiler {
 		List<JavaFileObject> files = new ArrayList<>();
 		files.add(javaFileObjectsFromFiles.iterator().next());
 		final javax.tools.JavaCompiler.CompilationTask task = _compiler.getTask(null, _fileManager, diagnostics, options, null, files);
-		boolean result=task.call();
+		boolean result = task.call();
 		List<IDiagnostic> message = new ArrayList<>();
 		
 		if (!result) {
 			for (@SuppressWarnings("rawtypes") Diagnostic diagnostic : diagnostics.getDiagnostics()) {
-				message.add(new JavaDiagnostic((int)diagnostic.getLineNumber(), "Error on line %d in %s" + diagnostic.getLineNumber() + diagnostic));
+				message.add(new JavaDiagnostic((int)diagnostic.getLineNumber(), "Error on line %d in %s" + diagnostic.getLineNumber() + diagnostic.getMessage(null)));
 			}
 		}
 		

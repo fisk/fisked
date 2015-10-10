@@ -15,6 +15,7 @@ import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
+import org.fisked.responder.RecognitionState;
 import org.fisked.text.TextLayout;
 
 public class BufferWindow extends Window {
@@ -80,8 +81,8 @@ public class BufferWindow extends Window {
 	}
 	
 	@Override
-	public boolean handleInput(Event input) {
-		boolean result = _currentMode.handleInput(input);
+	public RecognitionState handleInput(Event input) {
+		RecognitionState result = _currentMode.handleInput(input);
 		setNeedsRedraw();
 		return result;
 	}

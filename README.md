@@ -21,6 +21,7 @@ Current features:
   - enter input mode on new line under current line with o
   - enter input mode on new line on previous line with O
   - paste after with p and before cursor with P
+  - go to beginning of file with G and end of file with gg
   - navigate to the beginning of the line with 0 and end of line with $
 
 * Visual mode

@@ -1,10 +1,25 @@
 package org.fisked.responder;
 
-public class Event {
-	private int _input;
+import java.util.Iterator;
+
+public class Event implements Iterable<Event> {
+	private final int _input;
+	private Event _next;
 	
 	public Event(int input) {
 		_input = input;
+	}
+	
+	public Event getNext() {
+		return _next;
+	}
+	
+	public void setNext(Event next) {
+		_next = next;
+	}
+	
+	public boolean hasNext() {
+		return _next != null;
 	}
 	
 	public boolean isCharacter() {
@@ -59,6 +74,27 @@ public class Event {
 
 	public boolean isControlChar(char character) {
 		return matchesCharacter(true, false, character);
+	}
+	
+	private class EventIterator implements Iterator<Event> {
+		Event _current = Event.this;
+
+		@Override
+		public boolean hasNext() {
+			return _current != null;
+		}
+
+		@Override
+		public Event next() {
+			Event next = _current;
+			_current = next.getNext();
+			return next;
+		}
+	}
+
+	@Override
+	public Iterator<Event> iterator() {
+		return new EventIterator();
 	}
 
 }

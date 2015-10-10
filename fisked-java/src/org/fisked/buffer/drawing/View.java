@@ -9,6 +9,7 @@ import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
+import org.fisked.responder.RecognitionState;
 import org.fisked.services.ServiceManager;
 import org.fisked.theme.ThemeManager;
 
@@ -47,13 +48,17 @@ public class View implements IInputResponder, IDrawable {
 	}
 
 	@Override
-	public boolean handleInput(Event input) {
+	public RecognitionState handleInput(Event input) {
+		boolean maybeRecognized = false;
 		for (View view: _subviews) {
-			if (view.handleInput(input)) {
-				return true;
+			RecognitionState state = view.handleInput(input);
+			if (state == RecognitionState.Recognized) {
+				return RecognitionState.Recognized;
+			} else if (state == RecognitionState.MaybeRecognized) {
+				maybeRecognized = true;
 			}
 		}
-		return false;
+		return maybeRecognized ? RecognitionState.MaybeRecognized : RecognitionState.NotRecognized;
 	}
 	
 	public Color getParentBackgroundColor() {

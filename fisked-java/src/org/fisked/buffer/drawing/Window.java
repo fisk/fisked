@@ -5,6 +5,7 @@ import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
+import org.fisked.responder.RecognitionState;
 import org.fisked.services.ServiceManager;
 import org.fisked.theme.ITheme;
 import org.fisked.theme.ThemeManager;
@@ -23,8 +24,8 @@ public class Window implements IInputResponder, IDrawable {
 	}
 
 	@Override
-	public boolean handleInput(Event input) {
-		return true;
+	public RecognitionState handleInput(Event input) {
+		return RecognitionState.NotRecognized;
 	}
 
 	@Override

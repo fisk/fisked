@@ -3,6 +3,7 @@ package org.fisked.mode.responder;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
+import org.fisked.responder.RecognitionState;
 import org.fisked.text.TextNavigator;
 
 public class InputModeSwitchResponder implements IInputResponder {
@@ -15,29 +16,29 @@ public class InputModeSwitchResponder implements IInputResponder {
 	}
 
 	@Override
-	public boolean handleInput(Event input) {
+	public RecognitionState handleInput(Event input) {
 		if (input.isCharacter('i')) {
 			_window.switchToInputMode();
-			return true;
+			return RecognitionState.Recognized;
 		}
 		if (input.isCharacter('a')) {
 			_navigator.moveRight();
 			_navigator.scrollDownIfNeeded();
 			_window.switchToInputMode();
-			return true;
+			return RecognitionState.Recognized;
 		}
 		if (input.isCharacter('A')) {
 			_navigator.moveToTheEndOfLine();
 			_navigator.scrollDownIfNeeded();
 			_window.switchToInputMode();
-			return true;
+			return RecognitionState.Recognized;
 		}
 		if (input.isCharacter('o')) {
 			_navigator.moveToTheEndOfLine();
 			_window.getBuffer().appendCharAtPoint('\n');
 			_navigator.scrollDownIfNeeded();
 			_window.switchToInputMode();
-			return true;
+			return RecognitionState.Recognized;
 		}
 		if (input.isCharacter('O')) {
 			_navigator.moveToTheBeginningOfLine();
@@ -45,9 +46,9 @@ public class InputModeSwitchResponder implements IInputResponder {
 			_navigator.moveLeft();
 			_navigator.scrollDownIfNeeded();
 			_window.switchToInputMode();
-			return true;
+			return RecognitionState.Recognized;
 		}
-		return false;
+		return RecognitionState.NotRecognized;
 	}
 
 }

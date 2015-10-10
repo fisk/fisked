@@ -7,6 +7,7 @@ import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.InputResponderChain;
 import org.fisked.responder.InputResponderChain.OnRecognizeCallback;
+import org.fisked.responder.RecognitionState;
 import org.fisked.services.ServiceManager;
 
 public abstract class AbstractMode implements IInputResponder {
@@ -27,6 +28,10 @@ public abstract class AbstractMode implements IInputResponder {
 		_responders.addResponder(responder, callback);
 	}
 	
+	protected void addResponder(String match, OnRecognizeCallback callback) {
+		_responders.addResponder(match, callback);
+	}
+	
 	public abstract Face getModelineFace();
 	
 	public abstract void activate();
@@ -42,7 +47,7 @@ public abstract class AbstractMode implements IInputResponder {
 	}
 	
 	@Override
-	public boolean handleInput(Event input) {
+	public RecognitionState handleInput(Event input) {
 		return _responders.handleInput(input);
 	}
 }

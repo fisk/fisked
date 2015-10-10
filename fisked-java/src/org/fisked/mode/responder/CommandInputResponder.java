@@ -3,6 +3,7 @@ package org.fisked.mode.responder;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
+import org.fisked.responder.RecognitionState;
 
 public class CommandInputResponder implements IInputResponder {
 	private boolean _writingCommand = false;
@@ -12,20 +13,20 @@ public class CommandInputResponder implements IInputResponder {
 		_window = window;
 	}
 
-	public boolean handleInput(Event input) {
+	public RecognitionState handleInput(Event input) {
 		if (_writingCommand) {
-			if (!_window.getCommandController().handleInput(input)) {
+			if (_window.getCommandController().handleInput(input) == RecognitionState.NotRecognized) {
 				_writingCommand = false;
 			}
-			return true;
+			return RecognitionState.Recognized;
 		}
 		_window.getCommandController().setCommandFeedback(null);
 		if (input.getCharacter() == ':') {
 			_writingCommand = true;
 			_window.getCommandController().startCommand();
-			return true;
+			return RecognitionState.Recognized;
 		} else {
-			return false;
+			return RecognitionState.NotRecognized;
 		}
 	}
 

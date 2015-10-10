@@ -8,6 +8,7 @@ import org.fisked.mode.responder.VisualModeSwitchResponder;
 import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Face;
 import org.fisked.responder.Event;
+import org.fisked.responder.RecognitionState;
 import org.fisked.services.ServiceManager;
 import org.fisked.text.TextNavigator;
 
@@ -27,9 +28,9 @@ public class NormalMode extends AbstractMode {
 			if (nextEvent.isCharacter('p')) {
 				_window.getBuffer().appendStringAtPoint(getClipboard());
 				_window.switchToNormalMode();
-				return true;
+				return RecognitionState.Recognized;
 			}
-			return false;
+			return RecognitionState.NotRecognized;
 		});
 		addResponder((Event nextEvent) -> {
 			if (nextEvent.isCharacter('P')) {
@@ -37,9 +38,9 @@ public class NormalMode extends AbstractMode {
 				navigator.moveLeft();
 				_window.getBuffer().appendStringAtPoint(getClipboard());
 				_window.switchToNormalMode();
-				return true;
+				return RecognitionState.Recognized;
 			}
-			return false;
+			return RecognitionState.NotRecognized;
 		});
 	}
 

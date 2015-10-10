@@ -13,11 +13,14 @@ public class InputResponderChain implements IInputResponder {
 	public InputResponderChain() {}
 
 	@Override
-	public boolean handleInput(Event nextEvent) {
+	public RecognitionState handleInput(Event nextEvent) {
+		boolean maybeRecognized = false;
 		for (IInputResponder responder : _responders) {
-			if (responder.handleInput(nextEvent)) return true;
+			RecognitionState state = responder.handleInput(nextEvent);
+			if (state == RecognitionState.MaybeRecognized) maybeRecognized = true;
+			if (state == RecognitionState.Recognized) return RecognitionState.Recognized;
 		}
-		return false;
+		return maybeRecognized ? RecognitionState.MaybeRecognized : RecognitionState.NotRecognized;
 	}
 
 	public void addResponder(IInputResponder recognizer) {
@@ -26,11 +29,21 @@ public class InputResponderChain implements IInputResponder {
 
 	public void addResponder(IInputResponder recognizer, OnRecognizeCallback callback) {
 		_responders.add((Event nextEvent) -> {
-			boolean result = recognizer.handleInput(nextEvent);
-			if (result) {
+			RecognitionState result = recognizer.handleInput(nextEvent);
+			if (result == RecognitionState.Recognized) {
 				callback.onRecognize();
 			}
 			return result;
 		});
+	}
+	
+	public interface IRecognizeCallback {
+		void callback();
+	}
+	
+	public void addResponder(String match, OnRecognizeCallback callback) {
+		addResponder((Event event) -> {
+			return EventRecognition.matches(event, match);
+		}, callback);
 	}
 }
