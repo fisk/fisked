@@ -5,8 +5,10 @@ import java.util.List;
 
 import org.fisked.buffer.Buffer;
 import org.fisked.renderingengine.service.models.Point;
+import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.renderingengine.service.models.Size;
+import org.python.modules._threading._threading;
 
 // TODO: This file needs a lot more logic, like valid and invalid regions of the layout for lazy layouting
 
@@ -190,5 +192,20 @@ public class TextLayout {
 		int lineExcess = Math.min(point.getX(), lastLine.length());
 		
 		return i + lineExcess;
+	}
+	
+	public List<Boolean> getTrailingEndlineInfoForRange(Range range) {
+		layoutIfNeeded();
+		List<Boolean> result = new ArrayList<>();
+		if (range.getStart() > _logicalLines.size()) {
+			return result;
+		}
+		
+		int lineIndex = range.getStart();
+		while (lineIndex <= range.getEnd() && lineIndex < _logicalLines.size()) {
+			result.add(_logicalLines.get(lineIndex++)._trailingEndline);
+		}
+		
+		return result;
 	}
 }
