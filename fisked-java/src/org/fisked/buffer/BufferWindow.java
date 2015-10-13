@@ -16,6 +16,7 @@ import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
 import org.fisked.responder.RecognitionState;
+import org.fisked.settings.Settings;
 import org.fisked.text.TextLayout;
 
 public class BufferWindow extends Window {
@@ -36,8 +37,7 @@ public class BufferWindow extends Window {
 	public BufferWindow(Rectangle windowRect) {
 		super(windowRect);
 		
-		// Should be a setting?
-		final int numberOfDigitsForLineNumbers = 4;
+		final int numberOfDigitsForLineNumbers = Settings.getInstance().getNumberOfDigitsForLineNumbers();
 		
 		Rectangle rootViewRect = windowRect;
 		Rectangle modeLineRect = new Rectangle(

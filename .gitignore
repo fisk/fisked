@@ -4,3 +4,4 @@
 *.swp
 .settings
 fisked-java/fisked.log
+/fisked.properties

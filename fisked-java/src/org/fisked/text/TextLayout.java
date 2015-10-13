@@ -8,7 +8,6 @@ import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.renderingengine.service.models.Size;
-import org.python.modules._threading._threading;
 
 // TODO: This file needs a lot more logic, like valid and invalid regions of the layout for lazy layouting
 
