@@ -37,7 +37,8 @@ public class BufferWindow extends Window {
 	public BufferWindow(Rectangle windowRect) {
 		super(windowRect);
 		
-		final int numberOfDigitsForLineNumbers = Settings.getInstance().getNumberOfDigitsForLineNumbers();
+		int widthForLineNumbers = Settings.getInstance().getNumberOfDigitsForLineNumbers();
+		if (widthForLineNumbers > 0) { widthForLineNumbers++; }
 		
 		Rectangle rootViewRect = windowRect;
 		Rectangle modeLineRect = new Rectangle(
@@ -50,10 +51,10 @@ public class BufferWindow extends Window {
 				);
 		Rectangle lineNumberRect = new Rectangle(
 				0, 0,
-				numberOfDigitsForLineNumbers + 1, rootViewRect.getSize().getHeight() - 2
+				widthForLineNumbers, rootViewRect.getSize().getHeight() - 2
 				);
 		Rectangle bufferViewRect = new Rectangle(
-				5, 0,
+				widthForLineNumbers, 0,
 				rootViewRect.getSize().getWidth() - lineNumberRect.getSize().getWidth(), rootViewRect.getSize().getHeight() - 2
 				);
 		_rootView = new View(rootViewRect);
@@ -68,7 +69,7 @@ public class BufferWindow extends Window {
 		_bufferController = new BufferController(_bufferView, bufferViewRect.getSize());
 		_bufferView.setBufferController(_bufferController);
 		
-		_lineNumberController = new LineNumberController(this, numberOfDigitsForLineNumbers);
+		_lineNumberController = new LineNumberController(this);
 		_lineNumberView = new LineNumberView(lineNumberRect, _lineNumberController);
 		
 		_rootView.addSubview(_lineNumberView);

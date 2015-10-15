@@ -6,6 +6,7 @@ import java.util.List;
 import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.renderingengine.service.models.Face;
 import org.fisked.renderingengine.service.models.Range;
+import org.fisked.settings.Settings;
 import org.fisked.theme.ITheme;
 import org.fisked.theme.ThemeManager;
 
@@ -13,17 +14,23 @@ public class LineNumberController {
 	private BufferWindow _window;
 	private int _numberOfDigitsForLineNumbers;
 	
-	public LineNumberController(BufferWindow window, int numberOfDigitsForLineNumbers) {
+	public LineNumberController(BufferWindow window) {
 		_window = window;
-		_numberOfDigitsForLineNumbers = numberOfDigitsForLineNumbers;
+		_numberOfDigitsForLineNumbers = Settings.getInstance().getNumberOfDigitsForLineNumbers();
 	}
 	
 	private AttributedString drawEmptyRow(Face face) {
+		if (_numberOfDigitsForLineNumbers == 0) { return new AttributedString("", face); }
 		return new AttributedString(String.format("%" +_numberOfDigitsForLineNumbers +"s", " "), face);
 	}
 	
 	private AttributedString drawNumber(int number, Face face) {
-		return new AttributedString(String.format("%" +_numberOfDigitsForLineNumbers +"d", number), face);
+		if (_numberOfDigitsForLineNumbers == 0) { return new AttributedString("", face); }
+		String str = String.format("%" +_numberOfDigitsForLineNumbers +"d", number);
+		if (str.length() > _numberOfDigitsForLineNumbers) {
+			str = "?";
+		}
+		return new AttributedString(str, face);
 	}
 
 	// TODO: Allow themes to extend this
