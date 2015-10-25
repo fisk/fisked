@@ -34,8 +34,13 @@ public class TextNavigator {
 	}
 
 	private void setIndex(int index, boolean updateLastColumn) {
-		Log.println("Set Index: " + index);
 		getBuffer().getCursor().setCharIndex(index, updateLastColumn);
+		scrollDownIfNeeded();
+		scrollUpIfNeeded();
+	}
+
+	public void moveToIndexAndScroll(int index) {
+		getBuffer().getCursor().setCharIndex(index, true);
 	}
 	
 	private int getLastColumn() {

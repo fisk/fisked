@@ -5,6 +5,8 @@ import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.InputResponderChain;
 import org.fisked.responder.RecognitionState;
+import org.fisked.responder.motion.IMotion.MotionRange;
+import org.fisked.responder.motion.MotionRecognizer;
 import org.fisked.text.TextNavigator;
 
 public class BasicNavigationResponder implements IInputResponder {
@@ -15,6 +17,11 @@ public class BasicNavigationResponder implements IInputResponder {
 	public BasicNavigationResponder(BufferWindow window) {
 		_window = window;
 		_navigator = new TextNavigator(_window.getBuffer());
+		final MotionRecognizer motionRecognizer = new MotionRecognizer(window);
+		_responders.addResponder(motionRecognizer, () -> {
+			MotionRange range = motionRecognizer.getRange();
+			_navigator.moveToIndexAndScroll(range.getEnd());
+		});
 		_responders.addResponder("gg", () -> {
 			_navigator.moveToEnd();
 			_navigator.scrollDownIfNeeded();
