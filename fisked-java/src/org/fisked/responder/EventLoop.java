@@ -22,9 +22,10 @@ public class EventLoop {
 			} else {
 				postponedStart = postponedEnd = nextEvent;
 			}
-			RecognitionState state = _primaryResponder.handleInput(postponedStart);
+			RecognitionState state = _primaryResponder.recognizesInput(postponedStart);
 			switch (state) {
 			case Recognized:
+				_primaryResponder.onRecognize();
 			case NotRecognized:
 				postponedStart = postponedEnd = null;
 				break;
@@ -36,7 +37,7 @@ public class EventLoop {
 		}
 	}
 
-	public IInputResponder getPrimaryResponder() {
+	public IInputRecognizer getPrimaryResponder() {
 		return _primaryResponder;
 	}
 

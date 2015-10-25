@@ -4,21 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InputResponderChain implements IInputResponder {
-	private List<IInputResponder> _responders = new ArrayList<IInputResponder>();
-
-	public interface OnRecognizeCallback {
-		void onRecognize();
-	}
+	private List<IInputResponder> _responders = new ArrayList<>();
+	private IInputResponder _matched = null;
 
 	public InputResponderChain() {}
 
 	@Override
-	public RecognitionState handleInput(Event nextEvent) {
+	public RecognitionState recognizesInput(Event nextEvent) {
+		_matched = null;
 		boolean maybeRecognized = false;
 		for (IInputResponder responder : _responders) {
-			RecognitionState state = responder.handleInput(nextEvent);
+			RecognitionState state = responder.recognizesInput(nextEvent);
 			if (state == RecognitionState.MaybeRecognized) maybeRecognized = true;
-			if (state == RecognitionState.Recognized) return RecognitionState.Recognized;
+			if (state == RecognitionState.Recognized) {
+				_matched = responder;
+				return RecognitionState.Recognized;
+			}
 		}
 		return maybeRecognized ? RecognitionState.MaybeRecognized : RecognitionState.NotRecognized;
 	}
@@ -27,23 +28,23 @@ public class InputResponderChain implements IInputResponder {
 		_responders.add(recognizer);
 	}
 
-	public void addResponder(IInputResponder recognizer, OnRecognizeCallback callback) {
-		_responders.add((Event nextEvent) -> {
-			RecognitionState result = recognizer.handleInput(nextEvent);
-			if (result == RecognitionState.Recognized) {
-				callback.onRecognize();
-			}
-			return result;
-		});
+	public void addResponder(IInputRecognizer recognizer, IRecognitionAction callback) {
+		_responders.add(EventRecognition.newResponder(recognizer, callback));
 	}
 	
-	public interface IRecognizeCallback {
-		void callback();
-	}
-	
-	public void addResponder(String match, OnRecognizeCallback callback) {
+	public void addResponder(String match, IRecognitionAction callback) {
 		addResponder((Event event) -> {
 			return EventRecognition.matches(event, match);
 		}, callback);
+	}
+
+	public void onRecognize() {
+		if (_matched != null) {
+			_matched.onRecognize();
+		}
+	}
+
+	public void addResponder(IInputRecognizer responder) {
+		_responders.add(EventRecognition.newResponder(responder, () -> {}));
 	}
 }

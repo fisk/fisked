@@ -45,7 +45,7 @@ public class FindMotion implements IMotion {
 	}
 
 	@Override
-	public RecognitionState handleInput(Event nextEvent) {
+	public RecognitionState recognizesInput(Event nextEvent) {
 		int i = 0;
 		for (Event event : nextEvent) {
 			if (!event.isCharacter()) return RecognitionState.NotRecognized;

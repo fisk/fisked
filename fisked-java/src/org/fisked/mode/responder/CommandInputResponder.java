@@ -2,10 +2,10 @@ package org.fisked.mode.responder;
 
 import org.fisked.buffer.BufferWindow;
 import org.fisked.responder.Event;
-import org.fisked.responder.IInputResponder;
+import org.fisked.responder.IInputRecognizer;
 import org.fisked.responder.RecognitionState;
 
-public class CommandInputResponder implements IInputResponder {
+public class CommandInputResponder implements IInputRecognizer {
 	private boolean _writingCommand = false;
 	private BufferWindow _window;
 	
@@ -13,9 +13,9 @@ public class CommandInputResponder implements IInputResponder {
 		_window = window;
 	}
 
-	public RecognitionState handleInput(Event input) {
+	public RecognitionState recognizesInput(Event input) {
 		if (_writingCommand) {
-			if (_window.getCommandController().handleInput(input) == RecognitionState.NotRecognized) {
+			if (_window.getCommandController().recognizesInput(input) == RecognitionState.NotRecognized) {
 				_writingCommand = false;
 			}
 			return RecognitionState.Recognized;

@@ -24,8 +24,13 @@ public class Window implements IInputResponder, IDrawable {
 	}
 
 	@Override
-	public RecognitionState handleInput(Event input) {
+	public RecognitionState recognizesInput(Event input) {
 		return RecognitionState.NotRecognized;
+	}
+	
+	@Override
+	public void onRecognize() {
+		
 	}
 
 	@Override

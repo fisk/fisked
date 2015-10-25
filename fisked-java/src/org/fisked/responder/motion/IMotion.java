@@ -1,8 +1,8 @@
 package org.fisked.responder.motion;
 
-import org.fisked.responder.IInputResponder;
+import org.fisked.responder.IInputRecognizer;
 
-public interface IMotion extends IInputResponder {
+public interface IMotion extends IInputRecognizer {
 	public class MotionRange {
 		private int _start;
 		private int _end;

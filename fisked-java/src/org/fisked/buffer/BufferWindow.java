@@ -82,10 +82,15 @@ public class BufferWindow extends Window {
 	}
 	
 	@Override
-	public RecognitionState handleInput(Event input) {
-		RecognitionState result = _currentMode.handleInput(input);
+	public RecognitionState recognizesInput(Event input) {
+		RecognitionState result = _currentMode.recognizesInput(input);
 		setNeedsRedraw();
 		return result;
+	}
+
+	@Override
+	public void onRecognize() {
+		_currentMode.onRecognize();
 	}
 
 	public Buffer getBuffer() {

@@ -15,7 +15,7 @@ public class LineEndMotion implements IMotion {
 	}
 
 	@Override
-	public RecognitionState handleInput(Event nextEvent) {
+	public RecognitionState recognizesInput(Event nextEvent) {
 		return EventRecognition.matches(nextEvent, "$");
 	}
 

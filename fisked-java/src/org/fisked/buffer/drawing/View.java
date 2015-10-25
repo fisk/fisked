@@ -8,12 +8,12 @@ import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
-import org.fisked.responder.IInputResponder;
+import org.fisked.responder.IInputRecognizer;
 import org.fisked.responder.RecognitionState;
 import org.fisked.services.ServiceManager;
 import org.fisked.theme.ThemeManager;
 
-public class View implements IInputResponder, IDrawable {
+public class View implements IInputRecognizer, IDrawable {
 	private Rectangle _bounds;
 	private View _parent;
 	private List<View> _subviews = new ArrayList<>();
@@ -48,10 +48,10 @@ public class View implements IInputResponder, IDrawable {
 	}
 
 	@Override
-	public RecognitionState handleInput(Event input) {
+	public RecognitionState recognizesInput(Event input) {
 		boolean maybeRecognized = false;
 		for (View view: _subviews) {
-			RecognitionState state = view.handleInput(input);
+			RecognitionState state = view.recognizesInput(input);
 			if (state == RecognitionState.Recognized) {
 				return RecognitionState.Recognized;
 			} else if (state == RecognitionState.MaybeRecognized) {

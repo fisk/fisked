@@ -4,6 +4,7 @@ import org.fisked.buffer.BufferWindow;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.InputResponderChain;
+import org.fisked.responder.LoopResponder;
 import org.fisked.responder.RecognitionState;
 import org.fisked.responder.motion.IMotion.MotionRange;
 import org.fisked.responder.motion.MotionRecognizer;
@@ -13,10 +14,14 @@ public class BasicNavigationResponder implements IInputResponder {
 	private BufferWindow _window;
 	private TextNavigator _navigator;
 	private InputResponderChain _responders = new InputResponderChain();
+	private LoopResponder _numberPrefix;
 
 	public BasicNavigationResponder(BufferWindow window) {
 		_window = window;
 		_navigator = new TextNavigator(_window.getBuffer());
+		
+		_numberPrefix = new LoopResponder(_responders);
+
 		final MotionRecognizer motionRecognizer = new MotionRecognizer(window);
 		_responders.addResponder(motionRecognizer, () -> {
 			MotionRange range = motionRecognizer.getRange();
@@ -55,8 +60,13 @@ public class BasicNavigationResponder implements IInputResponder {
 	}
 
 	@Override
-	public RecognitionState handleInput(Event input) {
-		return _responders.handleInput(input);
+	public RecognitionState recognizesInput(Event input) {
+		return _numberPrefix.recognizesInput(input);
+	}
+
+	@Override
+	public void onRecognize() {
+		_numberPrefix.onRecognize();
 	}
 
 }

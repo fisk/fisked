@@ -3,10 +3,10 @@ package org.fisked.mode.responder;
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.responder.Event;
-import org.fisked.responder.IInputResponder;
+import org.fisked.responder.IInputRecognizer;
 import org.fisked.responder.RecognitionState;
 
-public class TextInputResponder implements IInputResponder {
+public class TextInputResponder implements IInputRecognizer {
 	private BufferWindow _window;
 	
 	public TextInputResponder(BufferWindow window) {
@@ -14,7 +14,7 @@ public class TextInputResponder implements IInputResponder {
 	}
 
 	@Override
-	public RecognitionState handleInput(Event input) {
+	public RecognitionState recognizesInput(Event input) {
 		if (input.isBackspace()) {
 			_window.getBuffer().removeCharAtPoint();
 			return RecognitionState.Recognized;

@@ -2,11 +2,11 @@ package org.fisked.mode.responder;
 
 import org.fisked.buffer.BufferWindow;
 import org.fisked.responder.Event;
-import org.fisked.responder.IInputResponder;
+import org.fisked.responder.IInputRecognizer;
 import org.fisked.responder.RecognitionState;
 import org.fisked.text.TextNavigator;
 
-public class InputModeSwitchResponder implements IInputResponder {
+public class InputModeSwitchResponder implements IInputRecognizer {
 	private BufferWindow _window;
 	private TextNavigator _navigator;
 	
@@ -16,7 +16,7 @@ public class InputModeSwitchResponder implements IInputResponder {
 	}
 
 	@Override
-	public RecognitionState handleInput(Event input) {
+	public RecognitionState recognizesInput(Event input) {
 		if (input.isCharacter('i')) {
 			_window.switchToInputMode();
 			return RecognitionState.Recognized;

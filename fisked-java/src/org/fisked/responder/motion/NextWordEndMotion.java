@@ -18,7 +18,7 @@ public class NextWordEndMotion implements IMotion {
 	}
 
 	@Override
-	public RecognitionState handleInput(Event nextEvent) {
+	public RecognitionState recognizesInput(Event nextEvent) {
 		return EventRecognition.matches(nextEvent, "e");
 	}
 

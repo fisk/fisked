@@ -4,9 +4,10 @@ import org.fisked.buffer.BufferWindow;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.models.Face;
 import org.fisked.responder.Event;
+import org.fisked.responder.IInputRecognizer;
 import org.fisked.responder.IInputResponder;
+import org.fisked.responder.IRecognitionAction;
 import org.fisked.responder.InputResponderChain;
-import org.fisked.responder.InputResponderChain.OnRecognizeCallback;
 import org.fisked.responder.RecognitionState;
 import org.fisked.services.ServiceManager;
 
@@ -20,15 +21,19 @@ public abstract class AbstractMode implements IInputResponder {
 	
 	abstract public String getModeName();
 	
+	protected void addResponder(IInputRecognizer responder) {
+		_responders.addResponder(responder);
+	}
+	
 	protected void addResponder(IInputResponder responder) {
 		_responders.addResponder(responder);
 	}
 	
-	protected void addResponder(IInputResponder responder, OnRecognizeCallback callback) {
+	protected void addResponder(IInputRecognizer responder, IRecognitionAction callback) {
 		_responders.addResponder(responder, callback);
 	}
 	
-	protected void addResponder(String match, OnRecognizeCallback callback) {
+	protected void addResponder(String match, IRecognitionAction callback) {
 		_responders.addResponder(match, callback);
 	}
 	
@@ -47,7 +52,12 @@ public abstract class AbstractMode implements IInputResponder {
 	}
 	
 	@Override
-	public RecognitionState handleInput(Event input) {
-		return _responders.handleInput(input);
+	public RecognitionState recognizesInput(Event input) {
+		return _responders.recognizesInput(input);
+	}
+	
+	@Override
+	public void onRecognize() {
+		_responders.onRecognize();
 	}
 }

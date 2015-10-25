@@ -13,12 +13,16 @@ public class NormalModeSwitchResponder implements IInputResponder {
 	}
 
 	@Override
-	public RecognitionState handleInput(Event input) {
+	public RecognitionState recognizesInput(Event input) {
 		if (input.isEscape()) {
-			_window.switchToNormalMode();
 			return RecognitionState.Recognized;
 		}
 		return RecognitionState.NotRecognized;
+	}
+
+	@Override
+	public void onRecognize() {
+		_window.switchToNormalMode();
 	}
 
 }

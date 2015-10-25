@@ -3,10 +3,10 @@ package org.fisked.command;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
-import org.fisked.responder.IInputResponder;
+import org.fisked.responder.IInputRecognizer;
 import org.fisked.responder.RecognitionState;
 
-public class CommandController implements IInputResponder {
+public class CommandController implements IInputRecognizer {
 	private BufferWindow _window;
 	private StringBuilder _command;
 	private boolean _writingCommand;
@@ -33,7 +33,7 @@ public class CommandController implements IInputResponder {
 	}
 	
 	@Override
-	public RecognitionState handleInput(Event nextEvent) {
+	public RecognitionState recognizesInput(Event nextEvent) {
 		if (nextEvent.isBackspace()) {
 			if (_command.length() > 0) {
 				_command.deleteCharAt(_command.length() - 1);

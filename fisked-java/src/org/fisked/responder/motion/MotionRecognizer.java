@@ -23,10 +23,10 @@ public class MotionRecognizer implements IMotion {
 	}
 
 	@Override
-	public RecognitionState handleInput(Event nextEvent) {
+	public RecognitionState recognizesInput(Event nextEvent) {
 		boolean maybe = false;
 		for (IMotion motion : _motions) {
-			RecognitionState state = motion.handleInput(nextEvent);
+			RecognitionState state = motion.recognizesInput(nextEvent);
 			if (state == RecognitionState.Recognized) {
 				_match = motion;
 				return state;
@@ -40,7 +40,6 @@ public class MotionRecognizer implements IMotion {
 	@Override
 	public MotionRange getRange() {
 		MotionRange range = _match.getRange();
-		_match = null;
 		return range;
 	}
 
