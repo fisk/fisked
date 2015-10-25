@@ -126,4 +126,8 @@ public class Buffer {
 	public File getFile() {
 		return _file;
 	}
+
+	public int getLength() {
+		return _buffer.length();
+	}
 }

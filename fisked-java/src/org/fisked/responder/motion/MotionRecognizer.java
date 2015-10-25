@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.fisked.buffer.BufferWindow;
-import org.fisked.log.Log;
 import org.fisked.responder.Event;
 import org.fisked.responder.RecognitionState;
 
@@ -14,6 +13,13 @@ public class MotionRecognizer implements IMotion {
 	
 	public MotionRecognizer(BufferWindow window) {
 		_motions.add(new FindMotion(window));
+		_motions.add(new BufferStartMotion(window));
+		_motions.add(new BufferEndMotion(window));
+		_motions.add(new LineStartMotion(window));
+		_motions.add(new LineEndMotion(window));
+		_motions.add(new NextWordStartMotion(window));
+		_motions.add(new NextWordEndMotion(window));
+		_motions.add(new PreviousWordStartMotion(window));
 	}
 
 	@Override

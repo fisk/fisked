@@ -22,19 +22,17 @@ public class BasicNavigationResponder implements IInputResponder {
 			MotionRange range = motionRecognizer.getRange();
 			_navigator.moveToIndexAndScroll(range.getEnd());
 		});
-		_responders.addResponder("gg", () -> {
-			_navigator.moveToEnd();
-			_navigator.scrollDownIfNeeded();
-		});
-		_responders.addResponder("G", () -> {
-			_navigator.moveToStart();
-			_navigator.scrollUpIfNeeded();
-		});
-		_responders.addResponder("e", () -> {
+		_responders.addResponder((Event nextEvent) -> {
+			if (nextEvent.isControlChar('e')) return RecognitionState.Recognized;
+			return RecognitionState.NotRecognized;
+		}, () -> {
 			_navigator.scrollDown();
 			_navigator.moveCursorDownIfNeeded();
 		});
-		_responders.addResponder("y", () -> {
+		_responders.addResponder((Event nextEvent) -> {
+			if (nextEvent.isControlChar('y')) return RecognitionState.Recognized;
+			return RecognitionState.NotRecognized;
+		}, () -> {
 			_navigator.scrollUp();
 			_navigator.moveCursorUpIfNeeded();
 		});
@@ -52,26 +50,6 @@ public class BasicNavigationResponder implements IInputResponder {
 		});
 		_responders.addResponder("k", () -> {
 			_navigator.moveUp();
-			_navigator.scrollUpIfNeeded();
-		});
-		_responders.addResponder("0", () -> {
-			_navigator.moveToTheBeginningOfLine();
-			_navigator.scrollUpIfNeeded();
-		});
-		_responders.addResponder("$", () -> {
-			_navigator.moveToTheEndOfLine();
-			_navigator.scrollDownIfNeeded();
-		});
-		_responders.addResponder("w", () -> {
-			_navigator.moveToNextWord();
-			_navigator.scrollDownIfNeeded();
-		});
-		_responders.addResponder("e", () -> {
-			_navigator.moveToEndOfWord();
-			_navigator.scrollDownIfNeeded();
-		});
-		_responders.addResponder("b", () -> {
-			_navigator.moveToPreviousWord();
 			_navigator.scrollUpIfNeeded();
 		});
 	}
