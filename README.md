@@ -23,6 +23,8 @@ Current features:
   - paste after with p and before cursor with P
   - go to beginning of file with G and end of file with gg
   - navigate to the beginning of the line with 0 and end of line with $
+  - navigate to the next character X with fX, same backwards with F instead of f
+  - repeat any navigation related command by putting a number prefix first, e.g. 200j to go down 200 lines or 10fK to find the 10th instance of 'K'
 
 * Visual mode
   - select text with basic navigations
@@ -33,11 +35,12 @@ Current features:
 
 * Commands (enter by writing colon)
   - :e <file> opens file
+  - :q exits fisked
   - :w saves current file
   - :r runs command and inserts text into current buffer
   - :ruby evaluates selected text as ruby and inserts it into the document
   - :python evaluates selected text as python and inserts it into the document
-  - exit with ESC
+  - cancel writing command with ESC
 
 This readme file was edited with this text editor because it is awesome.
 DAYUMN!
