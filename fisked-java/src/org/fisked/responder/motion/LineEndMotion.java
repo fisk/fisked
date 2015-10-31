@@ -16,11 +16,11 @@ public class LineEndMotion implements IMotion {
 
 	@Override
 	public RecognitionState recognizesInput(Event nextEvent) {
-		return EventRecognition.matches(nextEvent, "$");
+		return EventRecognition.matchesExact(nextEvent, "$");
 	}
 
 	@Override
-	public MotionRange getRange() {
+	public MotionRange getMotionRange() {
 		Buffer buffer = _window.getBuffer();
 
 		int newIndex = buffer.getPointIndex();

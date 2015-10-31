@@ -7,7 +7,7 @@ import org.fisked.responder.IInputRecognizer;
 import org.fisked.responder.RecognitionState;
 
 public class TextInputResponder implements IInputRecognizer {
-	private BufferWindow _window;
+	private final BufferWindow _window;
 	
 	public TextInputResponder(BufferWindow window) {
 		_window = window;

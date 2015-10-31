@@ -15,11 +15,11 @@ public class BufferEndMotion implements IMotion {
 
 	@Override
 	public RecognitionState recognizesInput(Event nextEvent) {
-		return EventRecognition.matches(nextEvent, "G");
+		return EventRecognition.matchesExact(nextEvent, "G");
 	}
 
 	@Override
-	public MotionRange getRange() {
+	public MotionRange getMotionRange() {
 		return new MotionRange(_window.getBuffer().getPointIndex(), _window.getBuffer().getLength());
 	}
 

@@ -14,11 +14,11 @@ public class BufferStartMotion implements IMotion {
 
 	@Override
 	public RecognitionState recognizesInput(Event nextEvent) {
-		return EventRecognition.matches(nextEvent, "gg");
+		return EventRecognition.matchesExact(nextEvent, "gg");
 	}
 
 	@Override
-	public MotionRange getRange() {
+	public MotionRange getMotionRange() {
 		return new MotionRange(_window.getBuffer().getPointIndex(), 0);
 	}
 

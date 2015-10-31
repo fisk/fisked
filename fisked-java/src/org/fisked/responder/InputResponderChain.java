@@ -34,7 +34,7 @@ public class InputResponderChain implements IInputResponder {
 	
 	public void addResponder(String match, IRecognitionAction callback) {
 		addResponder((Event event) -> {
-			return EventRecognition.matches(event, match);
+			return EventRecognition.matchesExact(event, match);
 		}, callback);
 	}
 

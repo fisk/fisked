@@ -19,13 +19,13 @@ public class NextWordEndMotion implements IMotion {
 
 	@Override
 	public RecognitionState recognizesInput(Event nextEvent) {
-		return EventRecognition.matches(nextEvent, "e");
+		return EventRecognition.matchesExact(nextEvent, "e");
 	}
 
 	private Pattern _endOfWordPattern = Pattern.compile("([^\\s]+)(\\s|$)");
 	
 	@Override
-	public MotionRange getRange() {
+	public MotionRange getMotionRange() {
 		Buffer buffer = _window.getBuffer();
 		int index = buffer.getPointIndex() + 1;
 		boolean found = false;

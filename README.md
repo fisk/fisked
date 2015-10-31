@@ -15,7 +15,8 @@ Current features:
   - write command with :
   - navigate with hjkl vim-style
   - scroll with CTRL-E and CTRL-Y
-  - move to next word with w, the end of the word with e and previous word with b
+  - move to next word with w, the end of the word with e and previous word with b. These commands are motions
+  - Use d <motion> to delete something and c <motion> to delete something and then enter insert mode. These commands are operators
   - enter input mode at point + 1 with a
   - enter input mode at end of line with A
   - enter input mode on new line under current line with o
@@ -25,6 +26,7 @@ Current features:
   - navigate to the beginning of the line with 0 and end of line with $
   - navigate to the next character X with fX, same backwards with F instead of f
   - repeat any navigation related command by putting a number prefix first, e.g. 200j to go down 200 lines or 10fK to find the 10th instance of 'K'
+  - repeaters also work with operators, so 20 d w would delete 20 words for example
 
 * Visual mode
   - select text with basic navigations

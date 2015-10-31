@@ -11,20 +11,18 @@ import org.fisked.responder.motion.MotionRecognizer;
 import org.fisked.text.TextNavigator;
 
 public class BasicNavigationResponder implements IInputResponder {
-	private BufferWindow _window;
-	private TextNavigator _navigator;
-	private InputResponderChain _responders = new InputResponderChain();
-	private LoopResponder _numberPrefix;
+	private final BufferWindow _window;
+	private final TextNavigator _navigator;
+	private final InputResponderChain _responders = new InputResponderChain();
+	private final LoopResponder _numberPrefix = new LoopResponder(_responders);
 
 	public BasicNavigationResponder(BufferWindow window) {
 		_window = window;
 		_navigator = new TextNavigator(_window.getBuffer());
-		
-		_numberPrefix = new LoopResponder(_responders);
 
 		final MotionRecognizer motionRecognizer = new MotionRecognizer(window);
 		_responders.addResponder(motionRecognizer, () -> {
-			MotionRange range = motionRecognizer.getRange();
+			MotionRange range = motionRecognizer.getMotionRange();
 			_navigator.moveToIndexAndScroll(range.getEnd());
 		});
 		_responders.addResponder((Event nextEvent) -> {

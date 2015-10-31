@@ -19,13 +19,13 @@ public class PreviousWordStartMotion implements IMotion {
 
 	@Override
 	public RecognitionState recognizesInput(Event nextEvent) {
-		return EventRecognition.matches(nextEvent, "b");
+		return EventRecognition.matchesExact(nextEvent, "b");
 	}
 
 	Pattern _previousWordPattern = Pattern.compile("([^\\s]+)(\\s|$)");
 	
 	@Override
-	public MotionRange getRange() {
+	public MotionRange getMotionRange() {
 		Buffer buffer = _window.getBuffer();
 
 		int index = buffer.getPointIndex();

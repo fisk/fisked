@@ -4,6 +4,7 @@ import org.fisked.buffer.BufferWindow;
 import org.fisked.mode.responder.BasicNavigationResponder;
 import org.fisked.mode.responder.CommandInputResponder;
 import org.fisked.mode.responder.InputModeSwitchResponder;
+import org.fisked.mode.responder.MotionActionResponder;
 import org.fisked.mode.responder.VisualModeSwitchResponder;
 import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Face;
@@ -24,6 +25,7 @@ public class NormalMode extends AbstractMode {
 		addResponder(new InputModeSwitchResponder(_window));
 		addResponder(new VisualModeSwitchResponder(_window));
 		addResponder(new BasicNavigationResponder(_window));
+		addResponder(new MotionActionResponder(_window));
 		addResponder((Event nextEvent) -> {
 			if (nextEvent.isCharacter('p')) {
 				_window.getBuffer().appendStringAtPoint(getClipboard());

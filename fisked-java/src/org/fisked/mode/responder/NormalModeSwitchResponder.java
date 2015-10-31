@@ -6,7 +6,7 @@ import org.fisked.responder.IInputResponder;
 import org.fisked.responder.RecognitionState;
 
 public class NormalModeSwitchResponder implements IInputResponder {
-	private BufferWindow _window;
+	private final BufferWindow _window;
 	
 	public NormalModeSwitchResponder(BufferWindow window) {
 		_window = window;

@@ -7,7 +7,7 @@ import org.fisked.responder.RecognitionState;
 
 public class CommandInputResponder implements IInputRecognizer {
 	private boolean _writingCommand = false;
-	private BufferWindow _window;
+	private final BufferWindow _window;
 	
 	public CommandInputResponder(BufferWindow window) {
 		_window = window;

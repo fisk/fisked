@@ -6,7 +6,7 @@ import org.fisked.responder.IInputRecognizer;
 import org.fisked.responder.RecognitionState;
 
 public class VisualModeSwitchResponder implements IInputRecognizer {
-	private BufferWindow _window;
+	private final BufferWindow _window;
 	
 	public VisualModeSwitchResponder(BufferWindow window) {
 		_window = window;

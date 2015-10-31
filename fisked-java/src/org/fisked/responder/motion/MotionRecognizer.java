@@ -38,8 +38,8 @@ public class MotionRecognizer implements IMotion {
 	}
 
 	@Override
-	public MotionRange getRange() {
-		MotionRange range = _match.getRange();
+	public MotionRange getMotionRange() {
+		MotionRange range = _match.getMotionRange();
 		return range;
 	}
 

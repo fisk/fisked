@@ -7,8 +7,8 @@ import org.fisked.responder.RecognitionState;
 import org.fisked.text.TextNavigator;
 
 public class InputModeSwitchResponder implements IInputRecognizer {
-	private BufferWindow _window;
-	private TextNavigator _navigator;
+	private final BufferWindow _window;
+	private final TextNavigator _navigator;
 	
 	public InputModeSwitchResponder(BufferWindow window) {
 		_window = window;

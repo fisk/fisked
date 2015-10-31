@@ -16,11 +16,11 @@ public class LineStartMotion implements IMotion {
 
 	@Override
 	public RecognitionState recognizesInput(Event nextEvent) {
-		return EventRecognition.matches(nextEvent, "0");
+		return EventRecognition.matchesExact(nextEvent, "0");
 	}
 
 	@Override
-	public MotionRange getRange() {
+	public MotionRange getMotionRange() {
 		Buffer buffer = _window.getBuffer();
 		int newIndex = buffer.getPointIndex();
 		if (newIndex != 0) {

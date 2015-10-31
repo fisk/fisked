@@ -69,7 +69,7 @@ public class FindMotion implements IMotion {
 	}
 
 	@Override
-	public MotionRange getRange() {
+	public MotionRange getMotionRange() {
 		findIndex();
 		return new MotionRange(_startIndex, _endIndex);
 	}
