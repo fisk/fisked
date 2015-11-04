@@ -3,6 +3,7 @@ package org.fisked;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fisked.buffer.BufferWindow;
@@ -39,6 +40,18 @@ public class Application {
 	private volatile Throwable _exception;
 	private String[] _argv;
 
+	private void evaluateScript(BufferWindow window, String language) {
+		if (window.getBufferController().getSelection() != null) {
+			String text = window.getBufferController().getSelectedText();
+			ISourceEvaluator evaluator = SourceEvaluatorManager.getInstance().getEvaluator(language);
+			String result = evaluator.evaluate(text);
+			window.getBufferController().setSelectionText(result);
+			window.switchToNormalMode();
+		} else {
+			window.getCommandController().setCommandFeedback("Can't evaluate script without selection.");
+		}
+	}
+
 	private void setupCommands() {
 		CommandManager cm = CommandManager.getSingleton();
 		cm.registerHandler("q", (BufferWindow window, String[] argv) -> {
@@ -55,26 +68,30 @@ public class Application {
 		});
 		cm.registerHandler("r", new ShellCommandHandler());
 		cm.registerHandler("ruby", (BufferWindow window, String[] argv) -> {
-			if (window.getBufferController().getSelection() != null) {
-				String text = window.getBufferController().getSelectedText();
-				ISourceEvaluator evaluator = SourceEvaluatorManager.getInstance().getEvaluator("ruby");
-				String result = evaluator.evaluate(text);
-				window.getBufferController().setSelectionText(result);
-				window.switchToNormalMode();
-			} else {
-				window.getCommandController().setCommandFeedback("Can't evaluate script without selection.");
-			}
+			evaluateScript(window, "ruby");
 		});
 		cm.registerHandler("python", (BufferWindow window, String[] argv) -> {
-			if (window.getBufferController().getSelection() != null) {
-				String text = window.getBufferController().getSelectedText();
-				ISourceEvaluator evaluator = SourceEvaluatorManager.getInstance().getEvaluator("python");
-				String result = evaluator.evaluate(text);
-				window.getBufferController().setSelectionText(result);
-				window.switchToNormalMode();
-			} else {
-				window.getCommandController().setCommandFeedback("Can't evaluate script without selection.");
+			evaluateScript(window, "python");
+		});
+		cm.registerHandler("javascript", (BufferWindow window, String[] argv) -> {
+			evaluateScript(window, "javascript");
+		});
+		cm.registerHandler("script", (BufferWindow window, String[] argv) -> {
+			if (argv.length != 2)
+				return;
+			File file = FileUtil.getFile(argv[1]);
+			ISourceEvaluator evaluator = SourceEvaluatorManager.getInstance().getEvaluator(file);
+			if (evaluator == null)
+				return;
+			String string;
+			try {
+				string = FileUtils.readFileToString(file);
+				string = evaluator.evaluate(string);
+			} catch (Exception e) {
+				string = e.getMessage();
 			}
+			window.getBufferController().getBuffer().appendStringAtPoint(string);
+			window.switchToNormalMode();
 		});
 	}
 
