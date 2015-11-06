@@ -7,7 +7,7 @@ import org.fisked.responder.RecognitionState;
 
 public class NormalModeSwitchResponder implements IInputResponder {
 	private final BufferWindow _window;
-	
+
 	public NormalModeSwitchResponder(BufferWindow window) {
 		_window = window;
 	}
@@ -15,6 +15,7 @@ public class NormalModeSwitchResponder implements IInputResponder {
 	@Override
 	public RecognitionState recognizesInput(Event input) {
 		if (input.isEscape()) {
+			_window.setNeedsFullRedraw();
 			return RecognitionState.Recognized;
 		}
 		return RecognitionState.NotRecognized;

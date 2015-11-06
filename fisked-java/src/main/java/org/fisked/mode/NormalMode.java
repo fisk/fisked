@@ -36,7 +36,7 @@ public class NormalMode extends AbstractMode {
 		});
 		addResponder((Event nextEvent) -> {
 			if (nextEvent.isCharacter('P')) {
-				TextNavigator navigator = new TextNavigator(_window.getBuffer());
+				TextNavigator navigator = new TextNavigator(_window);
 				navigator.moveLeft();
 				_window.getBuffer().appendStringAtPoint(getClipboard());
 				_window.switchToNormalMode();
@@ -46,10 +46,12 @@ public class NormalMode extends AbstractMode {
 		});
 	}
 
+	@Override
 	public Face getModelineFace() {
 		return new Face(Color.MAGENTA, Color.WHITE);
 	}
 
+	@Override
 	public void activate() {
 		changeCursor(CURSOR_UNDERLINE);
 	}

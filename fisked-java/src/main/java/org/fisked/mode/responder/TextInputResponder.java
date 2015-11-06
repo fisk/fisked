@@ -8,7 +8,7 @@ import org.fisked.responder.RecognitionState;
 
 public class TextInputResponder implements IInputRecognizer {
 	private final BufferWindow _window;
-	
+
 	public TextInputResponder(BufferWindow window) {
 		_window = window;
 	}
@@ -17,6 +17,7 @@ public class TextInputResponder implements IInputRecognizer {
 	public RecognitionState recognizesInput(Event input) {
 		if (input.isBackspace()) {
 			_window.getBuffer().removeCharAtPoint();
+			_window.setNeedsFullRedraw();
 			return RecognitionState.Recognized;
 		}
 		Buffer buffer = _window.getBuffer();
@@ -25,6 +26,7 @@ public class TextInputResponder implements IInputRecognizer {
 		} else {
 			buffer.appendCharAtPoint(input.getCharacter());
 		}
+		_window.setNeedsFullRedraw();
 		return RecognitionState.Recognized;
 	}
 

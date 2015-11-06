@@ -12,13 +12,14 @@ import org.fisked.theme.ThemeManager;
 
 public class Window implements IInputResponder, IDrawable {
 	protected View _rootView;
-	
-	public Window(Rectangle windowRect) {}
-	
+
+	public Window(Rectangle windowRect) {
+	}
+
 	public void setRootView(View rootView) {
 		_rootView = rootView;
 	}
-	
+
 	public View getRootView() {
 		return _rootView;
 	}
@@ -27,10 +28,10 @@ public class Window implements IInputResponder, IDrawable {
 	public RecognitionState recognizesInput(Event input) {
 		return RecognitionState.NotRecognized;
 	}
-	
+
 	@Override
 	public void onRecognize() {
-		
+
 	}
 
 	@Override
@@ -39,27 +40,35 @@ public class Window implements IInputResponder, IDrawable {
 		IConsoleService cs = sm.getConsoleService();
 		try (IRenderingContext context = cs.getRenderingContext()) {
 			ITheme theme = ThemeManager.getThemeManager().getCurrentTheme();
-			context.clearScreen(theme.getBackgroundColor());
-			_rootView.draw();
+
+			if (_needsFullRedraw) {
+				context.clearScreen(theme.getBackgroundColor());
+				_rootView.draw();
+			}
+			_needsLineRedraw = false;
+			_needsFullRedraw = false;
+
 			drawPoint(context);
 		}
 	}
 
 	public void drawPoint(IRenderingContext context) {
-		
+
 	}
 
-	private boolean _needsRedraw = true;
-	
-	public void setNeedsRedraw() {
-		_needsRedraw = true;
+	protected boolean _needsFullRedraw = true;
+	protected boolean _needsLineRedraw = false;
+
+	public void setNeedsFullRedraw() {
+		_needsFullRedraw = true;
 	}
-	
+
+	public void setNeedsLineRedraw() {
+		_needsLineRedraw = true;
+	}
+
 	public void refresh() {
-		if (_needsRedraw) {
-			_needsRedraw = false;
-			draw();
-		}
+		draw();
 	}
-	
+
 }

@@ -9,10 +9,10 @@ import org.fisked.text.TextNavigator;
 public class InputModeSwitchResponder implements IInputRecognizer {
 	private final BufferWindow _window;
 	private final TextNavigator _navigator;
-	
+
 	public InputModeSwitchResponder(BufferWindow window) {
 		_window = window;
-		_navigator = new TextNavigator(_window.getBuffer());
+		_navigator = new TextNavigator(_window);
 	}
 
 	@Override

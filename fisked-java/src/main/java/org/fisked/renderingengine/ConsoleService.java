@@ -7,14 +7,15 @@ import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.ICursorService;
 import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.renderingengine.service.models.Color;
+import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;
 
 import jline.console.ConsoleReader;
 
 public class ConsoleService implements IConsoleService {
 	private ConsoleReader _reader;
-	private Stack<RenderingContext> _renderingContexts = new Stack<>();
-	
+	private final Stack<RenderingContext> _renderingContexts = new Stack<>();
+
 	public ConsoleService() {
 		try {
 			_reader = new ConsoleReader();
@@ -23,7 +24,7 @@ public class ConsoleService implements IConsoleService {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	private void print(String string) {
 		try {
 			_reader.print(string);
@@ -34,6 +35,10 @@ public class ConsoleService implements IConsoleService {
 
 	private void csi() {
 		print("\u001B[");
+	}
+
+	private void esc() {
+		print("\u001B");
 	}
 
 	@Override
@@ -49,7 +54,8 @@ public class ConsoleService implements IConsoleService {
 	public int getChar() {
 		try {
 			return _reader.readCharacter();
-		} catch (IOException e) {}
+		} catch (IOException e) {
+		}
 		return 0;
 	}
 
@@ -62,7 +68,7 @@ public class ConsoleService implements IConsoleService {
 	public int getScreenHeight() {
 		return _reader.getTerminal().getHeight();
 	}
-	
+
 	class RenderingContext implements IRenderingContext {
 
 		@Override
@@ -102,19 +108,18 @@ public class ConsoleService implements IConsoleService {
 			print(string.toANSIString());
 		}
 
-		
 		@Override
 		public void moveTo(int x, int y) {
 			csi();
-			print((y + 1) + ";" + (x + 1) + "H");
+			print(y + 1 + ";" + (x + 1) + "H");
 		}
-		
+
 		private void showCursor() {
 			csi();
 			print("?25h");
 			flush();
 		}
-		
+
 		private void hideCursor() {
 			csi();
 			print("?25l");
@@ -129,7 +134,7 @@ public class ConsoleService implements IConsoleService {
 				flush();
 			}
 		}
-		
+
 	}
 
 	@Override
@@ -157,19 +162,46 @@ public class ConsoleService implements IConsoleService {
 		_reader.shutdown();
 		flush();
 	}
-	
+
 	private ICursorService _cursor = null;
-	
+
 	@Override
 	public ICursorService getCursorService() {
-		if (_cursor != null) return _cursor;
+		if (_cursor != null)
+			return _cursor;
 		if (System.getenv().containsKey("ITERM_PROFILE")) {
 			_cursor = new ItermCursorService(this);
 		} else {
-			_cursor = new DefaultCursorService();
+			_cursor = new DefaultCursorService(this);
 		}
 
 		return _cursor;
+	}
+
+	private void setScrollRegion(Range range) {
+		if (range == null) {
+			csi();
+			print("r");
+		} else {
+			csi();
+			print("" + range.getStart() + ";" + (range.getEnd() - 1) + "r");
+		}
+	}
+
+	@Override
+	public void scrollTextRegionUp(Range range) {
+		setScrollRegion(range);
+		esc();
+		print("D");
+		flush();
+	}
+
+	@Override
+	public void scrollTextRegionDown(Range range) {
+		setScrollRegion(range);
+		esc();
+		print("M");
+		flush();
 	}
 
 }

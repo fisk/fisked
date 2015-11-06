@@ -18,7 +18,7 @@ public class BasicNavigationResponder implements IInputResponder {
 
 	public BasicNavigationResponder(BufferWindow window) {
 		_window = window;
-		_navigator = new TextNavigator(_window.getBuffer());
+		_navigator = new TextNavigator(_window);
 
 		final MotionRecognizer motionRecognizer = new MotionRecognizer(window);
 		_responders.addResponder(motionRecognizer, () -> {
@@ -26,16 +26,22 @@ public class BasicNavigationResponder implements IInputResponder {
 			_navigator.moveToIndexAndScroll(range.getEnd());
 		});
 		_responders.addResponder((Event nextEvent) -> {
-			if (nextEvent.isControlChar('e')) return RecognitionState.Recognized;
+			if (nextEvent.isControlChar('e')) {
+				_window.setNeedsFullRedraw();
+				return RecognitionState.Recognized;
+			}
 			return RecognitionState.NotRecognized;
-		}, () -> {
+		} , () -> {
 			_navigator.scrollDown();
 			_navigator.moveCursorDownIfNeeded();
 		});
 		_responders.addResponder((Event nextEvent) -> {
-			if (nextEvent.isControlChar('y')) return RecognitionState.Recognized;
+			if (nextEvent.isControlChar('y')) {
+				_window.setNeedsFullRedraw();
+				return RecognitionState.Recognized;
+			}
 			return RecognitionState.NotRecognized;
-		}, () -> {
+		} , () -> {
 			_navigator.scrollUp();
 			_navigator.moveCursorUpIfNeeded();
 		});

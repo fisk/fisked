@@ -5,7 +5,7 @@ import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.ICursorService;
 
 public class ItermCursorService implements ICursorService {
-	private IConsoleService _console;
+	private final IConsoleService _console;
 
 	public ItermCursorService(IConsoleService console) {
 		_console = console;
@@ -19,6 +19,7 @@ public class ItermCursorService implements ICursorService {
 			} else {
 				rc.printString("\u001b]50;CursorShape=" + cursor + "\u0007");
 			}
+			_console.flush();
 		}
 	}
 

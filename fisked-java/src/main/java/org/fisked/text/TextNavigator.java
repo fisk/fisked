@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fisked.buffer.Buffer;
+import org.fisked.buffer.BufferWindow;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.text.TextLayout.InvalidLocationException;
@@ -13,6 +14,7 @@ import org.fisked.text.TextLayout.InvalidLocationException;
 public class TextNavigator {
 	private final TextLayout _layout;
 	private final Buffer _buffer;
+	private final BufferWindow _window;
 
 	final static Logger LOG = LogManager.getLogger(TextNavigator.class);
 
@@ -41,6 +43,7 @@ public class TextNavigator {
 		scrollDownIfNeeded();
 		scrollUpIfNeeded();
 		getBuffer().getCursor().setCharIndex(index, updateLastColumn);
+		_window.setNeedsFullRedraw();
 	}
 
 	public void moveToIndexAndScroll(int index) {
@@ -51,13 +54,21 @@ public class TextNavigator {
 		return getBuffer().getCursor().getLastColumn();
 	}
 
-	public TextNavigator(Buffer buffer) {
-		_buffer = buffer;
+	public TextNavigator(BufferWindow window) {
+		_window = window;
+		_buffer = window.getBuffer();
 		_layout = _buffer.getTextLayout();
 	}
 
 	public void scrollUp() {
 		Rectangle rect = _layout.getClippingRect();
+
+		// TODO: Figure out the escape sequences for scrolling
+		// ServiceManager sm = ServiceManager.getInstance();
+		// int start = rect.getOrigin().getY();
+		// int end = start + rect.getSize().getHeight();
+		// sm.getConsoleService().scrollTextRegionUp(new Range(start, end));
+
 		int y = Math.max(rect.getOrigin().getY() - 1, 0);
 		Rectangle newRect = new Rectangle(new Point(rect.getOrigin().getX(), y), rect.getSize());
 		_layout.setClippingRect(newRect);
@@ -66,6 +77,13 @@ public class TextNavigator {
 
 	public void scrollDown() {
 		Rectangle rect = _layout.getClippingRect();
+
+		// TODO: Figure out the escape sequences for scrolling
+		// ServiceManager sm = ServiceManager.getInstance();
+		// int start = rect.getOrigin().getY();
+		// int end = start + rect.getSize().getHeight();
+		// sm.getConsoleService().scrollTextRegionDown(new Range(start, end));
+
 		int y = rect.getOrigin().getY() + 1;
 		Rectangle newRect = new Rectangle(new Point(rect.getOrigin().getX(), y), rect.getSize());
 		_layout.setClippingRect(newRect);

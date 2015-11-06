@@ -74,13 +74,13 @@ public class BufferWindow extends Window {
 
 		_currentMode = new NormalMode(this);
 		_currentMode.activate();
+		setNeedsFullRedraw();
 	}
 
 	@Override
 	public RecognitionState recognizesInput(Event input) {
 		_recognizedMode = _currentMode;
 		RecognitionState result = _recognizedMode.recognizesInput(input);
-		setNeedsRedraw();
 		return result;
 	}
 
@@ -95,7 +95,7 @@ public class BufferWindow extends Window {
 
 	public void setBuffer(Buffer buffer) {
 		_bufferController.setBuffer(buffer);
-		setNeedsRedraw();
+		setNeedsFullRedraw();
 	}
 
 	public void openFile(File file) throws IOException {
@@ -105,10 +105,10 @@ public class BufferWindow extends Window {
 			setBuffer(buffer);
 			_currentMode = null;
 			switchToNormalMode();
-			setNeedsRedraw();
+			setNeedsFullRedraw();
 		} catch (IOException e) {
 			getCommandController().setCommandFeedback("Could not open file: " + file.getCanonicalPath() + ".");
-			setNeedsRedraw();
+			setNeedsFullRedraw();
 		}
 	}
 
@@ -128,6 +128,7 @@ public class BufferWindow extends Window {
 			return;
 		_currentMode = new InputMode(this);
 		_currentMode.activate();
+		setNeedsFullRedraw();
 	}
 
 	public void switchToNormalMode() {
@@ -135,6 +136,7 @@ public class BufferWindow extends Window {
 			return;
 		_currentMode = new NormalMode(this);
 		_currentMode.activate();
+		setNeedsFullRedraw();
 	}
 
 	public void switchToVisualMode() {
@@ -142,6 +144,7 @@ public class BufferWindow extends Window {
 			return;
 		_currentMode = new VisualMode(this);
 		_currentMode.activate();
+		setNeedsFullRedraw();
 	}
 
 	public AbstractMode getCurrentMode() {
