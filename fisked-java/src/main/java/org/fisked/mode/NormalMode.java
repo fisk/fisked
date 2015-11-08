@@ -9,6 +9,7 @@ import org.fisked.mode.responder.VisualModeSwitchResponder;
 import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Face;
 import org.fisked.responder.Event;
+import org.fisked.responder.EventRecognition;
 import org.fisked.responder.RecognitionState;
 import org.fisked.services.ServiceManager;
 import org.fisked.text.TextNavigator;
@@ -28,7 +29,7 @@ public class NormalMode extends AbstractMode {
 		addResponder(new MotionActionResponder(_window));
 		addResponder((Event nextEvent) -> {
 			if (nextEvent.isCharacter('p')) {
-				_window.getBuffer().appendStringAtPoint(getClipboard());
+				_window.getBuffer().appendStringAtPointLogged(getClipboard());
 				_window.switchToNormalMode();
 				return RecognitionState.Recognized;
 			}
@@ -38,11 +39,23 @@ public class NormalMode extends AbstractMode {
 			if (nextEvent.isCharacter('P')) {
 				TextNavigator navigator = new TextNavigator(_window);
 				navigator.moveLeft();
-				_window.getBuffer().appendStringAtPoint(getClipboard());
+				_window.getBuffer().appendStringAtPointLogged(getClipboard());
 				_window.switchToNormalMode();
 				return RecognitionState.Recognized;
 			}
 			return RecognitionState.NotRecognized;
+		});
+		addResponder(nextEvent -> {
+			return EventRecognition.matchesExact(nextEvent, "u");
+		} , () -> {
+			_window.getBuffer().undo();
+			_window.setNeedsFullRedraw();
+		});
+		addResponder(nextEvent -> {
+			return nextEvent.isControlChar('r') ? RecognitionState.Recognized : RecognitionState.NotRecognized;
+		} , () -> {
+			_window.getBuffer().redo();
+			_window.setNeedsFullRedraw();
 		});
 	}
 

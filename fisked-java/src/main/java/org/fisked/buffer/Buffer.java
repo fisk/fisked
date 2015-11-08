@@ -101,11 +101,13 @@ public class Buffer {
 		}
 	}
 
-	public void removeCharAtPoint() {
+	public void removeCharAtPointLogged() {
 		if (_cursor.getCharIndex() > 0 && _stringBuilder.length() > 0) {
-			_stringBuilder.deleteCharAt(_cursor.getCharIndex() - 1);
+			int index = _cursor.getCharIndex() - 1;
+			_undoLog.logDeleteString(new Range(index, 1));
+			_stringBuilder.deleteCharAt(index);
 			dirtyAttributedString();
-			_cursor.setCharIndex(_cursor.getCharIndex() - 1, true);
+			_cursor.setCharIndex(index, true);
 		}
 	}
 
@@ -115,16 +117,13 @@ public class Buffer {
 		_cursor.setCharIndex(selection.getStart(), true);
 	}
 
-	public void appendCharAtPoint(char character) {
-		if (_cursor.getCharIndex() == _stringBuilder.length()) {
-			_stringBuilder.append(character);
-			dirtyAttributedString();
-			_cursor.setCharIndex(_cursor.getCharIndex() + 1, true);
-		} else {
-			_stringBuilder.insert(_cursor.getCharIndex(), character);
-			dirtyAttributedString();
-			_cursor.setCharIndex(_cursor.getCharIndex() + 1, true);
-		}
+	public void removeCharsInRangeLogged(Range selection) {
+		_undoLog.logDeleteString(selection);
+		removeCharsInRange(selection);
+	}
+
+	public void appendCharAtPointLogged(char character) {
+		appendStringAtPointLogged(Character.toString(character));
 	}
 
 	public int getPointIndex() {
@@ -146,15 +145,28 @@ public class Buffer {
 		return _stringBuilder;
 	}
 
-	public void appendStringAtPoint(String string) {
-		if (_cursor.getCharIndex() == _stringBuilder.length()) {
+	public void insertString(int position, String string) {
+		_stringBuilder.insert(position, string);
+		dirtyAttributedString();
+		_cursor.setCharIndex(position + string.length(), true);
+	}
+
+	public void insertStringLogged(int position, String string) {
+		_undoLog.logInsertString(position, string);
+		insertString(position, string);
+	}
+
+	public void appendStringAtPointLogged(String string) {
+		int index = _cursor.getCharIndex();
+		_undoLog.logInsertString(index, string);
+		if (index == getLength()) {
 			_stringBuilder.append(string);
 			dirtyAttributedString();
-			_cursor.setCharIndex(_cursor.getCharIndex() + string.length(), true);
+			_cursor.setCharIndex(index + string.length(), true);
 		} else {
-			_stringBuilder.insert(_cursor.getCharIndex(), string);
+			_stringBuilder.insert(index, string);
 			dirtyAttributedString();
-			_cursor.setCharIndex(_cursor.getCharIndex() + string.length(), true);
+			_cursor.setCharIndex(index + string.length(), true);
 		}
 	}
 
@@ -172,5 +184,21 @@ public class Buffer {
 
 	public int getLength() {
 		return _stringBuilder.length();
+	}
+
+	private final UndoLog _undoLog = new UndoLog(this);
+
+	public UndoLog getUndoLog() {
+		return _undoLog;
+	}
+
+	public void undo() {
+		_undoLog.undo();
+		dirtyAttributedString();
+	}
+
+	public void redo() {
+		_undoLog.redo();
+		dirtyAttributedString();
 	}
 }

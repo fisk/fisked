@@ -27,6 +27,7 @@ Current features:
   - navigate to the next character X with fX, same backwards with F instead of f
   - repeat any navigation related command by putting a number prefix first, e.g. 200j to go down 200 lines or 10fK to find the 10th instance of 'K'
   - repeaters also work with operators, so 20 d w would delete 20 words for example
+  - undo with u and redo with CTRL-r
 
 * Visual mode
   - select text with basic navigations

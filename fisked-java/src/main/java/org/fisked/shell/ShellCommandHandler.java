@@ -18,7 +18,7 @@ public class ShellCommandHandler implements ICommandHandler {
 
 			@Override
 			public void call(String string) {
-				window.getBuffer().appendStringAtPoint(string);
+				window.getBuffer().appendStringAtPointLogged(string);
 				window.refresh();
 			}
 

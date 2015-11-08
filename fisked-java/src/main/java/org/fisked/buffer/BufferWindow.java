@@ -123,10 +123,12 @@ public class BufferWindow extends Window {
 		context.moveTo(point.getX(), point.getY());
 	}
 
-	public void switchToInputMode() {
+	public void switchToInputMode(int preactions) {
 		if (_currentMode != null && _currentMode instanceof InputMode)
 			return;
-		_currentMode = new InputMode(this);
+		if (_currentMode != null)
+			_currentMode.deactivate();
+		_currentMode = new InputMode(this, preactions);
 		_currentMode.activate();
 		setNeedsFullRedraw();
 	}
@@ -134,6 +136,8 @@ public class BufferWindow extends Window {
 	public void switchToNormalMode() {
 		if (_currentMode != null && _currentMode instanceof NormalMode)
 			return;
+		if (_currentMode != null)
+			_currentMode.deactivate();
 		_currentMode = new NormalMode(this);
 		_currentMode.activate();
 		setNeedsFullRedraw();
@@ -142,6 +146,8 @@ public class BufferWindow extends Window {
 	public void switchToVisualMode() {
 		if (_currentMode != null && _currentMode instanceof VisualMode)
 			return;
+		if (_currentMode != null)
+			_currentMode.deactivate();
 		_currentMode = new VisualMode(this);
 		_currentMode.activate();
 		setNeedsFullRedraw();
@@ -158,5 +164,4 @@ public class BufferWindow extends Window {
 	public BufferController getBufferController() {
 		return _bufferController;
 	}
-
 }

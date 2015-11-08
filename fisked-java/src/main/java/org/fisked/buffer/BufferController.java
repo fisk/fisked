@@ -70,8 +70,8 @@ public class BufferController {
 
 	public void setSelectionText(String text) {
 		Range selection = getSelection();
-		getBuffer().removeCharsInRange(selection);
-		getBuffer().appendStringAtPoint(text);
+		getBuffer().removeCharsInRangeLogged(selection);
+		getBuffer().appendStringAtPointLogged(text);
 		setSelection(null);
 	}
 }

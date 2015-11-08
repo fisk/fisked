@@ -18,34 +18,34 @@ public class InputModeSwitchResponder implements IInputRecognizer {
 	@Override
 	public RecognitionState recognizesInput(Event input) {
 		if (input.isCharacter('i')) {
-			_window.switchToInputMode();
+			_window.switchToInputMode(0);
 			return RecognitionState.Recognized;
 		}
 		if (input.isCharacter('a')) {
 			_navigator.moveRight();
 			_navigator.scrollDownIfNeeded();
-			_window.switchToInputMode();
+			_window.switchToInputMode(0);
 			return RecognitionState.Recognized;
 		}
 		if (input.isCharacter('A')) {
 			_navigator.moveToTheEndOfLine();
 			_navigator.scrollDownIfNeeded();
-			_window.switchToInputMode();
+			_window.switchToInputMode(0);
 			return RecognitionState.Recognized;
 		}
 		if (input.isCharacter('o')) {
 			_navigator.moveToTheEndOfLine();
-			_window.getBuffer().appendCharAtPoint('\n');
+			_window.getBuffer().appendCharAtPointLogged('\n');
 			_navigator.scrollDownIfNeeded();
-			_window.switchToInputMode();
+			_window.switchToInputMode(1);
 			return RecognitionState.Recognized;
 		}
 		if (input.isCharacter('O')) {
 			_navigator.moveToTheBeginningOfLine();
-			_window.getBuffer().appendCharAtPoint('\n');
+			_window.getBuffer().appendCharAtPointLogged('\n');
 			_navigator.moveLeft();
 			_navigator.scrollDownIfNeeded();
-			_window.switchToInputMode();
+			_window.switchToInputMode(1);
 			return RecognitionState.Recognized;
 		}
 		return RecognitionState.NotRecognized;

@@ -90,7 +90,7 @@ public class Application {
 			} catch (Exception e) {
 				string = e.getMessage();
 			}
-			window.getBufferController().getBuffer().appendStringAtPoint(string);
+			window.getBufferController().getBuffer().appendStringAtPointLogged(string);
 			window.switchToNormalMode();
 		});
 	}

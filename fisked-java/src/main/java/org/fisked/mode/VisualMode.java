@@ -15,7 +15,8 @@ import org.fisked.services.ServiceManager;
 
 public class VisualMode extends AbstractMode {
 	private Cursor _activeCursor = _window.getBuffer().getCursor();
-	private Cursor _inactiveCursor = Cursor.makeCursorFromCharIndex(_activeCursor.getCharIndex(), _window.getTextLayout());
+	private Cursor _inactiveCursor = Cursor.makeCursorFromCharIndex(_activeCursor.getCharIndex(),
+			_window.getTextLayout());
 
 	private Range getSelectionRange() {
 		int cursor1 = _activeCursor.getCharIndex();
@@ -26,33 +27,33 @@ public class VisualMode extends AbstractMode {
 		Range selection = new Range(minCursor, length);
 		return selection;
 	}
-	
+
 	private void setSelection() {
 		BufferController controller = _window.getBufferController();
 		controller.setSelection(getSelectionRange());
 	}
-	
+
 	private void clearSelection() {
 		_window.getBufferController().setSelection(null);
 	}
 
 	public VisualMode(BufferWindow window) {
 		super(window);
-		
+
 		addResponder(new CommandInputResponder(_window));
 		NormalModeSwitchResponder normalModeSwitch = new NormalModeSwitchResponder(_window);
 		addResponder(normalModeSwitch, () -> {
 			normalModeSwitch.onRecognize();
 			clearSelection();
-			});
+		});
 		BasicNavigationResponder navigationResponder = new BasicNavigationResponder(_window);
 		addResponder(navigationResponder, () -> {
 			navigationResponder.onRecognize();
 			setSelection();
-			});
+		});
 		addResponder((Event nextEvent) -> {
 			return EventRecognition.matchesExact(nextEvent, "o");
-		}, () -> {
+		} , () -> {
 			Cursor other = _inactiveCursor;
 			_window.getBuffer().setCursor(other);
 			_inactiveCursor = _activeCursor;
@@ -60,25 +61,26 @@ public class VisualMode extends AbstractMode {
 		});
 		addResponder((Event nextEvent) -> {
 			return EventRecognition.matchesExact(nextEvent, "d");
-		}, () -> {
+		} , () -> {
 			Range selection = getSelectionRange();
-			_window.getBuffer().removeCharsInRange(selection);
+			_window.getBuffer().removeCharsInRangeLogged(selection);
 			clearSelection();
 			_window.switchToNormalMode();
 		});
 		addResponder((Event nextEvent) -> {
 			return EventRecognition.matchesExact(nextEvent, "c");
-		}, () -> {
+		} , () -> {
 			Range selection = getSelectionRange();
-			_window.getBuffer().removeCharsInRange(selection);
+			_window.getBuffer().removeCharsInRangeLogged(selection);
 			clearSelection();
-			_window.switchToInputMode();
+			_window.switchToInputMode(0);
 		});
 		addResponder((Event nextEvent) -> {
 			return EventRecognition.matchesExact(nextEvent, "y");
-		}, () -> {
+		} , () -> {
 			Range selection = getSelectionRange();
-			CharSequence string = _window.getBuffer().getCharSequence().subSequence(selection.getStart(), selection.getEnd());
+			CharSequence string = _window.getBuffer().getCharSequence().subSequence(selection.getStart(),
+					selection.getEnd());
 			setClipboard(string.toString());
 			clearSelection();
 			_window.switchToNormalMode();
@@ -88,11 +90,13 @@ public class VisualMode extends AbstractMode {
 	public void setClipboard(String text) {
 		ServiceManager.getInstance().getClipboardService().setClipboard(text);
 	}
-	
+
+	@Override
 	public void activate() {
 		changeCursor(CURSOR_UNDERLINE);
 	}
-	
+
+	@Override
 	public Face getModelineFace() {
 		return new Face(Color.YELLOW, Color.WHITE);
 	}

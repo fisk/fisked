@@ -24,15 +24,15 @@ public class MotionActionResponder implements IInputResponder {
 			return EventRecognition.matchesJoined(event, "d", motionRecognizer);
 		} , () -> {
 			MotionRange range = motionRecognizer.getMotionRange();
-			_window.getBuffer().removeCharsInRange(range.getRange());
+			_window.getBuffer().removeCharsInRangeLogged(range.getRange());
 			_window.setNeedsFullRedraw();
 		});
 		_responders.addResponder((Event event) -> {
 			return EventRecognition.matchesJoined(event, "c", motionRecognizer);
 		} , () -> {
 			MotionRange range = motionRecognizer.getMotionRange();
-			_window.getBuffer().removeCharsInRange(range.getRange());
-			_window.switchToInputMode();
+			_window.getBuffer().removeCharsInRangeLogged(range.getRange());
+			_window.switchToInputMode(0);
 		});
 	}
 
