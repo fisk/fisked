@@ -3,12 +3,12 @@ package org.fisked.mode;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.mode.responder.BasicNavigationResponder;
 import org.fisked.mode.responder.CommandInputResponder;
+import org.fisked.mode.responder.DeleteLineResponder;
 import org.fisked.mode.responder.InputModeSwitchResponder;
 import org.fisked.mode.responder.MotionActionResponder;
 import org.fisked.mode.responder.VisualModeSwitchResponder;
 import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Face;
-import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.RecognitionState;
 import org.fisked.services.ServiceManager;
@@ -27,7 +27,7 @@ public class NormalMode extends AbstractMode {
 		addResponder(new VisualModeSwitchResponder(_window));
 		addResponder(new BasicNavigationResponder(_window));
 		addResponder(new MotionActionResponder(_window));
-		addResponder((Event nextEvent) -> {
+		addResponder(nextEvent -> {
 			if (nextEvent.isCharacter('p')) {
 				_window.getBuffer().appendStringAtPointLogged(getClipboard());
 				_window.switchToNormalMode();
@@ -35,7 +35,7 @@ public class NormalMode extends AbstractMode {
 			}
 			return RecognitionState.NotRecognized;
 		});
-		addResponder((Event nextEvent) -> {
+		addResponder(nextEvent -> {
 			if (nextEvent.isCharacter('P')) {
 				TextNavigator navigator = new TextNavigator(_window);
 				navigator.moveLeft();
@@ -57,6 +57,7 @@ public class NormalMode extends AbstractMode {
 			_window.getBuffer().redo();
 			_window.setNeedsFullRedraw();
 		});
+		addResponder(new DeleteLineResponder(_window));
 	}
 
 	@Override
