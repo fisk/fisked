@@ -46,5 +46,9 @@ Current features:
   - :python evaluates selected text as python and inserts it into the document
   - cancel writing command with ESC
 
+* Other features
+  - Concurrent parsing for syntax coloring
+  - Cool looking mode line that tracks git status
+
 This readme file was edited with this text editor because it is awesome.
 DAYUMN!
