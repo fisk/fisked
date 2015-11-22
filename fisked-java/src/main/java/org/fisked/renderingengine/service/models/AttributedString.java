@@ -4,6 +4,10 @@ import java.text.AttributedCharacterIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.fisked.buffer.BufferTextState;
+
 public class AttributedString implements CharSequence {
 	private java.text.AttributedString _string;
 	private final String _unattributedString;
@@ -242,5 +246,94 @@ public class AttributedString implements CharSequence {
 	@Override
 	public CharSequence subSequence(int start, int end) {
 		return substring(start, end);
+	}
+
+	final static Logger LOG = LogManager.getLogger(BufferTextState.class);
+
+	public AttributedString stringByInsertingString(String string, int index) {
+		LOG.debug("string: " + _unattributedString + ", insert: " + string + " at " + index);
+
+		StringBuilder builder = new StringBuilder(_unattributedString);
+		builder.insert(index, string);
+		String str = builder.toString();
+		AttributedString attrString = new AttributedString(str);
+		int start = 0;
+		int end = length();
+		AttributedCharacterIterator iterator = _string.getIterator(null, start, end);
+
+		while (iterator.getIndex() < end) {
+			int startIndex = iterator.getIndex();
+			int endIndex = iterator.getRunLimit();
+			int nextIndex = endIndex;
+
+			if (startIndex > index) {
+				startIndex += string.length();
+			}
+
+			if (endIndex > index) {
+				endIndex += string.length();
+			}
+
+			Map<java.text.AttributedCharacterIterator.Attribute, Object> attributes = iterator.getAttributes();
+
+			attrString._string.addAttributes(attributes, startIndex, endIndex);
+			iterator.setIndex(nextIndex);
+		}
+
+		LOG.debug("result: " + attrString.toString());
+
+		return attrString;
+	}
+
+	public AttributedString stringByDeletingString(Range range) {
+		LOG.debug("string: " + _unattributedString + ", delete: " + range.getStart() + " - " + range.getEnd());
+
+		if (range.getStart() < 0 || range.getEnd() > length())
+			throw new RuntimeException("Wrong range to delete");
+
+		StringBuilder builder = new StringBuilder(_unattributedString);
+		builder.delete(range.getStart(), range.getEnd());
+		String str = builder.toString();
+		AttributedString attrString = new AttributedString(str);
+		int start = 0;
+		int end = length();
+		AttributedCharacterIterator iterator = _string.getIterator(null, start, end);
+
+		while (iterator.getIndex() < end) {
+			int startIndex = iterator.getIndex();
+			int endIndex = iterator.getRunLimit();
+			int length = endIndex - startIndex;
+			Range intersection = new Range(startIndex, length).intersection(range);
+			int nextIndex = endIndex;
+
+			if (!(startIndex >= range.getStart() && endIndex < range.getEnd())) {
+				if (intersection != null) {
+					startIndex -= range.getLength();
+					length -= intersection.getLength();
+				}
+
+				if (length > 0) {
+					if (startIndex >= range.getEnd()) {
+						startIndex -= range.getLength();
+					}
+
+					endIndex = startIndex + length;
+
+					if (startIndex < 0 || endIndex > length())
+						throw new RuntimeException("Wrong range to delete");
+
+					LOG.debug("Deleting: " + startIndex + " - " + endIndex);
+
+					Map<java.text.AttributedCharacterIterator.Attribute, Object> attributes = iterator.getAttributes();
+					attrString._string.addAttributes(attributes, startIndex, endIndex);
+				}
+			}
+
+			iterator.setIndex(nextIndex);
+		}
+
+		LOG.debug("result: " + attrString.toString());
+
+		return attrString;
 	}
 }

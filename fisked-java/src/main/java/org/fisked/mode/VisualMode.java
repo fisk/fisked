@@ -31,6 +31,7 @@ public class VisualMode extends AbstractMode {
 	private void setSelection() {
 		BufferController controller = _window.getBufferController();
 		controller.setSelection(getSelectionRange());
+		_window.setNeedsFullRedraw();
 	}
 
 	private void clearSelection() {

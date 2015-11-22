@@ -1,20 +1,24 @@
 package org.fisked.responder;
 
+import java.io.IOException;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
 import org.fisked.buffer.drawing.Window;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.services.ServiceManager;
 
 public class EventLoop {
+	private final BlockingQueue<Runnable> _queue = new ArrayBlockingQueue<>(1024);
 	private Window _primaryResponder;
+	private Thread _iothread;
 
-	public void start() {
-		Event postponedStart = null;
-		Event postponedEnd = null;
+	public void run(Runnable runnable) {
+		_queue.add(runnable);
+	}
 
-		while (true) {
-			ServiceManager sm = ServiceManager.getInstance();
-			IConsoleService cs = sm.getConsoleService();
-			int nextChar = cs.getChar();
+	private void sendChar(int nextChar) {
+		run(() -> {
 			Event nextEvent = new Event(nextChar);
 			if (postponedEnd != null) {
 				postponedEnd.setNext(nextEvent);
@@ -33,6 +37,49 @@ public class EventLoop {
 			case MaybeRecognized:
 				break;
 			}
+		});
+	}
+
+	private void pollEvents() {
+		Runnable runnable;
+		try {
+			runnable = _queue.take();
+			runnable.run();
+		} catch (InterruptedException e) {
+		}
+		while ((runnable = _queue.poll()) != null) {
+			runnable.run();
+		}
+	}
+
+	private Event postponedStart = null;
+	private Event postponedEnd = null;
+
+	private int getNextChar() {
+		ServiceManager sm = ServiceManager.getInstance();
+		IConsoleService cs = sm.getConsoleService();
+
+		do {
+			try {
+				return cs.getChar();
+			} catch (IOException e) {
+			}
+		} while (true);
+	}
+
+	public void start() {
+		_iothread = new Thread() {
+			@Override
+			public void run() {
+				while (true) {
+					sendChar(getNextChar());
+				}
+			}
+		};
+		_iothread.start();
+
+		while (true) {
+			pollEvents();
 			_primaryResponder.refresh();
 		}
 	}

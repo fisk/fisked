@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.apache.commons.io.FilenameUtils;
 import org.fisked.language.java.JavaSourceDecorator;
+import org.fisked.language.java.SourceDecoratorQueue;
 import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.text.ITextDecorator;
 
@@ -18,18 +19,9 @@ public class FileContext {
 	public FileContext(File file) {
 		_file = file;
 		if (hasExtension("java")) {
-			_decorator = new JavaSourceDecorator();
+			_decorator = new SourceDecoratorQueue(new JavaSourceDecorator());
 		} else {
-			_decorator = new ITextDecorator() {
-				@Override
-				public void setNeedsRedraw() {
-				}
-
-				@Override
-				public AttributedString decorate(AttributedString string) {
-					return string;
-				}
-			};
+			_decorator = (state, decorator) -> decorator.call(new AttributedString(state.toString()));
 		}
 	}
 

@@ -1,6 +1,7 @@
 package org.fisked.language.java;
 
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.fisked.buffer.BufferTextState;
 import org.fisked.language.SourceDecoratorFactory;
 import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.text.ITextDecorator;
@@ -20,12 +21,7 @@ public class JavaSourceDecorator implements ITextDecorator {
 	}
 
 	@Override
-	public AttributedString decorate(AttributedString string) {
-		return _delegate.decorate(string);
-	}
-
-	@Override
-	public void setNeedsRedraw() {
-		_delegate.setNeedsRedraw();
+	public void decorate(BufferTextState state, ITextDecoratorCallback callback) {
+		_delegate.decorate(state, callback);
 	}
 }

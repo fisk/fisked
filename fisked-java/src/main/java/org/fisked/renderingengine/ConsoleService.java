@@ -51,12 +51,8 @@ public class ConsoleService implements IConsoleService {
 	}
 
 	@Override
-	public int getChar() {
-		try {
-			return _reader.readCharacter();
-		} catch (IOException e) {
-		}
-		return 0;
+	public int getChar() throws IOException {
+		return _reader.readCharacter();
 	}
 
 	@Override

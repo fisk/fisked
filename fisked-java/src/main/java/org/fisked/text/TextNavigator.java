@@ -212,6 +212,7 @@ public class TextNavigator {
 		while (point.getY() < getBuffer().getTextLayout().getClippingRect().getOrigin().getY()) {
 			scrollUp();
 			point = getBuffer().getCursor().getAbsolutePoint();
+			_window.setNeedsFullRedraw();
 		}
 	}
 
@@ -222,6 +223,7 @@ public class TextNavigator {
 			scrollDown();
 			point = getBuffer().getCursor().getAbsolutePoint();
 			rect = _layout.getClippingRect();
+			_window.setNeedsFullRedraw();
 		}
 	}
 

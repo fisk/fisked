@@ -28,7 +28,7 @@ public class BufferView extends View {
 		Buffer buffer = _controller.getBuffer();
 		ITextDecorator decorator = buffer.getSourceDecorator();
 
-		AttributedString attributedString = decorator.decorate(buffer.getAttributedString());
+		AttributedString attributedString = buffer.getBufferTextState().decorate(decorator).copy();
 
 		Color selectionBackgroundColor = ThemeManager.getThemeManager().getCurrentTheme().getSelectionBackgroundColor();
 		Color selectionForegroundColor = ThemeManager.getThemeManager().getCurrentTheme().getSelectionForegroundColor();

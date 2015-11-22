@@ -199,10 +199,7 @@ public class TextLayout {
 
 		String lastLine = null;
 
-		Logger logger = LogManager.getLogger();
-
 		for (Line currentLine : lines) {
-			logger.debug("Got line: " + currentLine._value.length());
 			if (line == point.getY()) {
 				lastLine = currentLine._value;
 				break;

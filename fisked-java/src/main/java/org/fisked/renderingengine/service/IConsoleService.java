@@ -1,5 +1,7 @@
 package org.fisked.renderingengine.service;
 
+import java.io.IOException;
+
 import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Range;
@@ -10,7 +12,7 @@ public interface IConsoleService {
 
 	void deactivate();
 
-	int getChar();
+	int getChar() throws IOException;
 
 	void flush();
 

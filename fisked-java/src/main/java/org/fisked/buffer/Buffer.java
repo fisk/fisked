@@ -17,12 +17,17 @@ import org.fisked.text.TextLayout;
 public class Buffer {
 	private AttributedString _string = null;
 	private final StringBuilder _stringBuilder = new StringBuilder();
+	private volatile BufferTextState _state = new BufferTextState("", null);
 	private boolean _stringNeedsRebuilding = true;
 
 	private FileContext _fileContext = null;
 	private TextLayout _layout;
 	private Cursor _cursor;
 	private final Map<String, Object> _map = new HashMap<String, Object>();
+
+	public BufferTextState getBufferTextState() {
+		return _state;
+	}
 
 	public AttributedString getAttributedString() {
 		if (_stringNeedsRebuilding || _string == null) {
@@ -36,7 +41,6 @@ public class Buffer {
 
 	public void dirtyAttributedString() {
 		_stringNeedsRebuilding = true;
-		getSourceDecorator().setNeedsRedraw();
 		_layout.setNeedsLayout();
 	}
 
@@ -48,16 +52,7 @@ public class Buffer {
 		if (_fileContext != null) {
 			return _fileContext.getSourceDecorator();
 		} else {
-			return new ITextDecorator() {
-				@Override
-				public void setNeedsRedraw() {
-				}
-
-				@Override
-				public AttributedString decorate(AttributedString string) {
-					return string;
-				}
-			};
+			return (state, callback) -> callback.call(new AttributedString(state.toString()));
 		}
 	}
 
@@ -75,7 +70,9 @@ public class Buffer {
 	public Buffer(File file) throws IOException {
 		_fileContext = new FileContext(file);
 		file.createNewFile();
-		_stringBuilder.append(IOUtils.toString(file.toURI(), Charset.forName("UTF-8")));
+		String fileContent = IOUtils.toString(file.toURI(), Charset.forName("UTF-8"));
+		_stringBuilder.append(fileContent);
+		_state = new BufferTextState(fileContent, null);
 	}
 
 	public Cursor getCursor() {
@@ -102,16 +99,14 @@ public class Buffer {
 	}
 
 	public void removeCharAtPointLogged() {
-		if (_cursor.getCharIndex() > 0 && _stringBuilder.length() > 0) {
-			int index = _cursor.getCharIndex() - 1;
-			_undoLog.logDeleteString(new Range(index, 1));
-			_stringBuilder.deleteCharAt(index);
-			dirtyAttributedString();
-			_cursor.setCharIndex(index, true);
-		}
+		if (_cursor.getCharIndex() == 0 || _stringBuilder.length() == 0)
+			return;
+		int index = _cursor.getCharIndex() - 1;
+		removeCharsInRangeLogged(new Range(index, 1));
 	}
 
 	public void removeCharsInRange(Range selection) {
+		_state = _state.deleteString(selection);
 		_stringBuilder.delete(selection.getStart(), selection.getEnd());
 		dirtyAttributedString();
 		_cursor.setCharIndex(selection.getStart(), true);
@@ -146,6 +141,7 @@ public class Buffer {
 	}
 
 	public void insertString(int position, String string) {
+		_state = _state.insertString(position, string);
 		_stringBuilder.insert(position, string);
 		dirtyAttributedString();
 		_cursor.setCharIndex(position + string.length(), true);
@@ -158,16 +154,7 @@ public class Buffer {
 
 	public void appendStringAtPointLogged(String string) {
 		int index = _cursor.getCharIndex();
-		_undoLog.logInsertString(index, string);
-		if (index == getLength()) {
-			_stringBuilder.append(string);
-			dirtyAttributedString();
-			_cursor.setCharIndex(index + string.length(), true);
-		} else {
-			_stringBuilder.insert(index, string);
-			dirtyAttributedString();
-			_cursor.setCharIndex(index + string.length(), true);
-		}
+		insertStringLogged(index, string);
 	}
 
 	public String getFileName() {

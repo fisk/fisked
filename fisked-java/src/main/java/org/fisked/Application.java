@@ -19,26 +19,28 @@ import org.fisked.responder.EventLoop;
 import org.fisked.services.ServiceManager;
 import org.fisked.shell.ShellCommandHandler;
 import org.fisked.util.FileUtil;
+import org.fisked.util.Singleton;
+import org.fisked.util.concurrency.Dispatcher;
 
 public class Application {
-	private static Application _sharedInstance;
 	final static Logger LOG = LogManager.getLogger(Application.class);
 
 	public static Application getApplication() {
-		if (_sharedInstance != null)
-			return _sharedInstance;
-		synchronized (Application.class) {
-			if (_sharedInstance == null) {
-				_sharedInstance = new Application();
-			}
-		}
-		return _sharedInstance;
+		return Singleton.getInstance(Application.class);
 	}
 
 	private EventLoop _loop;
 	private Window _primaryWindow;
 	private volatile Throwable _exception;
 	private String[] _argv;
+
+	public EventLoop getEventLoop() {
+		return _loop;
+	}
+
+	public Window getPrimaryWindow() {
+		return _primaryWindow;
+	}
 
 	private void evaluateScript(BufferWindow window, String language) {
 		if (window.getBufferController().getSelection() != null) {
@@ -124,6 +126,8 @@ public class Application {
 					}
 				}
 			});
+
+			Dispatcher.getInstance().setMainThread(Thread.currentThread());
 
 			setupCommands();
 			_loop = new EventLoop();

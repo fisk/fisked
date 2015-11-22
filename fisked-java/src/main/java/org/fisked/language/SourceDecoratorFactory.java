@@ -34,43 +34,32 @@ public class SourceDecoratorFactory {
 	public <LexerType extends Lexer, ParserType extends Parser> ITextDecorator createDecorator(
 			LexerFactory<LexerType> lexerFactory, ParserFactory<ParserType> parserFactory,
 			ParseTreeListenerFactory<LexerType, ParserType> visitorFactory, String rootRuleName) {
-		return new ITextDecorator() {
-			LexerType _lexer;
-			ParserType _parser;
-			CommonTokenStream _tokens;
-			Method _compilationUnitMethod;
-			AttributedString _string;
+		return (state, callback) -> {
+			try {
+				LexerType lexer;
+				ParserType parser;
+				CommonTokenStream tokens;
+				Method compilationUnitMethod;
+				AttributedString string = new AttributedString(state.toString());
+				ANTLRInputStream inputStream = new ANTLRInputStream(string.toString());
 
-			@Override
-			public AttributedString decorate(AttributedString string) {
-				try {
-					if (_string == null) {
-						_string = string.copy();
-						ANTLRInputStream inputStream = new ANTLRInputStream(_string.toString());
+				lexer = lexerFactory.create(inputStream);
+				tokens = new CommonTokenStream(lexer);
+				parser = parserFactory.create(tokens);
 
-						_lexer = lexerFactory.create(inputStream);
-						_tokens = new CommonTokenStream(_lexer);
-						_parser = parserFactory.create(_tokens);
+				lexer.removeErrorListeners();
+				parser.removeErrorListeners();
 
-						_lexer.removeErrorListeners();
-						_parser.removeErrorListeners();
+				compilationUnitMethod = parser.getClass().getDeclaredMethod(rootRuleName);
+				ParserRuleContext tree = (ParserRuleContext) compilationUnitMethod.invoke(parser);
 
-						_compilationUnitMethod = _parser.getClass().getDeclaredMethod(rootRuleName);
-						ParserRuleContext tree = (ParserRuleContext) _compilationUnitMethod.invoke(_parser);
+				ParseTreeWalker walker = new ParseTreeWalker();
+				ParseTreeListener extractor = visitorFactory.create(lexer, parser, tokens, string);
+				walker.walk(extractor, tree);
 
-						ParseTreeWalker walker = new ParseTreeWalker();
-						ParseTreeListener extractor = visitorFactory.create(_lexer, _parser, _tokens, _string);
-						walker.walk(extractor, tree);
-					}
-					return _string.copy();
-				} catch (Throwable e) {
-					throw new RuntimeException(e);
-				}
-			}
-
-			@Override
-			public void setNeedsRedraw() {
-				_string = null;
+				callback.call(string);
+			} catch (Throwable e) {
+				throw new RuntimeException(e);
 			}
 		};
 	}
