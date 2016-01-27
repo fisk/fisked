@@ -166,7 +166,11 @@ public class Buffer {
 	}
 
 	public File getFile() {
-		return _fileContext.getFile();
+		if (_fileContext != null) {
+			return _fileContext.getFile();
+		} else {
+			return null;
+		}
 	}
 
 	public int getLength() {

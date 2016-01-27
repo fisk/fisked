@@ -78,6 +78,9 @@ public class Application {
 		cm.registerHandler("javascript", (BufferWindow window, String[] argv) -> {
 			evaluateScript(window, "javascript");
 		});
+		cm.registerHandler("lisp", (BufferWindow window, String[] argv) -> {
+			evaluateScript(window, "lisp");
+		});
 		cm.registerHandler("script", (BufferWindow window, String[] argv) -> {
 			if (argv.length != 2)
 				return;

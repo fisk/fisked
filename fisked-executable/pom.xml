@@ -3,50 +3,265 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>fisked-executable</artifactId>
 	<packaging>pom</packaging>
-
+	<name>Fisked Launcher</name>
+	<properties>
+		<felix.bundlerepository.version>1.6.4</felix.bundlerepository.version>
+		<felix.gogo.version>0.16.0</felix.gogo.version>
+		<felix.framework.version>5.4.0</felix.framework.version>
+	</properties>
 	<parent>
 		<groupId>fisked</groupId>
 		<artifactId>fisked</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-
 	<dependencies>
 		<dependency>
 			<groupId>fisked</groupId>
 			<artifactId>fisked-java</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>fisked</groupId>
+			<artifactId>fisked-launcher</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>fisked</groupId>
+			<artifactId>fisked-java-log4j-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>fisked</groupId>
+			<artifactId>fisked-java-log4j-core</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.main</artifactId>
+			<version>5.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.main</artifactId>
+			<version>5.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr</artifactId>
+			<version>2.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.ipojo</artifactId>
+			<version>1.12.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.url</groupId>
+			<artifactId>pax-url-assembly</artifactId>
+			<version>2.4.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.exam</groupId>
+			<artifactId>pax-exam-link-assembly</artifactId>
+			<version>4.8.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.exam</groupId>
+			<artifactId>pax-exam-link-mvn</artifactId>
+			<version>4.8.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
 		</dependency>
 	</dependencies>
 	<build>
-
 		<plugins>
-
 			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2.1</version>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.4.1</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${project.build.directory}/bundle</directory>
+							<directory>${project.build.directory}/lib</directory>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.7</version>
 				<executions>
 					<execution>
-						<id>bundle-project-sources</id>
-						<phase>package</phase>
+						<id>copy-resources</id>
+						<phase>validate</phase>
 						<goals>
-							<goal>single</goal>
+							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<descriptorRefs>
-								<descriptorRef>jar-with-dependencies</descriptorRef>
-							</descriptorRefs>
-							<archive>
-								<manifest>
-									<mainClass>org.fisked.Main</mainClass>
-								</manifest>
-							</archive>
+							<outputDirectory>${project.build.directory}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/non-packaged-resources</directory>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.2</version>
+				<executions>
+					<execution>
+						<id>copy-lib</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.jruby</groupId>
+									<artifactId>jruby-complete</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.python</groupId>
+									<artifactId>jython-standalone</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.abcl</groupId>
+									<artifactId>org.abcl.core</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.felix</groupId>
+									<artifactId>org.apache.felix.main</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.felix</groupId>
+									<artifactId>org.apache.felix.scr</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.ops4j.pax.url</groupId>
+									<artifactId>pax-url-assembly</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.ops4j.pax.exam</groupId>
+									<artifactId>pax-exam-link-assembly</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.ops4j.pax.exam</groupId>
+									<artifactId>pax-exam-link-mvn</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>fisked</groupId>
+									<artifactId>fisked-launcher</artifactId>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-bundle</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.osgi</groupId>
+									<artifactId>org.osgi.compendium</artifactId>
+									<version>4.2.0</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>fisked</groupId>
+									<artifactId>fisked-java</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.felix</groupId>
+									<artifactId>org.apache.felix.ipojo</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.felix</groupId>
+									<artifactId>org.apache.felix.ipojo.annotations</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.felix</groupId>
+									<artifactId>org.osgi.core</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.felix</groupId>
+									<artifactId>org.apache.felix.scr.annotations</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.felix</groupId>
+									<artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>commons-io</groupId>
+									<artifactId>commons-io</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.commons</groupId>
+									<artifactId>commons-collections4</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.logging.log4j</groupId>
+									<artifactId>log4j-core</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.logging.log4j</groupId>
+									<artifactId>log4j-api</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>fisked</groupId>
+									<artifactId>fisked-java-log4j-core</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>fisked</groupId>
+									<artifactId>fisked-java-log4j-api</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.slf4j</groupId>
+									<artifactId>slf4j-api</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.logging.log4j</groupId>
+									<artifactId>log4j-slf4j-impl</artifactId>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.build.directory}/bundle</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.6</version>
+				<executions>
+					<execution>
+						<id>file-permissions</id>
+						<phase>validate</phase>
+						<configuration>
+							<target>
+								<chmod file="${project.build.directory}/fisked" perm="755" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
-
 	</build>
 </project>

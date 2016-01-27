@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.apache.commons.io.FilenameUtils;
 import org.fisked.language.javascript.JavaScriptEvaluator;
+import org.fisked.language.lisp.LispEvaluator;
 import org.fisked.language.python.PythonEvaluator;
 import org.fisked.language.ruby.RubyEvaluator;
 
@@ -24,6 +25,7 @@ public class SourceEvaluatorManager {
 	private ISourceEvaluator _ruby;
 	private ISourceEvaluator _python;
 	private ISourceEvaluator _javaScript;
+	private ISourceEvaluator _lisp;
 
 	public ISourceEvaluator getEvaluator(String language) {
 		if (language.equals("ruby")) {
@@ -56,6 +58,16 @@ public class SourceEvaluatorManager {
 			}
 			return _javaScript;
 		}
+		if (language.equals("lisp")) {
+			if (_lisp != null)
+				return _lisp;
+			synchronized (this) {
+				if (_lisp != null)
+					return _lisp;
+				_lisp = new LispEvaluator();
+			}
+			return _lisp;
+		}
 		return null;
 	}
 
@@ -69,6 +81,8 @@ public class SourceEvaluatorManager {
 			return getEvaluator("ruby");
 		if (extension.equals("js"))
 			return getEvaluator("javascript");
+		if (extension.equals("lisp"))
+			return getEvaluator("lisp");
 		return null;
 	}
 }
