@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.command.CommandManager;
@@ -22,11 +20,13 @@ import org.fisked.shell.ShellCommandHandler;
 import org.fisked.util.ConsolePrinter;
 import org.fisked.util.FileUtil;
 import org.fisked.util.concurrency.Dispatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jline.internal.Log;
 
 public class Application {
-	final static Logger LOG = LogManager.getLogger(Application.class);
+	private final static Logger LOG = LoggerFactory.getLogger(Application.class);
 	private static volatile Application _application;
 
 	public static Application getApplication() {
@@ -129,7 +129,7 @@ public class Application {
 		cs.getCursorService().changeCursor(ICursorService.CURSOR_BLOCK);
 		cs.deactivate();
 		if (_exception != null) {
-			ConsolePrinter.LOG.fatal("Fisked exited because of an exception:", _exception);
+			ConsolePrinter.LOG.error("Fisked exited because of an exception:", _exception);
 		}
 	}
 

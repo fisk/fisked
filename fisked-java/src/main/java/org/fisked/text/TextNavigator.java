@@ -3,20 +3,20 @@ package org.fisked.text;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.text.TextLayout.InvalidLocationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TextNavigator {
 	private final TextLayout _layout;
 	private final Buffer _buffer;
 	private final BufferWindow _window;
 
-	final static Logger LOG = LogManager.getLogger(TextNavigator.class);
+	private final static Logger LOG = LoggerFactory.getLogger(TextNavigator.class);
 
 	private Buffer getBuffer() {
 		return _buffer;

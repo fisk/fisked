@@ -3,13 +3,13 @@ package org.fisked.text;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.fisked.buffer.Buffer;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.renderingengine.service.models.Size;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // TODO: This file needs a lot more logic, like valid and invalid regions of the layout for lazy layouting
 
@@ -237,12 +237,13 @@ public class TextLayout {
 		return result;
 	}
 
+	private static final Logger LOG = LoggerFactory.getLogger(TextLayout.class);
+
 	public int getCharIndexForPhysicalLine(int number) {
 		try {
 			return getCharIndexForAbsolutePhysicalPoint(new Point(0, number));
 		} catch (InvalidLocationException e) {
-			Logger logger = LogManager.getLogger();
-			logger.debug("Reached end: " + _buffer.getLength());
+			LOG.debug("Reached end: " + _buffer.getLength());
 			return _buffer.getLength();
 		}
 	}

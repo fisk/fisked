@@ -1,6 +1,5 @@
 package org.fisked.responder.motion;
 
-import org.apache.logging.log4j.LogManager;
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.responder.Event;
@@ -8,11 +7,14 @@ import org.fisked.responder.EventRecognition;
 import org.fisked.responder.NumberPrefixResponder;
 import org.fisked.responder.NumberPrefixResponder.INumberInputResponder;
 import org.fisked.responder.RecognitionState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GoToLineMotion implements IMotion {
 	private final BufferWindow _window;
 	private NumberPrefixResponder _prefix;
 	private int _number;
+	private static final Logger LOG = LoggerFactory.getLogger(GoToLineMotion.class);
 
 	public GoToLineMotion(BufferWindow window) {
 		_window = window;
@@ -52,7 +54,7 @@ public class GoToLineMotion implements IMotion {
 	public MotionRange getMotionRange() {
 		Buffer buffer = _window.getBuffer();
 		int index = buffer.getTextLayout().getCharIndexForPhysicalLine(_number);
-		LogManager.getLogger(GoToLineMotion.class).debug("Go to line: " + _number + ", index: " + index);
+		LOG.debug("Go to line: " + _number + ", index: " + index);
 
 		return new MotionRange(buffer.getPointIndex(), index);
 	}

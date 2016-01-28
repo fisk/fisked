@@ -13,10 +13,10 @@ import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.renderingengine.service.models.Color;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JavaSyntaxDecoratorVisitor extends Java8BaseListener implements ANTLRErrorListener {
 	private final AttributedString _string;
@@ -46,7 +46,7 @@ public class JavaSyntaxDecoratorVisitor extends Java8BaseListener implements ANT
 
 	}
 
-	private final static Logger LOG = LogManager.getLogger(JavaSyntaxDecoratorVisitor.class);
+	private final static Logger LOG = LoggerFactory.getLogger(JavaSyntaxDecoratorVisitor.class);
 
 	@Override
 	public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,

@@ -3,11 +3,11 @@ package org.fisked.language.java;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.fisked.buffer.BufferTextState;
 import org.fisked.text.ITextDecorator;
 import org.fisked.util.concurrency.Dispatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SourceDecoratorQueue extends Thread implements ITextDecorator {
 	private final BlockingQueue<DecorationJob> _queue = new ArrayBlockingQueue<>(1024);
@@ -28,7 +28,7 @@ public class SourceDecoratorQueue extends Thread implements ITextDecorator {
 		}
 	}
 
-	final static Logger LOG = LogManager.getLogger(SourceDecoratorQueue.class);
+	final static Logger LOG = LoggerFactory.getLogger(SourceDecoratorQueue.class);
 
 	private volatile boolean _terminate = false;
 

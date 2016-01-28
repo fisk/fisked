@@ -1,13 +1,13 @@
 package org.fisked.buffer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.fisked.Application;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.renderingengine.service.models.Range;
 import org.fisked.text.ITextDecorator;
 import org.fisked.util.concurrency.Dispatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BufferTextState implements CharSequence {
 	private final String _string;
@@ -17,7 +17,7 @@ public class BufferTextState implements CharSequence {
 	private volatile boolean _decorationRequested = false;
 	private volatile boolean _decorationFinished = false;
 
-	final static Logger LOG = LogManager.getLogger(BufferTextState.class);
+	final static Logger LOG = LoggerFactory.getLogger(BufferTextState.class);
 
 	private abstract class TextTransition {
 		private final BufferTextState _next;

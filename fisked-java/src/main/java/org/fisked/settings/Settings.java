@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.fisked.util.FileUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Settings {
 	public static Settings _instance;
-	final static Logger LOG = LogManager.getLogger(Settings.class);
+	private final static Logger LOG = LoggerFactory.getLogger(Settings.class);
 
 	private static final String _settingsFileName = ".fiskedrc";
 

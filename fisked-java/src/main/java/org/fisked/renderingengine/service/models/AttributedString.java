@@ -4,9 +4,9 @@ import java.text.AttributedCharacterIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.fisked.buffer.BufferTextState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AttributedString implements CharSequence {
 	private java.text.AttributedString _string;
@@ -248,7 +248,7 @@ public class AttributedString implements CharSequence {
 		return substring(start, end);
 	}
 
-	final static Logger LOG = LogManager.getLogger(BufferTextState.class);
+	final static Logger LOG = LoggerFactory.getLogger(BufferTextState.class);
 
 	public AttributedString stringByInsertingString(String string, int index) {
 		LOG.debug("string: " + _unattributedString + ", insert: " + string + " at " + index);
