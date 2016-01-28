@@ -10,7 +10,17 @@ public class FileUtil {
 		Path path = Paths.get(pathString);
 		path = path.normalize();
 		File file = path.toFile();
-		
+
+		return file;
+	}
+
+	public static File getFiskedHome() {
+		File file = getFile("~/.fisked");
+		if (!file.exists()) {
+			if (!file.mkdir()) {
+				throw new RuntimeException("Could not get fisked home directory.");
+			}
+		}
 		return file;
 	}
 }

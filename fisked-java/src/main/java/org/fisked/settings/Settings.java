@@ -17,7 +17,7 @@ public class Settings {
 	public static Settings _instance;
 	final static Logger LOG = LogManager.getLogger(Settings.class);
 
-	private static final String _settingsFileName = "~/.fiskedrc";
+	private static final String _settingsFileName = ".fiskedrc";
 
 	private int _numberOfDigitsForLineNumbers;
 	private boolean _usingPowerlinePatchedFont;
@@ -28,7 +28,8 @@ public class Settings {
 	}
 
 	private Settings() {
-		File f = FileUtil.getFile(_settingsFileName);
+		File home = FileUtil.getFiskedHome();
+		File f = new File(home, _settingsFileName);
 		load(f);
 		LOG.debug("Settings file: " + f.getAbsolutePath());
 		if (!f.exists()) {

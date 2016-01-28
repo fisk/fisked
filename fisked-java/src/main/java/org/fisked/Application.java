@@ -129,7 +129,7 @@ public class Application {
 		cs.getCursorService().changeCursor(ICursorService.CURSOR_BLOCK);
 		cs.deactivate();
 		if (_exception != null) {
-			ConsolePrinter.LOG.error("Fisked exited because of an exception:", _exception);
+			ConsolePrinter.LOG.fatal("Fisked exited because of an exception:", _exception);
 		}
 	}
 
@@ -176,7 +176,7 @@ public class Application {
 	}
 
 	public void exit(int code) {
-		LOG.debug("Recognized quit command.");
+		LOG.debug("Exiting fisked gracefully.");
 		_loop.exit();
 		shutDownServices();
 		Runtime.getRuntime().removeShutdownHook(_shutdownHook);

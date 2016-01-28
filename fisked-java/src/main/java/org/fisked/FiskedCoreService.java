@@ -17,7 +17,14 @@ public class FiskedCoreService implements IFiskedCoreService {
 
 	@Validate
 	public void start() {
-		runMain();
+		Thread thread = new Thread() {
+			@Override
+			public void run() {
+				setName("Fisked Main Thread");
+				runMain();
+			}
+		};
+		thread.start();
 	}
 
 	@Invalidate
