@@ -14,6 +14,7 @@ import org.fisked.renderingengine.service.models.Face;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.scm.ISCMRepository;
 import org.fisked.scm.SCMRepositoryResolver;
+import org.fisked.settings.Settings;
 import org.fisked.theme.ITheme;
 import org.fisked.theme.ThemeManager;
 import org.fisked.util.concurrency.Dispatcher;
@@ -37,27 +38,59 @@ public class ModeLineController {
 	}
 
 	private AttributedString drawSlimRightArrow(Face face) {
-		return new AttributedString("\ue0b1", face);
+		String str;
+		if (Settings.getInstance().isPowerlinePatchedFontUsed()) {
+			str = "\ue0b1";
+		} else {
+			str = "|";
+		}
+		return new AttributedString(str, face);
 	}
 
 	private AttributedString drawFatRightArrow(Color leftColor, Color rightColor) {
-		return new AttributedString("\ue0b0", new Face(rightColor, leftColor, false));
+		if (Settings.getInstance().isPowerlinePatchedFontUsed()) {
+			return new AttributedString("\ue0b0", new Face(rightColor, leftColor, false));
+		} else {
+			return new AttributedString(" ", new Face(leftColor, rightColor, false));
+		}
 	}
 
 	private AttributedString drawSlimLeftArrow(Face face) {
-		return new AttributedString("\ue0b3", face);
+		String str;
+		if (Settings.getInstance().isPowerlinePatchedFontUsed()) {
+			str = "\ue0b3";
+		} else {
+			str = "|";
+		}
+		return new AttributedString(str, face);
 	}
 
 	private AttributedString drawFatLeftArrow(Color leftColor, Color rightColor) {
-		return new AttributedString("\ue0b2", new Face(leftColor, rightColor, false));
+		if (Settings.getInstance().isPowerlinePatchedFontUsed()) {
+			return new AttributedString("\ue0b2", new Face(leftColor, rightColor, false));
+		} else {
+			return new AttributedString(" ", new Face(rightColor, leftColor, false));
+		}
 	}
 
 	private AttributedString drawLineNumberChar(Face face) {
-		return new AttributedString("\ue0a1", face);
+		String str;
+		if (Settings.getInstance().isPowerlinePatchedFontUsed()) {
+			str = "\ue0a1";
+		} else {
+			str = "LN";
+		}
+		return new AttributedString(str, face);
 	}
 
 	private AttributedString drawBranch(Face face) {
-		return new AttributedString("\ue0a0", face);
+		String str;
+		if (Settings.getInstance().isPowerlinePatchedFontUsed()) {
+			str = "\ue0a0";
+		} else {
+			str = "√";
+		}
+		return new AttributedString(str, face);
 	}
 
 	private AttributedString drawText(String text, Face face) {

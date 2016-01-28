@@ -12,21 +12,25 @@ import org.fisked.command.CommandManager;
 import org.fisked.command.OpenFileCommand;
 import org.fisked.language.ISourceEvaluator;
 import org.fisked.language.SourceEvaluatorManager;
+import org.fisked.launcher.service.ILauncherService;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.ICursorService;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.EventLoop;
 import org.fisked.services.ServiceManager;
 import org.fisked.shell.ShellCommandHandler;
+import org.fisked.util.ConsolePrinter;
 import org.fisked.util.FileUtil;
-import org.fisked.util.Singleton;
 import org.fisked.util.concurrency.Dispatcher;
+
+import jline.internal.Log;
 
 public class Application {
 	final static Logger LOG = LogManager.getLogger(Application.class);
+	private static volatile Application _application;
 
 	public static Application getApplication() {
-		return Singleton.getInstance(Application.class);
+		return _application;
 	}
 
 	private EventLoop _loop;
@@ -44,9 +48,12 @@ public class Application {
 
 	private void evaluateScript(BufferWindow window, String language) {
 		if (window.getBufferController().getSelection() != null) {
+			LOG.debug("Evaluating script of type: " + language);
 			String text = window.getBufferController().getSelectedText();
 			ISourceEvaluator evaluator = SourceEvaluatorManager.getInstance().getEvaluator(language);
+			LOG.debug("Running script:\n" + text);
 			String result = evaluator.evaluate(text);
+			Log.debug("Result: " + result);
 			window.getBufferController().setSelectionText(result);
 			window.switchToNormalMode();
 		} else {
@@ -57,7 +64,7 @@ public class Application {
 	private void setupCommands() {
 		CommandManager cm = CommandManager.getSingleton();
 		cm.registerHandler("q", (BufferWindow window, String[] argv) -> {
-			System.exit(0);
+			exit(0);
 		});
 		cm.registerHandler("e", new OpenFileCommand());
 		cm.registerHandler("w", (BufferWindow window, String[] argv) -> {
@@ -109,26 +116,34 @@ public class Application {
 				window.openFile(file);
 			} catch (IOException e) {
 				e.printStackTrace();
-				System.exit(-1);
+				exit(-1);
 			}
 		}
 	}
 
+	private Thread _shutdownHook;
+
+	private void shutDownServices() {
+		ServiceManager sm = ServiceManager.getInstance();
+		IConsoleService cs = sm.getConsoleService();
+		cs.getCursorService().changeCursor(ICursorService.CURSOR_BLOCK);
+		cs.deactivate();
+		if (_exception != null) {
+			ConsolePrinter.LOG.error("Fisked exited because of an exception:", _exception);
+		}
+	}
+
 	public void start(String[] argv) {
+		LOG.debug("Starting Fisked");
 		_argv = argv;
 		try {
-			Runtime.getRuntime().addShutdownHook(new Thread() {
+			_shutdownHook = new Thread() {
 				@Override
 				public void run() {
-					ServiceManager sm = ServiceManager.getInstance();
-					IConsoleService cs = sm.getConsoleService();
-					cs.getCursorService().changeCursor(ICursorService.CURSOR_BLOCK);
-					cs.deactivate();
-					if (_exception != null) {
-						LOG.error("Fisked exited because of an exception:", _exception);
-					}
+					shutDownServices();
 				}
-			});
+			};
+			Runtime.getRuntime().addShutdownHook(_shutdownHook);
 
 			Dispatcher.getInstance().setMainThread(Thread.currentThread());
 
@@ -152,7 +167,7 @@ public class Application {
 		} catch (Throwable throwable) {
 			Application app = Application.getApplication();
 			app.setException(throwable);
-			app.exit();
+			app.exit(-1);
 		}
 	}
 
@@ -160,7 +175,18 @@ public class Application {
 		_exception = throwable;
 	}
 
-	public void exit() {
-		System.exit(0);
+	public void exit(int code) {
+		LOG.debug("Recognized quit command.");
+		_loop.exit();
+		shutDownServices();
+		Runtime.getRuntime().removeShutdownHook(_shutdownHook);
+		_launcherService.stop(code);
+	}
+
+	private final ILauncherService _launcherService;
+
+	public Application(ILauncherService launcherService) {
+		_launcherService = launcherService;
+		_application = this;
 	}
 }

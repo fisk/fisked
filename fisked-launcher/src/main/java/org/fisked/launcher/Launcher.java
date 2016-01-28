@@ -26,7 +26,19 @@ public class Launcher {
 		@Override
 		public void start(BundleContext context) {
 			_context = context;
-			ILauncherService service = () -> _args;
+			ILauncherService service = new ILauncherService() {
+
+				@Override
+				public String[] getMainArgs() {
+					return _args;
+				}
+
+				@Override
+				public void stop(int code) {
+					Launcher.this.stop(code);
+				}
+
+			};
 			_registration = context.registerService(ILauncherService.class, service, null);
 		}
 
@@ -70,7 +82,7 @@ public class Launcher {
 		}
 	}
 
-	private void printBundles() {
+	public void printBundles() {
 		System.out.println("Bundle snapshot: ");
 		for (Bundle bundle : _activator.getBundles()) {
 			System.out.println("Bundle " + bundle.getSymbolicName() + ": " + state(bundle.getState()));
@@ -111,16 +123,40 @@ public class Launcher {
 		return _activator.getBundles();
 	}
 
-	public void stop() {
+	private volatile boolean _stopRequested;
+	private int _stopCode;
+
+	public void stop(int code) {
+		_stopCode = code;
+		_stopRequested = true;
+		synchronized (this) {
+			notify();
+		}
+	}
+
+	private void finalExit() {
 		try {
 			_felix.stop();
 			_felix.waitForStop(0);
+			System.exit(_stopCode);
 		} catch (Exception e) {
+			e.printStackTrace(System.err);
 		}
+		System.exit(_stopCode);
 	}
 
 	public static void main(String[] args) {
 		Launcher launcher = new Launcher(args);
 		launcher.start();
+		synchronized (launcher) {
+			while (!launcher._stopRequested) {
+				try {
+					launcher.wait();
+				} catch (InterruptedException e) {
+				}
+			}
+		}
+
+		launcher.finalExit();
 	}
 }

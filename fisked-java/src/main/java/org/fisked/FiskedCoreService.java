@@ -27,7 +27,7 @@ public class FiskedCoreService implements IFiskedCoreService {
 	@Override
 	public void runMain() {
 		String[] args = _launcherService.getMainArgs();
-		Application application = Application.getApplication();
+		Application application = new Application(_launcherService);
 		application.start(args);
 	}
 }

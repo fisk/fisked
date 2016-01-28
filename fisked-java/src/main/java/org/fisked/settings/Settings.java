@@ -11,12 +11,14 @@ import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fisked.util.FileUtil;
 
 public class Settings {
 	public static Settings _instance;
 	final static Logger LOG = LogManager.getLogger(Settings.class);
 
-	private final String _settingsFileName = "fisked.properties";
+	private static final String _settingsFileName = "~/.fiskedrc";
+
 	private int _numberOfDigitsForLineNumbers;
 	private boolean _usingPowerlinePatchedFont;
 	private TerminalType _terminalType;
@@ -26,10 +28,11 @@ public class Settings {
 	}
 
 	private Settings() {
-		load();
-		File f = new File(_settingsFileName);
+		File f = FileUtil.getFile(_settingsFileName);
+		load(f);
+		LOG.debug("Settings file: " + f.getAbsolutePath());
 		if (!f.exists()) {
-			save();
+			save(f);
 		}
 	}
 
@@ -55,7 +58,7 @@ public class Settings {
 
 	// Can later be public if we want to store any changes the user does during
 	// runtime.
-	private void save() {
+	private void save(File f) {
 		StringBuilder sb = new StringBuilder();
 		List<String> lines = new ArrayList<String>();
 		lines.add("# The number of digits used for displaying line numbers. Set to 0 to hide the line numbers.");
@@ -83,17 +86,17 @@ public class Settings {
 			sb.append("\n");
 		}
 
-		try (PrintWriter pw = new PrintWriter(_settingsFileName)) {
+		try (PrintWriter pw = new PrintWriter(f)) {
 			pw.print(sb.toString());
 		} catch (IOException e) {
 			LOG.error("Could not save config file.");
 		}
 	}
 
-	private void load() {
+	private void load(File f) {
 		Properties prop = new Properties();
 		try {
-			FileInputStream fis = new FileInputStream(new File(_settingsFileName));
+			FileInputStream fis = new FileInputStream(f);
 			prop.load(fis);
 			fis.close();
 		} catch (FileNotFoundException e) {
@@ -107,5 +110,26 @@ public class Settings {
 		_usingPowerlinePatchedFont = SettingsConverter.convert(prop.getProperty("view.usingPowerlinePatchedFont"),
 				false);
 		_terminalType = SettingsConverter.convert(prop.getProperty("terminal.type"), TerminalType.Unknown);
+		if (_terminalType == TerminalType.Unknown) {
+			// If the user doesn't know, try to detect automatically
+			if (System.getenv().containsKey("ITERM_PROFILE")) {
+				_terminalType = TerminalType.iTerm;
+			}
+		}
+
+		LOG.debug("Digits for line numbers: " + _numberOfDigitsForLineNumbers);
+		LOG.debug("Powerline patched font: " + _usingPowerlinePatchedFont);
+		LOG.debug("Terminal type: " + terminalName(_terminalType));
+	}
+
+	private String terminalName(TerminalType terminalType) {
+		switch (terminalType) {
+		case Unknown:
+			return "Unknown";
+		case iTerm:
+			return "iTerm";
+		default:
+			return "Unknown";
+		}
 	}
 }

@@ -9,6 +9,7 @@ import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;
+import org.fisked.settings.Settings;
 
 import jline.console.ConsoleReader;
 
@@ -165,7 +166,7 @@ public class ConsoleService implements IConsoleService {
 	public ICursorService getCursorService() {
 		if (_cursor != null)
 			return _cursor;
-		if (System.getenv().containsKey("ITERM_PROFILE")) {
+		if (Settings.getInstance().getTerminalType() == Settings.TerminalType.iTerm) {
 			_cursor = new ItermCursorService(this);
 		} else {
 			_cursor = new DefaultCursorService(this);
