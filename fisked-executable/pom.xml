@@ -80,6 +80,10 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr4-runtime</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -238,6 +242,10 @@
 								<artifactItem>
 									<groupId>org.apache.logging.log4j</groupId>
 									<artifactId>log4j-slf4j-impl</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.antlr</groupId>
+									<artifactId>antlr4-runtime</artifactId>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.build.directory}/bundle</outputDirectory>
