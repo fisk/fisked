@@ -4,7 +4,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import org.fisked.language.ISourceEvaluator;
+import org.fisked.language.service.ISourceEvaluator;
 
 public class JavaScriptEvaluator implements ISourceEvaluator {
 	private final ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");

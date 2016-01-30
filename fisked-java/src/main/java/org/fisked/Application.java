@@ -8,18 +8,19 @@ import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.command.CommandManager;
 import org.fisked.command.OpenFileCommand;
-import org.fisked.language.ISourceEvaluator;
-import org.fisked.language.SourceEvaluatorManager;
+import org.fisked.language.service.ISourceEvaluator;
 import org.fisked.launcher.service.ILauncherService;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.ICursorService;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.EventLoop;
+import org.fisked.services.ComponentManager;
 import org.fisked.services.ServiceManager;
 import org.fisked.shell.ShellCommandHandler;
 import org.fisked.util.ConsolePrinter;
 import org.fisked.util.FileUtil;
 import org.fisked.util.concurrency.Dispatcher;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,12 +51,18 @@ public class Application {
 		if (window.getBufferController().getSelection() != null) {
 			LOG.debug("Evaluating script of type: " + language);
 			String text = window.getBufferController().getSelectedText();
-			ISourceEvaluator evaluator = SourceEvaluatorManager.getInstance().getEvaluator(language);
-			LOG.debug("Running script:\n" + text);
-			String result = evaluator.evaluate(text);
-			Log.debug("Result: " + result);
-			window.getBufferController().setSelectionText(result);
-			window.switchToNormalMode();
+			ISourceEvaluator evaluator = ComponentManager.getInstance().getSourceEvalManager().getEvaluator(language);
+			if (evaluator != null) {
+				LOG.debug("Running script:\n" + text);
+				String result = evaluator.evaluate(text);
+				Log.debug("Result: " + result);
+				window.getBufferController().setSelectionText(result);
+				window.switchToNormalMode();
+			} else {
+				LOG.debug("Could not find evaluator for " + language);
+				ComponentManager.getInstance().getLauncherService().printBundles();
+				window.getCommandController().setCommandFeedback("Could not find evaluator for " + language);
+			}
 		} else {
 			window.getCommandController().setCommandFeedback("Can't evaluate script without selection.");
 		}
@@ -92,7 +99,7 @@ public class Application {
 			if (argv.length != 2)
 				return;
 			File file = FileUtil.getFile(argv[1]);
-			ISourceEvaluator evaluator = SourceEvaluatorManager.getInstance().getEvaluator(file);
+			ISourceEvaluator evaluator = ComponentManager.getInstance().getSourceEvalManager().getEvaluator(file);
 			if (evaluator == null)
 				return;
 			String string;
@@ -180,13 +187,11 @@ public class Application {
 		_loop.exit();
 		shutDownServices();
 		Runtime.getRuntime().removeShutdownHook(_shutdownHook);
-		_launcherService.stop(code);
+		ILauncherService launcher = ComponentManager.getInstance().getLauncherService();
+		launcher.stop(code);
 	}
 
-	private final ILauncherService _launcherService;
-
-	public Application(ILauncherService launcherService) {
-		_launcherService = launcherService;
+	public Application(ILauncherService launcherService, BundleContext context) {
 		_application = this;
 	}
 }

@@ -1,12 +1,14 @@
 package org.fisked;
 
 import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Context;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.fisked.launcher.service.ILauncherService;
+import org.osgi.framework.BundleContext;
 
 @Component(immediate = true, publicFactory = false)
 @Instantiate(name = IFiskedCoreService.COMPONENT_NAME)
@@ -14,6 +16,9 @@ import org.fisked.launcher.service.ILauncherService;
 public class FiskedCoreService implements IFiskedCoreService {
 	@Requires
 	private ILauncherService _launcherService;
+
+	@Context
+	private BundleContext _context;
 
 	@Validate
 	public void start() {
@@ -34,7 +39,7 @@ public class FiskedCoreService implements IFiskedCoreService {
 	@Override
 	public void runMain() {
 		String[] args = _launcherService.getMainArgs();
-		Application application = new Application(_launcherService);
+		Application application = new Application(_launcherService, _context);
 		application.start(args);
 	}
 }

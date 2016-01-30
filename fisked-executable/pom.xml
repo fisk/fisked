@@ -27,6 +27,16 @@
 		</dependency>
 		<dependency>
 			<groupId>fisked</groupId>
+			<artifactId>fisked-eval-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>fisked</groupId>
+			<artifactId>fisked-eval-ruby</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>fisked</groupId>
 			<artifactId>fisked-java-log4j-api</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
@@ -190,6 +200,14 @@
 								<artifactItem>
 									<groupId>fisked</groupId>
 									<artifactId>fisked-java</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>fisked</groupId>
+									<artifactId>fisked-eval-api</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>fisked</groupId>
+									<artifactId>fisked-eval-ruby</artifactId>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>

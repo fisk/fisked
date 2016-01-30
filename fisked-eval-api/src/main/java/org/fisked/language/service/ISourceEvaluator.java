@@ -1,4 +1,4 @@
-package org.fisked.language;
+package org.fisked.language.service;
 
 public interface ISourceEvaluator {
 	String evaluate(String val);

@@ -38,6 +38,11 @@ public class Launcher {
 					Launcher.this.stop(code);
 				}
 
+				@Override
+				public void printBundles() {
+					Launcher.this.printBundles();
+				}
+
 			};
 			_registration = context.registerService(ILauncherService.class, service, null);
 		}
@@ -91,7 +96,8 @@ public class Launcher {
 
 	public void start() {
 		Map<String, Object> config = new HashMap<>();
-		config.put(FelixConstants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, "org.fisked.launcher.service; version=1.0.0");
+		config.put(FelixConstants.FRAMEWORK_SYSTEMPACKAGES_EXTRA,
+				"org.fisked.launcher.service; version=1.0.0, sun.misc");
 
 		List<LauncherActivator> list = new ArrayList<>();
 		_activator = new LauncherActivator();

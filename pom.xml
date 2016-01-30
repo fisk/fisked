@@ -14,6 +14,8 @@
 		<module>fisked-executable</module>
 		<module>fisked-java-log4j-core</module>
 		<module>fisked-java-log4j-api</module>
+		<module>fisked-eval-ruby</module>
+		<module>fisked-eval-api</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
