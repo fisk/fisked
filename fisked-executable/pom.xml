@@ -37,6 +37,11 @@
 		</dependency>
 		<dependency>
 			<groupId>fisked</groupId>
+			<artifactId>fisked-eval-groovy</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>fisked</groupId>
 			<artifactId>fisked-eval-python</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
@@ -219,6 +224,10 @@
 								<artifactItem>
 									<groupId>fisked</groupId>
 									<artifactId>fisked-eval-python</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>fisked</groupId>
+									<artifactId>fisked-eval-groovy</artifactId>
 								</artifactItem>
 								<artifactItem>
 									<groupId>fisked</groupId>

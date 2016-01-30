@@ -105,6 +105,9 @@ public class Application {
 		cm.registerHandler("lisp", (BufferWindow window, String[] argv) -> {
 			evaluateScript(window, "lisp");
 		});
+		cm.registerHandler("groovy", (BufferWindow window, String[] argv) -> {
+			evaluateScript(window, "groovy");
+		});
 		cm.registerHandler("script", (BufferWindow window, String[] argv) -> {
 			if (argv.length != 2)
 				return;

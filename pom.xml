@@ -18,6 +18,7 @@
 		<module>fisked-eval-python</module>
 		<module>fisked-eval-lisp</module>
 		<module>fisked-eval-javascript</module>
+		<module>fisked-eval-groovy</module>
 		<module>fisked-eval-api</module>
 	</modules>
 	<dependencyManagement>
@@ -86,6 +87,11 @@
 				<groupId>org.python</groupId>
 				<artifactId>jython-standalone</artifactId>
 				<version>2.7.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.codehaus.groovy</groupId>
+				<artifactId>groovy-all</artifactId>
+				<version>2.4.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.antlr</groupId>
