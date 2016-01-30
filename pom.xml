@@ -15,6 +15,9 @@
 		<module>fisked-java-log4j-core</module>
 		<module>fisked-java-log4j-api</module>
 		<module>fisked-eval-ruby</module>
+		<module>fisked-eval-python</module>
+		<module>fisked-eval-lisp</module>
+		<module>fisked-eval-javascript</module>
 		<module>fisked-eval-api</module>
 	</modules>
 	<dependencyManagement>
@@ -113,6 +116,11 @@
 				<groupId>org.abcl</groupId>
 				<artifactId>org.abcl.core</artifactId>
 				<version>1.3.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>3.4</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

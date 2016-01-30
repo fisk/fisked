@@ -37,6 +37,21 @@
 		</dependency>
 		<dependency>
 			<groupId>fisked</groupId>
+			<artifactId>fisked-eval-python</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>fisked</groupId>
+			<artifactId>fisked-eval-javascript</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>fisked</groupId>
+			<artifactId>fisked-eval-lisp</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>fisked</groupId>
 			<artifactId>fisked-java-log4j-api</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
@@ -145,16 +160,8 @@
 						<configuration>
 							<artifactItems>
 								<artifactItem>
-									<groupId>org.jruby</groupId>
-									<artifactId>jruby-complete</artifactId>
-								</artifactItem>
-								<artifactItem>
 									<groupId>org.python</groupId>
 									<artifactId>jython-standalone</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.abcl</groupId>
-									<artifactId>org.abcl.core</artifactId>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
@@ -208,6 +215,18 @@
 								<artifactItem>
 									<groupId>fisked</groupId>
 									<artifactId>fisked-eval-ruby</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>fisked</groupId>
+									<artifactId>fisked-eval-python</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>fisked</groupId>
+									<artifactId>fisked-eval-lisp</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>fisked</groupId>
+									<artifactId>fisked-eval-javascript</artifactId>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>

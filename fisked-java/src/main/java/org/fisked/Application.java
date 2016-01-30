@@ -8,7 +8,7 @@ import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.command.CommandManager;
 import org.fisked.command.OpenFileCommand;
-import org.fisked.language.service.ISourceEvaluator;
+import org.fisked.language.eval.service.ISourceEvaluator;
 import org.fisked.launcher.service.ILauncherService;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.ICursorService;
@@ -54,10 +54,20 @@ public class Application {
 			ISourceEvaluator evaluator = ComponentManager.getInstance().getSourceEvalManager().getEvaluator(language);
 			if (evaluator != null) {
 				LOG.debug("Running script:\n" + text);
-				String result = evaluator.evaluate(text);
-				Log.debug("Result: " + result);
-				window.getBufferController().setSelectionText(result);
-				window.switchToNormalMode();
+				String result;
+				try {
+					result = evaluator.evaluate(text);
+					Log.debug("Result: " + result);
+				} catch (Throwable e) {
+					result = e.getMessage();
+				}
+				if (result != null) {
+					window.getBufferController().setSelectionText(result);
+					window.switchToNormalMode();
+				} else {
+					LOG.debug("Evaluator did not reply.");
+					window.getCommandController().setCommandFeedback("Evaluator did not reply.");
+				}
 			} else {
 				LOG.debug("Could not find evaluator for " + language);
 				ComponentManager.getInstance().getLauncherService().printBundles();

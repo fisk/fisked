@@ -94,10 +94,28 @@ public class Launcher {
 		}
 	}
 
+	private String join(List<String> strs, String delim) {
+		StringBuilder str = new StringBuilder();
+		int i = 0;
+		for (String substr : strs) {
+			str.append(substr);
+			if (++i != strs.size()) {
+				str.append(delim);
+			}
+		}
+		return str.toString();
+	}
+
 	public void start() {
 		Map<String, Object> config = new HashMap<>();
-		config.put(FelixConstants.FRAMEWORK_SYSTEMPACKAGES_EXTRA,
-				"org.fisked.launcher.service; version=1.0.0, sun.misc");
+
+		List<String> deps = new ArrayList<>();
+		deps.add("org.fisked.launcher.service; version=1.0.0");
+		deps.add("sun.misc");
+		deps.add("org.python");
+		deps.add("org.python.util");
+
+		config.put(FelixConstants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, join(deps, ", "));
 
 		List<LauncherActivator> list = new ArrayList<>();
 		_activator = new LauncherActivator();

@@ -5,7 +5,7 @@ import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
-import org.fisked.language.service.ISourceEvaluatorManager;
+import org.fisked.language.eval.service.ISourceEvaluatorManager;
 import org.fisked.launcher.service.ILauncherService;
 
 @Component(immediate = true, publicFactory = false)
