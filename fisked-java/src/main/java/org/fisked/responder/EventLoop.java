@@ -7,11 +7,11 @@ import java.util.concurrent.BlockingQueue;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.services.ServiceManager;
-import org.fisked.util.concurrency.Dispatcher.IMainRunner;
+import org.fisked.util.concurrency.IRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EventLoop implements IMainRunner {
+public class EventLoop implements IRunner {
 	private final static Logger LOG = LoggerFactory.getLogger(EventLoop.class);
 	private final BlockingQueue<Runnable> _queue = new ArrayBlockingQueue<>(1024);
 	private Window _primaryResponder;
@@ -48,9 +48,11 @@ public class EventLoop implements IMainRunner {
 	}
 
 	private void pollEvents() {
+		LOG.debug("Polling events in event loop.");
 		Runnable runnable;
 		try {
 			runnable = _queue.take();
+			LOG.debug("Got event in event loop.");
 			runnable.run();
 		} catch (InterruptedException e) {
 		}
@@ -71,7 +73,7 @@ public class EventLoop implements IMainRunner {
 	}
 
 	private class IOThread extends Thread {
-		private boolean _requestingChar = false;
+		private boolean _requestingChar = true;
 
 		public IOThread() {
 			super("Fisked Async IO Thread");
@@ -84,7 +86,11 @@ public class EventLoop implements IMainRunner {
 				try {
 					synchronized (_sema) {
 						while (true) {
-							_sema.wait();
+							LOG.debug("Waiting for IO.");
+							if (!_requestingChar) {
+								_sema.wait();
+							}
+							LOG.debug("Wake up IO thread.");
 							if (_exitRequested) {
 								LOG.debug("Shutting down IO thread.");
 								return;
@@ -106,8 +112,9 @@ public class EventLoop implements IMainRunner {
 		}
 
 		private void requestChar() {
+			LOG.debug("Requesting character from async IO thread.");
 			synchronized (_sema) {
-				LOG.info("Requesting character from async IO thread");
+				LOG.debug("Run loop got monitor.");
 				if (_requestingChar)
 					return;
 				_requestingChar = true;

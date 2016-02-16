@@ -126,6 +126,7 @@ public class Launcher {
 		config.put("felix.auto.deploy.dir", "bundle");
 		config.put("org.osgi.framework.storage.clean", "onFirstInit");
 		config.put(Constants.FRAMEWORK_STORAGE, "bundle-cache");
+		// config.put(AutoProcessor.AUTO_DEPLOY_STARTLEVEL_PROPERTY, "1");
 
 		try {
 			_felix = new Felix(config);

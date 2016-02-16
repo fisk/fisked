@@ -10,17 +10,13 @@ import org.fisked.util.Singleton;
 public class Dispatcher {
 	private final ExecutorService _pool = Executors.newCachedThreadPool();
 	private Thread _mainThread;
-	private IMainRunner _mainRunner;
-
-	public interface IMainRunner {
-		void run(Runnable runnable);
-	}
+	private IRunner _mainRunner;
 
 	public static Dispatcher getInstance() {
 		return Singleton.getInstance(Dispatcher.class);
 	}
 
-	public void setMainThread(IMainRunner mainRunner, Thread thread) {
+	public void setMainThread(IRunner mainRunner, Thread thread) {
 		_mainThread = thread;
 	}
 

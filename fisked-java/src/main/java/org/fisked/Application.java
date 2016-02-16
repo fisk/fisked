@@ -154,9 +154,13 @@ public class Application {
 	}
 
 	public void start(String[] argv) {
-		LOG.debug("Starting Fisked");
+		LOG.debug("Starting Fisked.");
 		_argv = argv;
 		try {
+			LOG.debug("Starting run loop.");
+			_loop = new EventLoop();
+			Dispatcher.getInstance().setMainThread(_loop, Thread.currentThread());
+
 			_shutdownHook = new Thread() {
 				@Override
 				public void run() {
@@ -164,10 +168,6 @@ public class Application {
 				}
 			};
 			Runtime.getRuntime().addShutdownHook(_shutdownHook);
-
-			_loop = new EventLoop();
-
-			Dispatcher.getInstance().setMainThread(_loop, Thread.currentThread());
 
 			setupCommands();
 			ServiceManager sm = ServiceManager.getInstance();
@@ -183,8 +183,8 @@ public class Application {
 			_loop.setPrimaryResponder(_primaryWindow);
 
 			_primaryWindow.draw();
-			ComponentManager cm = ComponentManager.getInstance();
-			cm.sendEmail();
+			// ComponentManager cm = ComponentManager.getInstance();
+			// cm.sendEmail();
 
 			_loop.start();
 		} catch (Throwable throwable) {

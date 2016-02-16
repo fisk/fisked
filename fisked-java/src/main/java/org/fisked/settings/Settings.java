@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.io.FileUtils;
 import org.fisked.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ public class Settings {
 	public static Settings _instance;
 	private final static Logger LOG = LoggerFactory.getLogger(Settings.class);
 
-	private static final String _settingsFileName = ".fiskedrc";
+	private static final String _settingsFileName = "fiskedrc";
 
 	private int _numberOfDigitsForLineNumbers;
 	private boolean _usingPowerlinePatchedFont;
@@ -30,11 +30,11 @@ public class Settings {
 	private Settings() {
 		File home = FileUtil.getFiskedHome();
 		File f = new File(home, _settingsFileName);
-		load(f);
 		LOG.debug("Settings file: " + f.getAbsolutePath());
 		if (!f.exists()) {
 			save(f);
 		}
+		load(f);
 	}
 
 	private static class SettingsHolder {
@@ -87,8 +87,8 @@ public class Settings {
 			sb.append("\n");
 		}
 
-		try (PrintWriter pw = new PrintWriter(f)) {
-			pw.print(sb.toString());
+		try {
+			FileUtils.write(f, lines.toString());
 		} catch (IOException e) {
 			LOG.error("Could not save config file.");
 		}

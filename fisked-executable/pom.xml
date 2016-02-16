@@ -235,6 +235,22 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>fisked</groupId>
+									<artifactId>fisked-email</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>fisked</groupId>
+									<artifactId>fisked-email-smtp</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>fisked</groupId>
+									<artifactId>fisked-email-imap</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>fisked</groupId>
+									<artifactId>fisked-util</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>fisked</groupId>
 									<artifactId>fisked-eval-api</artifactId>
 								</artifactItem>
 								<artifactItem>
