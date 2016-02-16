@@ -17,7 +17,7 @@ public class Settings {
 	public static Settings _instance;
 	private final static Logger LOG = LoggerFactory.getLogger(Settings.class);
 
-	private static final String _settingsFileName = "fiskedrc";
+	private static final String _settingsFileName = "conf/fiskedrc";
 
 	private int _numberOfDigitsForLineNumbers;
 	private boolean _usingPowerlinePatchedFont;

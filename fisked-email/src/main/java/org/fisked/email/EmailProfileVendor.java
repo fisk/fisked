@@ -123,7 +123,7 @@ public class EmailProfileVendor implements IEmailProfileVendor {
 		}
 
 		private void parseConfig() {
-			File file = FileUtil.getFile("~/.fisked/email.json");
+			File file = FileUtil.getFile("~/.fisked/conf/email.json");
 			if (!file.exists()) {
 				try {
 					file.createNewFile();

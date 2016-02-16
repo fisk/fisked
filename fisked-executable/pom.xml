@@ -143,8 +143,8 @@
 				<configuration>
 					<filesets>
 						<fileset>
-							<directory>${project.build.directory}/bundle</directory>
-							<directory>${project.build.directory}/lib</directory>
+							<directory>${HOME}/.fisked/bundle</directory>
+							<directory>${HOME}/.fisked/lib</directory>
 						</fileset>
 					</filesets>
 				</configuration>
@@ -155,12 +155,12 @@
 				<executions>
 					<execution>
 						<id>copy-resources</id>
-						<phase>validate</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.build.directory}</outputDirectory>
+							<outputDirectory>${HOME}/.fisked</outputDirectory>
 							<resources>
 								<resource>
 									<directory>src/non-packaged-resources</directory>
@@ -178,7 +178,7 @@
 				<executions>
 					<execution>
 						<id>copy-lib</id>
-						<phase>generate-resources</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>copy</goal>
 						</goals>
@@ -213,12 +213,12 @@
 									<artifactId>fisked-launcher</artifactId>
 								</artifactItem>
 							</artifactItems>
-							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+							<outputDirectory>${HOME}/.fisked/lib</outputDirectory>
 						</configuration>
 					</execution>
 					<execution>
 						<id>copy-bundle</id>
-						<phase>generate-resources</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>copy</goal>
 						</goals>
@@ -338,7 +338,7 @@
 									<artifactId>json</artifactId>
 								</artifactItem>
 							</artifactItems>
-							<outputDirectory>${project.build.directory}/bundle</outputDirectory>
+							<outputDirectory>${HOME}/.fisked/bundle</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
@@ -350,10 +350,10 @@
 				<executions>
 					<execution>
 						<id>file-permissions</id>
-						<phase>validate</phase>
+						<phase>install</phase>
 						<configuration>
 							<target>
-								<chmod file="${project.build.directory}/fisked" perm="755" />
+								<chmod file="${HOME}/.fisked/bin/fisked" perm="755" />
 							</target>
 						</configuration>
 						<goals>

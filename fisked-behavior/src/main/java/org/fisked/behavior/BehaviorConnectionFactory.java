@@ -9,6 +9,11 @@ public class BehaviorConnectionFactory<C> implements IPreparedBehaviorProvider {
 		_callerClass = callerClass;
 	}
 
+	public BehaviorConnectionFactory(IBehaviorProvider provider, Class<C> callerClass) {
+		_provider = provider;
+		_callerClass = callerClass;
+	}
+
 	@Override
 	public <T> IBehaviorConnection<T> getBehaviorConnection(Class<T> targetClass) {
 		return _provider.getBehaviorConnection(_callerClass, targetClass);
