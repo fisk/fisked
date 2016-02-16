@@ -9,6 +9,11 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<modules>
+		<module>fisked-util</module>
+		<module>fisked-email</module>
+		<module>fisked-email-imap</module>
+		<module>fisked-email-smtp</module>
+		<module>fisked-behavior</module>
 		<module>fisked-java</module>
 		<module>fisked-launcher</module>
 		<module>fisked-executable</module>
@@ -44,9 +49,9 @@
 				<version>1.2.4</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.felix</groupId>
+				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.core</artifactId>
-				<version>1.4.0</version>
+				<version>6.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.felix</groupId>
@@ -127,6 +132,16 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
 				<version>3.4</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.mail</groupId>
+				<artifactId>mail</artifactId>
+				<version>1.4.7</version>
+			</dependency>
+			<dependency>
+				<groupId>org.json</groupId>
+				<artifactId>json</artifactId>
+				<version>20160212</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

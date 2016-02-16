@@ -7,16 +7,18 @@ import java.util.concurrent.BlockingQueue;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.services.ServiceManager;
+import org.fisked.util.concurrency.Dispatcher.IMainRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EventLoop {
+public class EventLoop implements IMainRunner {
 	private final static Logger LOG = LoggerFactory.getLogger(EventLoop.class);
 	private final BlockingQueue<Runnable> _queue = new ArrayBlockingQueue<>(1024);
 	private Window _primaryResponder;
 	private IOThread _iothread;
 	private volatile boolean _exitRequested;
 
+	@Override
 	public void run(Runnable runnable) {
 		_queue.add(runnable);
 	}

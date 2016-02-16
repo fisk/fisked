@@ -5,18 +5,22 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.fisked.Application;
 import org.fisked.util.Singleton;
 
 public class Dispatcher {
 	private final ExecutorService _pool = Executors.newCachedThreadPool();
 	private Thread _mainThread;
+	private IMainRunner _mainRunner;
+
+	public interface IMainRunner {
+		void run(Runnable runnable);
+	}
 
 	public static Dispatcher getInstance() {
 		return Singleton.getInstance(Dispatcher.class);
 	}
 
-	public void setMainThread(Thread thread) {
+	public void setMainThread(IMainRunner mainRunner, Thread thread) {
 		_mainThread = thread;
 	}
 
@@ -32,7 +36,7 @@ public class Dispatcher {
 		if (Thread.currentThread() == _mainThread) {
 			runnable.run();
 		} else {
-			Application.getApplication().getEventLoop().run(runnable);
+			_mainRunner.run(runnable);
 		}
 	}
 }

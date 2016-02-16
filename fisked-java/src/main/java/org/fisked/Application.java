@@ -165,10 +165,11 @@ public class Application {
 			};
 			Runtime.getRuntime().addShutdownHook(_shutdownHook);
 
-			Dispatcher.getInstance().setMainThread(Thread.currentThread());
+			_loop = new EventLoop();
+
+			Dispatcher.getInstance().setMainThread(_loop, Thread.currentThread());
 
 			setupCommands();
-			_loop = new EventLoop();
 			ServiceManager sm = ServiceManager.getInstance();
 			IConsoleService cs = sm.getConsoleService();
 
@@ -182,6 +183,8 @@ public class Application {
 			_loop.setPrimaryResponder(_primaryWindow);
 
 			_primaryWindow.draw();
+			ComponentManager cm = ComponentManager.getInstance();
+			cm.sendEmail();
 
 			_loop.start();
 		} catch (Throwable throwable) {

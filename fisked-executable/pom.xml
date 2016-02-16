@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>fisked-executable</artifactId>
 	<packaging>pom</packaging>
-	<name>Fisked Launcher</name>
+	<name>Fisked Executable</name>
 	<properties>
 		<felix.bundlerepository.version>1.6.4</felix.bundlerepository.version>
 		<felix.gogo.version>0.16.0</felix.gogo.version>
@@ -18,6 +18,26 @@
 		<dependency>
 			<groupId>fisked</groupId>
 			<artifactId>fisked-java</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>fisked</groupId>
+			<artifactId>fisked-email</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>fisked</groupId>
+			<artifactId>fisked-email-imap</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>fisked</groupId>
+			<artifactId>fisked-email-smtp</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>fisked</groupId>
+			<artifactId>fisked-util</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -246,7 +266,7 @@
 									<artifactId>org.apache.felix.ipojo.annotations</artifactId>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.apache.felix</groupId>
+									<groupId>org.osgi</groupId>
 									<artifactId>org.osgi.core</artifactId>
 								</artifactItem>
 								<artifactItem>
@@ -292,6 +312,14 @@
 								<artifactItem>
 									<groupId>org.antlr</groupId>
 									<artifactId>antlr4-runtime</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>javax.mail</groupId>
+									<artifactId>mail</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.json</groupId>
+									<artifactId>json</artifactId>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.build.directory}/bundle</outputDirectory>
