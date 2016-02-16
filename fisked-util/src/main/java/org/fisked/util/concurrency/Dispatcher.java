@@ -9,8 +9,8 @@ import org.fisked.util.Singleton;
 
 public class Dispatcher {
 	private final ExecutorService _pool = Executors.newCachedThreadPool();
-	private Thread _mainThread;
-	private IRunner _mainRunner;
+	private volatile Thread _mainThread;
+	private volatile IRunner _mainRunner;
 
 	public static Dispatcher getInstance() {
 		return Singleton.getInstance(Dispatcher.class);
@@ -29,6 +29,9 @@ public class Dispatcher {
 	}
 
 	public void runMain(Runnable runnable) {
+		if (_mainThread == null || _mainRunner == null)
+			return;
+
 		if (Thread.currentThread() == _mainThread) {
 			runnable.run();
 		} else {

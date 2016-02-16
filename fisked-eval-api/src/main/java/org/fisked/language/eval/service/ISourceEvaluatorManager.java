@@ -7,7 +7,11 @@ public interface ISourceEvaluatorManager {
 
 	void removeEvaluator(SourceEvaluatorInformation evalInfo);
 
-	ISourceEvaluator getEvaluator(String language);
+	interface ISourceEvaluatorCallback {
+		void call(ISourceEvaluator evaluator);
+	}
 
-	ISourceEvaluator getEvaluator(File file);
+	void getEvaluator(String language, ISourceEvaluatorCallback callbak);
+
+	void getEvaluator(File file, ISourceEvaluatorCallback callback);
 }

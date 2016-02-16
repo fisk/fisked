@@ -3,13 +3,14 @@ package org.fisked.language.eval.groovy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.felix.ipojo.annotations.Bind;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
-import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
-import org.apache.felix.ipojo.annotations.Validate;
-import org.fisked.language.eval.groovy.service.IGroovySourceEvaluator;
+import org.apache.felix.ipojo.annotations.ServiceProperty;
+import org.apache.felix.ipojo.annotations.Unbind;
+import org.fisked.language.eval.service.ISourceEvaluator;
 import org.fisked.language.eval.service.ISourceEvaluatorManager;
 import org.fisked.language.eval.service.SourceEvaluatorInformation;
 import org.slf4j.Logger;
@@ -20,10 +21,13 @@ import groovy.lang.GroovyShell;
 @Component(immediate = true, publicFactory = false)
 @Instantiate(name = GroovyEvaluator.COMPONENT_NAME)
 @Provides
-public class GroovyEvaluator implements IGroovySourceEvaluator {
+public class GroovyEvaluator implements ISourceEvaluator {
+	@ServiceProperty(name = "language", value = "groovy")
+	private String _language;
+
 	private final static Logger LOG = LoggerFactory.getLogger(GroovyEvaluator.class);
-	public static final String COMPONENT_NAME = "RubyEvaluator";
-	@Requires
+	public static final String COMPONENT_NAME = "GroovyEvaluator";
+	@Requires(optional = true)
 	private ISourceEvaluatorManager _manager;
 	private SourceEvaluatorInformation _info;
 
@@ -46,18 +50,18 @@ public class GroovyEvaluator implements IGroovySourceEvaluator {
 		}
 	}
 
-	@Validate
-	public void start() {
-		LOG.debug("Adding evaluator for ruby to manager: " + _manager);
+	@Bind
+	public void bindManager(ISourceEvaluatorManager manager) {
+		LOG.debug("Adding evaluator for groovy to manager: " + _manager);
 		List<String> fileExtensions = new ArrayList<>();
 		fileExtensions.add("groovy");
 		fileExtensions.add("gvy");
-		_info = new SourceEvaluatorInformation(this, "groovy", fileExtensions);
+		_info = new SourceEvaluatorInformation("groovy", fileExtensions);
 		_manager.addEvaluator(_info);
 	}
 
-	@Invalidate
-	public void end() {
+	@Unbind
+	public void unbindManager(ISourceEvaluatorManager manager) {
 		_manager.removeEvaluator(_info);
 	}
 }

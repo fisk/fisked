@@ -3,13 +3,14 @@ package org.fisked.language.eval.ruby;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.felix.ipojo.annotations.Bind;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
-import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
-import org.apache.felix.ipojo.annotations.Validate;
-import org.fisked.language.eval.ruby.service.IRubySourceEvaluator;
+import org.apache.felix.ipojo.annotations.ServiceProperty;
+import org.apache.felix.ipojo.annotations.Unbind;
+import org.fisked.language.eval.service.ISourceEvaluator;
 import org.fisked.language.eval.service.ISourceEvaluatorManager;
 import org.fisked.language.eval.service.SourceEvaluatorInformation;
 import org.jruby.Ruby;
@@ -20,11 +21,14 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, publicFactory = false)
 @Instantiate(name = RubyEvaluator.COMPONENT_NAME)
 @Provides
-public class RubyEvaluator implements IRubySourceEvaluator {
+public class RubyEvaluator implements ISourceEvaluator {
+	@ServiceProperty(name = "language", value = "ruby")
+	private String _language;
+
 	private final static Logger LOG = LoggerFactory.getLogger(RubyEvaluator.class);
 	public static final String COMPONENT_NAME = "RubyEvaluator";
 	private Ruby _runtime;
-	@Requires
+	@Requires(optional = true)
 	private ISourceEvaluatorManager _manager;
 	private SourceEvaluatorInformation _info;
 
@@ -45,17 +49,17 @@ public class RubyEvaluator implements IRubySourceEvaluator {
 		}
 	}
 
-	@Validate
-	public void start() {
+	@Bind
+	public void bindManager(ISourceEvaluatorManager manager) {
 		LOG.debug("Adding evaluator for ruby to manager: " + _manager);
 		List<String> fileExtensions = new ArrayList<>();
 		fileExtensions.add("rb");
-		_info = new SourceEvaluatorInformation(this, "ruby", fileExtensions);
+		_info = new SourceEvaluatorInformation("ruby", fileExtensions);
 		_manager.addEvaluator(_info);
 	}
 
-	@Invalidate
-	public void end() {
+	@Unbind
+	public void unbindManager(ISourceEvaluatorManager manager) {
 		_manager.removeEvaluator(_info);
 	}
 }

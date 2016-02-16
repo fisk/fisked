@@ -25,7 +25,6 @@ public class EmailFetchService implements IEmailFetchService {
 	private final static Logger LOG = LoggerFactory.getLogger(EmailFetchService.class);
 
 	private ServiceReference<IEmailFetchService> getService(EmailProfile profile) {
-
 		String protocol = profile.getReceiveServer().getProtocol();
 
 		BundleContext context = FrameworkUtil.getBundle(EmailFetchService.class).getBundleContext();
