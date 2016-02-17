@@ -1,10 +1,15 @@
 package org.fisked.email.service;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Email {
+public class Email implements Serializable {
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 484428815949063662L;
 	private final List<String> _receivers = new ArrayList<>();
 	private final List<String> _ccList = new ArrayList<>();
 	private String _from;

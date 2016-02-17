@@ -3,6 +3,10 @@ package org.fisked.email.imap;
 import org.fisked.email.service.ServerConfiguration;
 
 public class IMAPServerConfiguration extends ServerConfiguration {
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = -1428145605686343571L;
 	private String _host;
 	private String _port;
 	private boolean _ssl = false;

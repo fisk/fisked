@@ -1,6 +1,12 @@
 package org.fisked.email.service;
 
-public class EmailProfile {
+import java.io.Serializable;
+
+public class EmailProfile implements Serializable {
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 6507442732294783090L;
 	private String _id;
 	private String _name;
 	private String _email;

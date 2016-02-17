@@ -3,6 +3,10 @@ package org.fisked.email.smtp;
 import org.fisked.email.service.ServerConfiguration;
 
 public class SMTPServerConfiguration extends ServerConfiguration {
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 317886025695573474L;
 	private String _host;
 	private String _port = "587";
 	private boolean _tls = false;

@@ -12,16 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CompositionBehaviorProvider implements IBehaviorProvider {
-	private final IBehaviorProvider _parent;
-
-	public CompositionBehaviorProvider() {
-		this(null);
-	}
-
-	public CompositionBehaviorProvider(IBehaviorProvider parent) {
-		_parent = parent;
-	}
-
 	private final Map<String, IBehaviorProvider> _providerMap = new HashMap<>();
 	private final List<IBehaviorProvider> _providerList = new ArrayList<>();
 	private final static Logger LOG = LoggerFactory.getLogger(CompositionBehaviorProvider.class);

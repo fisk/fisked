@@ -1,6 +1,12 @@
 package org.fisked.email.service;
 
-public abstract class ServerConfiguration {
+import java.io.Serializable;
+
+public abstract class ServerConfiguration implements Serializable {
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = -7692291867735382999L;
 	private String _id;
 	private String _protocol;
 
