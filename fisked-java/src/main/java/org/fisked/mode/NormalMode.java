@@ -1,5 +1,7 @@
 package org.fisked.mode;
 
+import org.fisked.behavior.BehaviorConnectionFactory;
+import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.mode.responder.BasicNavigationResponder;
 import org.fisked.mode.responder.CommandInputResponder;
@@ -7,18 +9,18 @@ import org.fisked.mode.responder.DeleteLineResponder;
 import org.fisked.mode.responder.InputModeSwitchResponder;
 import org.fisked.mode.responder.MotionActionResponder;
 import org.fisked.mode.responder.VisualModeSwitchResponder;
+import org.fisked.renderingengine.service.IClipboardService;
 import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Face;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.RecognitionState;
-import org.fisked.services.ServiceManager;
 import org.fisked.text.TextNavigator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NormalMode extends AbstractMode {
-
-	public String getClipboard() {
-		return ServiceManager.getInstance().getClipboardService().getClipboard();
-	}
+	private final static Logger LOG = LoggerFactory.getLogger(NormalMode.class);
+	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(NormalMode.class);
 
 	public NormalMode(BufferWindow window) {
 		super(window);
@@ -29,7 +31,12 @@ public class NormalMode extends AbstractMode {
 		addResponder(new MotionActionResponder(_window));
 		addResponder(nextEvent -> {
 			if (nextEvent.isCharacter('p')) {
-				_window.getBuffer().appendStringAtPointLogged(getClipboard());
+				try (IBehaviorConnection<IClipboardService> clipboardBC = BEHAVIORS
+						.getBehaviorConnection(IClipboardService.class).get()) {
+					_window.getBuffer().appendStringAtPointLogged(clipboardBC.getBehavior().getClipboard());
+				} catch (Exception e) {
+					LOG.error("Exception in clipboard: ", e);
+				}
 				_window.switchToNormalMode();
 				return RecognitionState.Recognized;
 			}
@@ -39,7 +46,12 @@ public class NormalMode extends AbstractMode {
 			if (nextEvent.isCharacter('P')) {
 				TextNavigator navigator = new TextNavigator(_window);
 				navigator.moveLeft();
-				_window.getBuffer().appendStringAtPointLogged(getClipboard());
+				try (IBehaviorConnection<IClipboardService> clipboardBC = BEHAVIORS
+						.getBehaviorConnection(IClipboardService.class).get()) {
+					_window.getBuffer().appendStringAtPointLogged(clipboardBC.getBehavior().getClipboard());
+				} catch (Exception e) {
+					LOG.error("Exception in clipboard: ", e);
+				}
 				_window.switchToNormalMode();
 				return RecognitionState.Recognized;
 			}

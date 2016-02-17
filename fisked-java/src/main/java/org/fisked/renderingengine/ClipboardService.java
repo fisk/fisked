@@ -7,25 +7,29 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
+import org.apache.felix.ipojo.annotations.Provides;
 import org.fisked.renderingengine.service.IClipboardService;
 
+@Component(immediate = true, publicFactory = false)
+@Instantiate
+@Provides
 public class ClipboardService implements IClipboardService {
-	private Clipboard clipboard = new Clipboard("Clipboard");
-	
+	private final Clipboard clipboard = new Clipboard("Clipboard");
+
 	@Override
 	public String getClipboard() {
 		String result = "";
 		Transferable contents = clipboard.getContents(null);
-		boolean hasTransferableText =
-				(contents != null) &&
-				contents.isDataFlavorSupported(DataFlavor.stringFlavor)
-				;
+		boolean hasTransferableText = contents != null && contents.isDataFlavorSupported(DataFlavor.stringFlavor);
 		if (hasTransferableText) {
 			try {
-				result = (String)contents.getTransferData(DataFlavor.stringFlavor);
-				if (result == null) result = "";
+				result = (String) contents.getTransferData(DataFlavor.stringFlavor);
+				if (result == null)
+					result = "";
+			} catch (UnsupportedFlavorException | IOException e) {
 			}
-			catch (UnsupportedFlavorException | IOException e){}
 		}
 		return result;
 	}

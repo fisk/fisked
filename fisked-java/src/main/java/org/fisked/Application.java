@@ -4,17 +4,18 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.fisked.behavior.BehaviorConnectionFactory;
+import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.command.CommandManager;
 import org.fisked.command.OpenFileCommand;
+import org.fisked.language.eval.service.ISourceEvaluatorManager;
 import org.fisked.launcher.service.ILauncherService;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.ICursorService;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.EventLoop;
-import org.fisked.services.ComponentManager;
-import org.fisked.services.ServiceManager;
 import org.fisked.shell.ShellCommandHandler;
 import org.fisked.util.ConsolePrinter;
 import org.fisked.util.FileUtil;
@@ -27,6 +28,7 @@ import jline.internal.Log;
 
 public class Application {
 	private final static Logger LOG = LoggerFactory.getLogger(Application.class);
+	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(Application.class);
 	private static volatile Application _application;
 
 	public static Application getApplication() {
@@ -50,23 +52,28 @@ public class Application {
 		if (window.getBufferController().getSelection() != null) {
 			LOG.debug("Evaluating script of type: " + language);
 			String text = window.getBufferController().getSelectedText();
-			ComponentManager.getInstance().getSourceEvalManager().getEvaluator(language, (evaluator) -> {
-				LOG.debug("Running script:\n" + text);
-				String result;
-				try {
-					result = evaluator.evaluate(text);
-					Log.debug("Result: " + result);
-				} catch (Throwable e) {
-					result = e.getMessage();
-				}
-				if (result != null) {
-					window.getBufferController().setSelectionText(result);
-					window.switchToNormalMode();
-				} else {
-					LOG.debug("Evaluator did not reply.");
-					window.getCommandController().setCommandFeedback("Evaluator did not reply.");
-				}
-			});
+			try (IBehaviorConnection<ISourceEvaluatorManager> managerBC = BEHAVIORS
+					.getBehaviorConnection(ISourceEvaluatorManager.class).get()) {
+				managerBC.getBehavior().getEvaluator(language, (evaluator) -> {
+					LOG.debug("Running script:\n" + text);
+					String result;
+					try {
+						result = evaluator.evaluate(text);
+						Log.debug("Result: " + result);
+					} catch (Throwable e) {
+						result = e.getMessage();
+					}
+					if (result != null) {
+						window.getBufferController().setSelectionText(result);
+						window.switchToNormalMode();
+					} else {
+						LOG.debug("Evaluator did not reply.");
+						window.getCommandController().setCommandFeedback("Evaluator did not reply.");
+					}
+				});
+			} catch (Exception e) {
+				LOG.error("Can't evaluate source: ", e);
+			}
 		} else {
 			window.getCommandController().setCommandFeedback("Can't evaluate script without selection.");
 		}
@@ -106,18 +113,23 @@ public class Application {
 			if (argv.length != 2)
 				return;
 			File file = FileUtil.getFile(argv[1]);
-			ComponentManager.getInstance().getSourceEvalManager().getEvaluator(file, (evaluator) -> {
-				String string;
-				try {
-					string = FileUtils.readFileToString(file);
-					string = evaluator.evaluate(string);
-				} catch (Exception e) {
-					string = e.getMessage();
-				}
-				window.getBufferController().getBuffer().appendStringAtPointLogged(string);
-				window.switchToNormalMode();
-			});
 
+			try (IBehaviorConnection<ISourceEvaluatorManager> managerBC = BEHAVIORS
+					.getBehaviorConnection(ISourceEvaluatorManager.class).get()) {
+				managerBC.getBehavior().getEvaluator(file, (evaluator) -> {
+					String string;
+					try {
+						string = FileUtils.readFileToString(file);
+						string = evaluator.evaluate(string);
+					} catch (Exception e) {
+						string = e.getMessage();
+					}
+					window.getBufferController().getBuffer().appendStringAtPointLogged(string);
+					window.switchToNormalMode();
+				});
+			} catch (Exception e) {
+				LOG.error("Can't evaluate source: ", e);
+			}
 		});
 	}
 
@@ -138,10 +150,15 @@ public class Application {
 	private Thread _shutdownHook;
 
 	private void shutDownServices() {
-		ServiceManager sm = ServiceManager.getInstance();
-		IConsoleService cs = sm.getConsoleService();
-		cs.getCursorService().changeCursor(ICursorService.CURSOR_BLOCK);
-		cs.deactivate();
+		try (IBehaviorConnection<IConsoleService> consoleBC = BEHAVIORS.getBehaviorConnection(IConsoleService.class)
+				.get()) {
+			IConsoleService cs = consoleBC.getBehavior();
+			cs.getCursorService().changeCursor(ICursorService.CURSOR_BLOCK);
+			cs.deactivate();
+		} catch (Exception e) {
+			LOG.error("Can't get console service: ", e);
+		}
+
 		if (_exception != null) {
 			ConsolePrinter.LOG.error("Fisked exited because of an exception:", _exception);
 		}
@@ -164,19 +181,23 @@ public class Application {
 			Runtime.getRuntime().addShutdownHook(_shutdownHook);
 
 			setupCommands();
-			ServiceManager sm = ServiceManager.getInstance();
-			IConsoleService cs = sm.getConsoleService();
 
-			cs.activate();
+			try (IBehaviorConnection<IConsoleService> consoleBC = BEHAVIORS.getBehaviorConnection(IConsoleService.class)
+					.get()) {
+				IConsoleService cs = consoleBC.getBehavior();
+				cs.activate();
 
-			Rectangle windowRect = new Rectangle(0, 0, cs.getScreenWidth(), cs.getScreenHeight());
+				Rectangle windowRect = new Rectangle(0, 0, cs.getScreenWidth(), cs.getScreenHeight());
 
-			_primaryWindow = new BufferWindow(windowRect);
-			processArguments();
+				_primaryWindow = new BufferWindow(windowRect);
+				processArguments();
 
-			_loop.setPrimaryResponder(_primaryWindow);
+				_loop.setPrimaryResponder(_primaryWindow);
 
-			_primaryWindow.draw();
+				_primaryWindow.draw();
+			} catch (Exception e) {
+				LOG.error("Can't get console service: ", e);
+			}
 
 			_loop.start();
 		} catch (Throwable throwable) {
@@ -195,8 +216,13 @@ public class Application {
 		_loop.exit();
 		shutDownServices();
 		Runtime.getRuntime().removeShutdownHook(_shutdownHook);
-		ILauncherService launcher = ComponentManager.getInstance().getLauncherService();
-		launcher.stop(code);
+
+		try (IBehaviorConnection<ILauncherService> launcherBC = BEHAVIORS.getBehaviorConnection(ILauncherService.class)
+				.get()) {
+			launcherBC.getBehavior().stop(code);
+		} catch (Exception e) {
+			LOG.error("Can't find launcher service: ", e);
+		}
 	}
 
 	public Application(ILauncherService launcherService, BundleContext context) {

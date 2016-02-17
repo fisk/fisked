@@ -1,5 +1,7 @@
 package org.fisked.mode;
 
+import org.fisked.behavior.BehaviorConnectionFactory;
+import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.models.Face;
@@ -9,9 +11,12 @@ import org.fisked.responder.IInputResponder;
 import org.fisked.responder.IRecognitionAction;
 import org.fisked.responder.InputResponderChain;
 import org.fisked.responder.RecognitionState;
-import org.fisked.services.ServiceManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractMode implements IInputResponder {
+	private final static Logger LOG = LoggerFactory.getLogger(AbstractMode.class);
+	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(AbstractMode.class);
 	protected BufferWindow _window;
 	protected InputResponderChain _responders = new InputResponderChain();
 
@@ -50,9 +55,12 @@ public abstract class AbstractMode implements IInputResponder {
 	protected final int CURSOR_UNDERLINE = 2;
 
 	protected void changeCursor(int cursor) {
-		ServiceManager sm = ServiceManager.getInstance();
-		IConsoleService cs = sm.getConsoleService();
-		cs.getCursorService().changeCursor(cursor);
+		try (IBehaviorConnection<IConsoleService> consoleBC = BEHAVIORS.getBehaviorConnection(IConsoleService.class)
+				.get()) {
+			consoleBC.getBehavior().getCursorService().changeCursor(cursor);
+		} catch (Exception e) {
+			LOG.error("Exception in changing cursor: ", e);
+		}
 	}
 
 	@Override

@@ -4,15 +4,17 @@ import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.fisked.behavior.BehaviorConnectionFactory;
+import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.renderingengine.service.IConsoleService;
-import org.fisked.services.ServiceManager;
 import org.fisked.util.concurrency.IRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class EventLoop implements IRunner {
 	private final static Logger LOG = LoggerFactory.getLogger(EventLoop.class);
+	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(EventLoop.class);
 	private final BlockingQueue<Runnable> _queue = new ArrayBlockingQueue<>(1024);
 	private Window _primaryResponder;
 	private IOThread _iothread;
@@ -66,10 +68,13 @@ public class EventLoop implements IRunner {
 	private final Object _sema = new Object();
 
 	private int getNextChar() throws IOException {
-		ServiceManager sm = ServiceManager.getInstance();
-		IConsoleService cs = sm.getConsoleService();
-
-		return cs.getChar();
+		try (IBehaviorConnection<IConsoleService> consoleBC = BEHAVIORS.getBehaviorConnection(IConsoleService.class)
+				.get()) {
+			return consoleBC.getBehavior().getChar();
+		} catch (Exception e) {
+			LOG.error("Exception in reading char: ", e);
+			throw new RuntimeException(e);
+		}
 	}
 
 	private class IOThread extends Thread {

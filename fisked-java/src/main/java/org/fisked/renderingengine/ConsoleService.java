@@ -3,6 +3,9 @@ package org.fisked.renderingengine;
 import java.io.IOException;
 import java.util.Stack;
 
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
+import org.apache.felix.ipojo.annotations.Provides;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.ICursorService;
 import org.fisked.renderingengine.service.models.AttributedString;
@@ -13,6 +16,9 @@ import org.fisked.settings.Settings;
 
 import jline.console.ConsoleReader;
 
+@Component(immediate = true, publicFactory = false)
+@Instantiate
+@Provides
 public class ConsoleService implements IConsoleService {
 	private ConsoleReader _reader;
 	private final Stack<RenderingContext> _renderingContexts = new Stack<>();
