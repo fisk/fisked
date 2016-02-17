@@ -125,7 +125,7 @@ public class Launcher {
 		config.put("felix.auto.deploy.action", "install,start");
 		config.put("felix.auto.deploy.dir", System.getProperty("user.home") + "/.fisked/bundle");
 		config.put("org.osgi.framework.storage.clean", "onFirstInit");
-		config.put(Constants.FRAMEWORK_STORAGE, "bundle-cache");
+		config.put(Constants.FRAMEWORK_STORAGE, System.getProperty("user.home") + "/.fisked/bundle-cache");
 		// config.put(AutoProcessor.AUTO_DEPLOY_STARTLEVEL_PROPERTY, "1");
 
 		try {
