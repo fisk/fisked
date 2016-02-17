@@ -177,8 +177,6 @@ public class Application {
 			_loop.setPrimaryResponder(_primaryWindow);
 
 			_primaryWindow.draw();
-			// ComponentManager cm = ComponentManager.getInstance();
-			// cm.sendEmail();
 
 			_loop.start();
 		} catch (Throwable throwable) {

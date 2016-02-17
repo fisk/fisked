@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.fisked.behavior.impl.CompositionBehaviorProvider;
 import org.fisked.behavior.impl.NormalBehaviorProvider;
 import org.fisked.behavior.impl.OSGiBehaviorProvider;
+import org.fisked.behavior.impl.RMI_IIOPBehaviorProvider;
 import org.fisked.util.Singleton;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -24,10 +25,12 @@ public class RootBehaviorProvider {
 		}
 
 		OSGiBehaviorProvider osgi = new OSGiBehaviorProvider();
-		NormalBehaviorProvider normal = new NormalBehaviorProvider();
+		RMI_IIOPBehaviorProvider rmi_iiop = new RMI_IIOPBehaviorProvider(osgi);
+		NormalBehaviorProvider normal = new NormalBehaviorProvider(rmi_iiop);
 		CompositionBehaviorProvider intent = new CompositionBehaviorProvider();
-		intent.addProvider("normal", normal);
 		intent.addProvider("osgi", osgi);
+		intent.addProvider("rmi_iiop", rmi_iiop);
+		intent.addProvider("normal", normal);
 
 		provider = _map.put(context, intent);
 		if (provider != null) {

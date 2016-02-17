@@ -1,3 +1,7 @@
 #!/bin/bash
 
-java -XX:+UseParallelGC -Xms128M -Xmx512M -Djava.awt.headless=true -Djava.protocol.handler.pkgs=org.ops4j.pax.url -cp "${HOME}/.fisked/lib/*" org.fisked.launcher.Launcher "$@"
+java -XX:+UseParallelGC -Xms128M -Xmx512M \
+     -Djava.awt.headless=true -Djava.protocol.handler.pkgs=org.ops4j.pax.url \
+     -Djava.naming.factory.initial=com.sun.jndi.cosnaming.CNCtxFactory \
+     -Djava.naming.provider.url=iiop://localhost:1050 \
+     -cp "${HOME}/.fisked/lib/*" org.fisked.launcher.Launcher "$@"

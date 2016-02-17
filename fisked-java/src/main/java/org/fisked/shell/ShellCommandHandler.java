@@ -4,7 +4,8 @@ import java.util.Arrays;
 
 import org.fisked.buffer.BufferWindow;
 import org.fisked.command.ICommandHandler;
-import org.fisked.shell.ShellCommandExecution.CommandResult;
+import org.fisked.util.shell.ShellCommandExecution;
+import org.fisked.util.shell.ShellCommandExecution.CommandResult;
 
 public class ShellCommandHandler implements ICommandHandler {
 

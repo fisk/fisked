@@ -76,7 +76,7 @@ public class SMTPEmailSendService implements IEmailSendService {
 
 		try {
 			MimeMessage message = new MimeMessage(session);
-			message.setFrom(new InternetAddress(email.getFrom()));
+			message.setFrom(new InternetAddress(profile.getName() + " <" + email.getFrom() + ">"));
 
 			for (String to : email.getReceivers()) {
 				message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));

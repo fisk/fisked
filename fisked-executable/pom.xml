@@ -22,6 +22,11 @@
 		</dependency>
 		<dependency>
 			<groupId>fisked</groupId>
+			<artifactId>fisked-behavior</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>fisked</groupId>
 			<artifactId>fisked-email</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
@@ -232,6 +237,10 @@
 								<artifactItem>
 									<groupId>fisked</groupId>
 									<artifactId>fisked-java</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>fisked</groupId>
+									<artifactId>fisked-behavior</artifactId>
 								</artifactItem>
 								<artifactItem>
 									<groupId>fisked</groupId>

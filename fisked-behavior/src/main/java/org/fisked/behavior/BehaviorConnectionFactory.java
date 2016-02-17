@@ -1,21 +1,23 @@
 package org.fisked.behavior;
 
-public class BehaviorConnectionFactory<C> implements IPreparedBehaviorProvider {
-	private final Class<C> _callerClass;
+import java.util.concurrent.Future;
+
+public class BehaviorConnectionFactory implements IPreparedBehaviorProvider {
+	private final Class<?> _callerClass;
 	private final IBehaviorProvider _provider;
 
-	public BehaviorConnectionFactory(Class<C> callerClass) {
+	public BehaviorConnectionFactory(Class<?> callerClass) {
 		_provider = RootBehaviorProvider.getInstance().getBehaviorProvider(callerClass);
 		_callerClass = callerClass;
 	}
 
-	public BehaviorConnectionFactory(IBehaviorProvider provider, Class<C> callerClass) {
+	public BehaviorConnectionFactory(IBehaviorProvider provider, Class<?> callerClass) {
 		_provider = provider;
 		_callerClass = callerClass;
 	}
 
 	@Override
-	public <T> IBehaviorConnection<T> getBehaviorConnection(Class<T> targetClass) {
+	public <T> Future<IBehaviorConnection<T>> getBehaviorConnection(Class<T> targetClass) {
 		return _provider.getBehaviorConnection(_callerClass, targetClass);
 	}
 }

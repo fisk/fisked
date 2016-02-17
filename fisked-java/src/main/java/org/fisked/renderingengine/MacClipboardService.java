@@ -1,8 +1,8 @@
 package org.fisked.renderingengine;
 
 import org.fisked.renderingengine.service.IClipboardService;
-import org.fisked.shell.ShellCommandExecution;
-import org.fisked.shell.ShellCommandExecution.ExecutionResult;
+import org.fisked.util.shell.ShellCommandExecution;
+import org.fisked.util.shell.ShellCommandExecution.ExecutionResult;
 
 public class MacClipboardService implements IClipboardService {
 
