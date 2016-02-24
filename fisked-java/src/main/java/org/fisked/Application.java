@@ -3,6 +3,11 @@ package org.fisked;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
+import org.apache.felix.ipojo.annotations.Invalidate;
+import org.apache.felix.ipojo.annotations.Provides;
+import org.apache.felix.ipojo.annotations.Validate;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.BufferWindow;
@@ -15,34 +20,55 @@ import org.fisked.responder.EventLoop;
 import org.fisked.util.ConsolePrinter;
 import org.fisked.util.FileUtil;
 import org.fisked.util.concurrency.Dispatcher;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Application {
+@Component(immediate = true, publicFactory = false)
+@Instantiate
+@Provides(specifications = { IApplication.class })
+public class Application implements IApplication {
 	private final static Logger LOG = LoggerFactory.getLogger(Application.class);
 	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(Application.class);
-	private static volatile Application _application;
-
-	public static Application getApplication() {
-		return _application;
-	}
 
 	private EventLoop _loop;
 	private Window _primaryWindow;
 	private volatile Throwable _exception;
 	private String[] _argv;
+	private Thread _shutdownHook;
+
+	@Validate
+	public void start() {
+		try (IBehaviorConnection<ILauncherService> launcherBC = BEHAVIORS.getBehaviorConnection(ILauncherService.class)
+				.get()) {
+			final String[] args = launcherBC.getBehavior().getMainArgs();
+			Thread thread = new Thread() {
+				@Override
+				public void run() {
+					setName("Fisked Main Thread");
+					Application.this.start(args);
+				}
+			};
+			thread.start();
+		} catch (Exception e) {
+			LOG.error("Could not launch application: ", e);
+		}
+
+	}
+
+	@Invalidate
+	public void stop() {
+	}
 
 	public EventLoop getEventLoop() {
 		return _loop;
 	}
 
+	@Override
 	public Window getPrimaryWindow() {
 		return _primaryWindow;
 	}
 
-	private void processArguments() {
-		BufferWindow window = (BufferWindow) _primaryWindow;
+	private void processArguments(BufferWindow window) {
 		if (_argv.length == 1) {
 			String path = _argv[0];
 			File file = FileUtil.getFile(path);
@@ -54,8 +80,6 @@ public class Application {
 			}
 		}
 	}
-
-	private Thread _shutdownHook;
 
 	private void shutDownServices() {
 		try (IBehaviorConnection<IConsoleService> consoleBC = BEHAVIORS.getBehaviorConnection(IConsoleService.class)
@@ -94,29 +118,34 @@ public class Application {
 				cs.activate();
 
 				Rectangle windowRect = new Rectangle(0, 0, cs.getScreenWidth(), cs.getScreenHeight());
+				BufferWindow window = new BufferWindow(windowRect);
+				processArguments(window);
 
-				_primaryWindow = new BufferWindow(windowRect);
-				processArguments();
-
-				_loop.setPrimaryResponder(_primaryWindow);
-
-				_primaryWindow.draw();
+				setPrimaryWindow(window);
 			} catch (Exception e) {
 				LOG.error("Can't get console service: ", e);
 			}
 
 			_loop.start();
 		} catch (Throwable throwable) {
-			Application app = Application.getApplication();
+			Application app = Application.this;
 			app.setException(throwable);
 			app.exit(-1);
 		}
+	}
+
+	@Override
+	public void setPrimaryWindow(Window window) {
+		_primaryWindow = window;
+		_loop.setPrimaryResponder(_primaryWindow);
+		_primaryWindow.draw();
 	}
 
 	public void setException(Throwable throwable) {
 		_exception = throwable;
 	}
 
+	@Override
 	public void exit(int code) {
 		LOG.debug("Exiting fisked gracefully.");
 		_loop.exit();
@@ -129,9 +158,5 @@ public class Application {
 		} catch (Exception e) {
 			LOG.error("Can't find launcher service: ", e);
 		}
-	}
-
-	public Application(ILauncherService launcherService, BundleContext context) {
-		_application = this;
 	}
 }

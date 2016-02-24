@@ -165,7 +165,7 @@ public class EmailProfileVendor implements IEmailProfileVendor {
 	}
 
 	@Override
-	public EmailProfile[] getEmailProfiles(String email) {
+	public EmailProfile[] getEmailProfiles() {
 		Config config = new Config();
 		config.parseConfig();
 		return config._profileList.toArray(new EmailProfile[] {});

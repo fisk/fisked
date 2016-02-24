@@ -6,7 +6,7 @@ import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Validate;
-import org.fisked.IFiskedCoreService;
+import org.fisked.IApplication;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.BufferWindow;
@@ -36,8 +36,8 @@ public class ApplicationCommands {
 			ICommandManager cm = commandBC.getBehavior();
 
 			_quitCommand = cm.registerHandler("q", (BufferWindow window, String[] argv) -> {
-				try (IBehaviorConnection<IFiskedCoreService> applicationBC = BEHAVIORS
-						.getBehaviorConnection(IFiskedCoreService.class).get()) {
+				try (IBehaviorConnection<IApplication> applicationBC = BEHAVIORS
+						.getBehaviorConnection(IApplication.class).get()) {
 					applicationBC.getBehavior().exit(0);
 				} catch (Exception e) {
 					LOG.error("Couldn't shut down gracefully.");

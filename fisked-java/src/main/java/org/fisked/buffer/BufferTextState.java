@@ -1,6 +1,8 @@
 package org.fisked.buffer;
 
-import org.fisked.Application;
+import org.fisked.IApplication;
+import org.fisked.behavior.BehaviorConnectionFactory;
+import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.renderingengine.service.models.Range;
@@ -10,14 +12,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BufferTextState implements CharSequence {
+	private final static Logger LOG = LoggerFactory.getLogger(BufferTextState.class);
+	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(BufferTextState.class);
+
 	private final String _string;
 	private volatile AttributedString _attributedString;
 	private volatile TextTransition _next;
 	private BufferTextState _previous;
 	private volatile boolean _decorationRequested = false;
 	private volatile boolean _decorationFinished = false;
-
-	final static Logger LOG = LoggerFactory.getLogger(BufferTextState.class);
 
 	private abstract class TextTransition {
 		private final BufferTextState _next;
@@ -52,9 +55,14 @@ public class BufferTextState implements CharSequence {
 				_decorationFinished = true;
 				Dispatcher.getInstance().runMain(() -> {
 					LOG.debug("State decoration pushed to main");
-					Window currentWindow = Application.getApplication().getPrimaryWindow();
-					currentWindow.setNeedsFullRedraw();
-					currentWindow.draw();
+					try (IBehaviorConnection<IApplication> applicationBC = BEHAVIORS
+							.getBehaviorConnection(IApplication.class).get()) {
+						Window currentWindow = applicationBC.getBehavior().getPrimaryWindow();
+						currentWindow.setNeedsFullRedraw();
+						currentWindow.draw();
+					} catch (Exception e) {
+						LOG.error("Could not decorate state: ", e);
+					}
 				});
 			});
 		}
