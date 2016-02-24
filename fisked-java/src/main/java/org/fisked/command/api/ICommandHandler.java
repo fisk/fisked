@@ -1,4 +1,4 @@
-package org.fisked.command;
+package org.fisked.command.api;
 
 import org.fisked.buffer.BufferWindow;
 

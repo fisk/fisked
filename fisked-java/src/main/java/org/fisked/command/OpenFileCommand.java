@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.fisked.buffer.BufferWindow;
+import org.fisked.command.api.ICommandHandler;
 import org.fisked.util.FileUtil;
 
 public class OpenFileCommand implements ICommandHandler {

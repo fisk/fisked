@@ -36,10 +36,17 @@ public class FiskedCoreService implements IFiskedCoreService {
 	public void stop() {
 	}
 
+	Application _application;
+
 	@Override
 	public void runMain() {
 		String[] args = _launcherService.getMainArgs();
-		Application application = new Application(_launcherService, _context);
-		application.start(args);
+		_application = new Application(_launcherService, _context);
+		_application.start(args);
+	}
+
+	@Override
+	public void exit(int status) {
+		_application.exit(status);
 	}
 }

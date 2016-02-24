@@ -56,7 +56,8 @@ public class EventLoop implements IRunner {
 			runnable = _queue.take();
 			LOG.debug("Got event in event loop.");
 			runnable.run();
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
+			LOG.error("Event loop caught exception: ", e);
 		}
 		while ((runnable = _queue.poll()) != null) {
 			runnable.run();

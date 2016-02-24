@@ -1,28 +1,30 @@
 package org.fisked.command;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
+import org.apache.felix.ipojo.annotations.Provides;
 import org.fisked.buffer.BufferWindow;
+import org.fisked.command.api.CommandHandlerReference;
+import org.fisked.command.api.ICommandHandler;
+import org.fisked.command.api.ICommandManager;
 
-public class CommandManager {
-	private static CommandManager _sharedInstance;
-	public static CommandManager getSingleton() {
-		if (_sharedInstance != null) return _sharedInstance;
-		synchronized (CommandManager.class) {
-			if (_sharedInstance == null) {
-				_sharedInstance = new CommandManager();
-			}
-		}
-		return _sharedInstance;
+@Component(immediate = true, publicFactory = false)
+@Instantiate
+@Provides
+public class CommandManager implements ICommandManager {
+	private final Map<String, CommandHandlerReference> _map = new ConcurrentHashMap<>();
+
+	@Override
+	public CommandHandlerReference registerHandler(String command, ICommandHandler handler) {
+		CommandHandlerReference handlerWrapper = new CommandHandlerReference(command, handler);
+		_map.put(command, handlerWrapper);
+		return handlerWrapper;
 	}
 
-	private Map<String, ICommandHandler> _map = new HashMap<>();
-	
-	public void registerHandler(String command, ICommandHandler handler) {
-		_map.put(command, handler);
-	}
-	
+	@Override
 	public boolean handle(BufferWindow window, String command, String[] argv) {
 		ICommandHandler handler = _map.get(command);
 		if (handler == null) {
@@ -30,5 +32,10 @@ public class CommandManager {
 		}
 		handler.run(window, argv);
 		return true;
+	}
+
+	@Override
+	public void removeHandler(CommandHandlerReference handler) {
+		_map.remove(handler.getCommand(), handler);
 	}
 }

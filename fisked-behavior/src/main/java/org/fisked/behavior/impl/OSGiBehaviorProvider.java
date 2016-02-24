@@ -60,18 +60,23 @@ public class OSGiBehaviorProvider implements IBehaviorProvider {
 		List<Bundle> problemBundles = new ArrayList<>();
 
 		for (Bundle bundle : bundles) {
-			if (bundle.getState() == Bundle.STARTING) {
+			if (bundle.getState() != Bundle.ACTIVE) {
 				problemBundles.add(bundle);
 			}
 		}
 
 		if (problemBundles.size() == 0) {
-			return null;
+			throw new RuntimeException("Could not find OSGI behavior: " + targetClass.getName());
 		}
 
 		AtomicInteger needsWait = new AtomicInteger(problemBundles.size());
 
-		LOG.debug("Found that some bundles are pending. Installing listener.");
+		Exception ex = new RuntimeException("Pending bundles");
+		LOG.debug("Found that some bundles are pending. Installing listener.", ex);
+
+		for (Bundle bundle : problemBundles) {
+			LOG.debug("Pending bundle: " + bundle.getSymbolicName());
+		}
 
 		CompletableFuture<IBehaviorConnection<T>> future = new CompletableFuture<IBehaviorConnection<T>>();
 		try {

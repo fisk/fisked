@@ -3,28 +3,21 @@ package org.fisked;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.io.FileUtils;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.drawing.Window;
-import org.fisked.command.CommandManager;
-import org.fisked.command.OpenFileCommand;
-import org.fisked.language.eval.service.ISourceEvaluatorManager;
 import org.fisked.launcher.service.ILauncherService;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.ICursorService;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.EventLoop;
-import org.fisked.shell.ShellCommandHandler;
 import org.fisked.util.ConsolePrinter;
 import org.fisked.util.FileUtil;
 import org.fisked.util.concurrency.Dispatcher;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import jline.internal.Log;
 
 public class Application {
 	private final static Logger LOG = LoggerFactory.getLogger(Application.class);
@@ -46,91 +39,6 @@ public class Application {
 
 	public Window getPrimaryWindow() {
 		return _primaryWindow;
-	}
-
-	private void evaluateScript(BufferWindow window, String language) {
-		if (window.getBufferController().getSelection() != null) {
-			LOG.debug("Evaluating script of type: " + language);
-			String text = window.getBufferController().getSelectedText();
-			try (IBehaviorConnection<ISourceEvaluatorManager> managerBC = BEHAVIORS
-					.getBehaviorConnection(ISourceEvaluatorManager.class).get()) {
-				managerBC.getBehavior().getEvaluator(language, (evaluator) -> {
-					LOG.debug("Running script:\n" + text);
-					String result;
-					try {
-						result = evaluator.evaluate(text);
-						Log.debug("Result: " + result);
-					} catch (Throwable e) {
-						result = e.getMessage();
-					}
-					if (result != null) {
-						window.getBufferController().setSelectionText(result);
-						window.switchToNormalMode();
-					} else {
-						LOG.debug("Evaluator did not reply.");
-						window.getCommandController().setCommandFeedback("Evaluator did not reply.");
-					}
-				});
-			} catch (Exception e) {
-				LOG.error("Can't evaluate source: ", e);
-			}
-		} else {
-			window.getCommandController().setCommandFeedback("Can't evaluate script without selection.");
-		}
-	}
-
-	private void setupCommands() {
-		CommandManager cm = CommandManager.getSingleton();
-		cm.registerHandler("q", (BufferWindow window, String[] argv) -> {
-			exit(0);
-		});
-		cm.registerHandler("e", new OpenFileCommand());
-		cm.registerHandler("w", (BufferWindow window, String[] argv) -> {
-			try {
-				window.getBuffer().save();
-				window.getCommandController().setCommandFeedback("Saved file.");
-			} catch (Exception e) {
-				window.getCommandController().setCommandFeedback("Couldn't save.");
-			}
-		});
-		cm.registerHandler("r", new ShellCommandHandler());
-		cm.registerHandler("ruby", (BufferWindow window, String[] argv) -> {
-			evaluateScript(window, "ruby");
-		});
-		cm.registerHandler("python", (BufferWindow window, String[] argv) -> {
-			evaluateScript(window, "python");
-		});
-		cm.registerHandler("javascript", (BufferWindow window, String[] argv) -> {
-			evaluateScript(window, "javascript");
-		});
-		cm.registerHandler("lisp", (BufferWindow window, String[] argv) -> {
-			evaluateScript(window, "lisp");
-		});
-		cm.registerHandler("groovy", (BufferWindow window, String[] argv) -> {
-			evaluateScript(window, "groovy");
-		});
-		cm.registerHandler("script", (BufferWindow window, String[] argv) -> {
-			if (argv.length != 2)
-				return;
-			File file = FileUtil.getFile(argv[1]);
-
-			try (IBehaviorConnection<ISourceEvaluatorManager> managerBC = BEHAVIORS
-					.getBehaviorConnection(ISourceEvaluatorManager.class).get()) {
-				managerBC.getBehavior().getEvaluator(file, (evaluator) -> {
-					String string;
-					try {
-						string = FileUtils.readFileToString(file);
-						string = evaluator.evaluate(string);
-					} catch (Exception e) {
-						string = e.getMessage();
-					}
-					window.getBufferController().getBuffer().appendStringAtPointLogged(string);
-					window.switchToNormalMode();
-				});
-			} catch (Exception e) {
-				LOG.error("Can't evaluate source: ", e);
-			}
-		});
 	}
 
 	private void processArguments() {
@@ -179,8 +87,6 @@ public class Application {
 				}
 			};
 			Runtime.getRuntime().addShutdownHook(_shutdownHook);
-
-			setupCommands();
 
 			try (IBehaviorConnection<IConsoleService> consoleBC = BEHAVIORS.getBehaviorConnection(IConsoleService.class)
 					.get()) {

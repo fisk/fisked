@@ -1,13 +1,20 @@
 package org.fisked.command;
 
+import org.fisked.behavior.BehaviorConnectionFactory;
+import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.BufferWindow;
+import org.fisked.command.api.ICommandManager;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputRecognizer;
 import org.fisked.responder.RecognitionState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CommandController implements IInputRecognizer {
-	private BufferWindow _window;
+	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(CommandController.class);
+	private final static Logger LOG = LoggerFactory.getLogger(CommandController.class);
+	private final BufferWindow _window;
 	private StringBuilder _command;
 	private boolean _writingCommand;
 	private String _feedback;
@@ -31,7 +38,7 @@ public class CommandController implements IInputRecognizer {
 	public void setCommandFeedback(String feedback) {
 		_feedback = feedback;
 	}
-	
+
 	@Override
 	public RecognitionState recognizesInput(Event nextEvent) {
 		if (nextEvent.isBackspace()) {
@@ -46,7 +53,7 @@ public class CommandController implements IInputRecognizer {
 		}
 		return RecognitionState.Recognized;
 	}
-	
+
 	public void startCommand() {
 		_writingCommand = true;
 		_feedback = null;
@@ -58,11 +65,16 @@ public class CommandController implements IInputRecognizer {
 		_command = new StringBuilder();
 		handleCommand(command);
 	}
-	
+
 	private void handleCommand(String command) {
 		String[] argv = command.split("\\s+");
 		if (argv.length >= 1) {
-			CommandManager.getSingleton().handle(_window, argv[0], argv);
+			try (IBehaviorConnection<ICommandManager> commandBC = BEHAVIORS.getBehaviorConnection(ICommandManager.class)
+					.get()) {
+				commandBC.getBehavior().handle(_window, argv[0], argv);
+			} catch (Exception e) {
+				LOG.error("Command failed: ", e);
+			}
 		}
 	}
 

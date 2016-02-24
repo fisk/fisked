@@ -3,7 +3,7 @@ package org.fisked.shell;
 import java.util.Arrays;
 
 import org.fisked.buffer.BufferWindow;
-import org.fisked.command.ICommandHandler;
+import org.fisked.command.api.ICommandHandler;
 import org.fisked.util.shell.ShellCommandExecution;
 import org.fisked.util.shell.ShellCommandExecution.CommandResult;
 
