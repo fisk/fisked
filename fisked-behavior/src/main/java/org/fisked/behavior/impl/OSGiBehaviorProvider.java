@@ -71,12 +71,7 @@ public class OSGiBehaviorProvider implements IBehaviorProvider {
 
 		AtomicInteger needsWait = new AtomicInteger(problemBundles.size());
 
-		Exception ex = new RuntimeException("Pending bundles");
-		LOG.debug("Found that some bundles are pending. Installing listener.", ex);
-
-		for (Bundle bundle : problemBundles) {
-			LOG.debug("Pending bundle: " + bundle.getSymbolicName());
-		}
+		LOG.debug("Found that some bundles are pending. Installing listener.");
 
 		CompletableFuture<IBehaviorConnection<T>> future = new CompletableFuture<IBehaviorConnection<T>>();
 		try {
