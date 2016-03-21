@@ -34,7 +34,7 @@ public class TextNavigator {
 		try {
 			getBuffer().getCursor().setAbsolutePoint(point, updateLastColumn);
 		} catch (InvalidLocationException e) {
-			LOG.error("Invalid location: " + e.getMessage());
+			LOG.error("Invalid location: " + point.toString());
 		}
 	}
 

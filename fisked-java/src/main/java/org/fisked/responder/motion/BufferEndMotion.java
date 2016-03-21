@@ -6,9 +6,9 @@ import org.fisked.responder.EventRecognition;
 import org.fisked.responder.RecognitionState;
 
 public class BufferEndMotion implements IMotion {
-	
-	private BufferWindow _window;
-	
+
+	private final BufferWindow _window;
+
 	public BufferEndMotion(BufferWindow window) {
 		_window = window;
 	}
@@ -20,7 +20,7 @@ public class BufferEndMotion implements IMotion {
 
 	@Override
 	public MotionRange getMotionRange() {
-		return new MotionRange(_window.getBuffer().getPointIndex(), _window.getBuffer().getLength());
+		return new MotionRange(_window.getBuffer().getPointIndex(), _window.getBuffer().length());
 	}
 
 }

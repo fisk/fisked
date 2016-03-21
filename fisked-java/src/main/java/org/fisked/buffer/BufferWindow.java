@@ -95,6 +95,9 @@ public class BufferWindow extends Window {
 
 	public void setBuffer(Buffer buffer) {
 		_bufferController.setBuffer(buffer);
+		_currentMode.deactivate();
+		_currentMode = new NormalMode(this);
+		_currentMode.activate();
 		setNeedsFullRedraw();
 	}
 

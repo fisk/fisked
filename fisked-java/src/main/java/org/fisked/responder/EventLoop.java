@@ -35,10 +35,11 @@ public class EventLoop implements IRunner {
 			} else {
 				postponedStart = postponedEnd = nextEvent;
 			}
-			RecognitionState state = _primaryResponder.recognizesInput(postponedStart);
+			IInputResponder responder = _primaryResponder;
+			RecognitionState state = responder.recognizesInput(postponedStart);
 			switch (state) {
 			case Recognized:
-				_primaryResponder.onRecognize();
+				responder.onRecognize();
 			case NotRecognized:
 				postponedStart = postponedEnd = null;
 				break;
@@ -152,8 +153,8 @@ public class EventLoop implements IRunner {
 		return _primaryResponder;
 	}
 
-	public void setPrimaryResponder(Window _primaryResponder) {
-		this._primaryResponder = _primaryResponder;
+	public void setPrimaryResponder(Window primaryResponder) {
+		_primaryResponder = primaryResponder;
 	}
 
 	public void exit() {

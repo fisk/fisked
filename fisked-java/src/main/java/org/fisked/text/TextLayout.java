@@ -3,7 +3,6 @@ package org.fisked.text;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.fisked.buffer.Buffer;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;
@@ -14,7 +13,9 @@ import org.slf4j.LoggerFactory;
 // TODO: This file needs a lot more logic, like valid and invalid regions of the layout for lazy layouting
 
 public class TextLayout {
-	private final Buffer _buffer;
+	private static final Logger LOG = LoggerFactory.getLogger(TextLayout.class);
+
+	private final CharSequence _text;
 	private List<Line> _physicalLines = null;
 	private List<Line> _logicalLines = null;
 	private Rectangle _rect = null;
@@ -34,9 +35,9 @@ public class TextLayout {
 		_needsLayout = true;
 	}
 
-	public TextLayout(Buffer buffer, Size size) {
+	public TextLayout(CharSequence text, Size size) {
 		_rect = new Rectangle(new Point(0, 0), size);
-		_buffer = buffer;
+		_text = text;
 		setNeedsLayout();
 	}
 
@@ -48,7 +49,7 @@ public class TextLayout {
 		_rect = rect;
 	}
 
-	private void layoutIfNeeded() {
+	public void layoutIfNeeded() {
 		if (_needsLayout) {
 			layoutText();
 			_needsLayout = false;
@@ -65,7 +66,7 @@ public class TextLayout {
 		StringBuilder currentLogicalLine = new StringBuilder();
 		StringBuilder currentPhysicalLine = new StringBuilder();
 
-		for (char character : _buffer.getCharSequence().toString().toCharArray()) {
+		for (char character : _text.toString().toCharArray()) {
 			if (character == '\n') {
 				_physicalLines.add(new Line(currentPhysicalLine.toString(), true));
 				_logicalLines.add(new Line(currentLogicalLine.toString(), true));
@@ -146,10 +147,12 @@ public class TextLayout {
 	}
 
 	public Point getAbsoluteLogicalPointForCharIndex(int charIndex) {
+		layoutIfNeeded();
 		return getPointForCharIndexAtOffset(charIndex, 0, _logicalLines);
 	}
 
 	public Point getRelativeLogicalPointForCharIndex(int charIndex) {
+		layoutIfNeeded();
 		Point point = getPointForCharIndexAtOffset(charIndex, _rect.getOrigin().getY(), _logicalLines);
 		int line = point.getY();
 
@@ -160,10 +163,12 @@ public class TextLayout {
 	}
 
 	public Point getAbsolutePhysicalPointForCharIndex(int charIndex) {
+		layoutIfNeeded();
 		return getPointForCharIndexAtOffset(charIndex, 0, _physicalLines);
 	}
 
 	public Point getRelativePhysicalPointForCharIndex(int charIndex) {
+		layoutIfNeeded();
 		return getPointForCharIndexAtOffset(charIndex, _rect.getOrigin().getY(), _physicalLines);
 	}
 
@@ -180,14 +185,17 @@ public class TextLayout {
 	}
 
 	public int getCharIndexForAbsoluteLogicalPoint(Point point) throws InvalidLocationException {
+		layoutIfNeeded();
 		return getCharIndexForAbsolutePoint(point, _logicalLines);
 	}
 
 	public int getCharIndexForRelativePhysicalPoint(Point point) throws InvalidLocationException {
+		layoutIfNeeded();
 		return getCharIndexForAbsolutePhysicalPoint(point);
 	}
 
 	public int getCharIndexForAbsolutePhysicalPoint(Point point) throws InvalidLocationException {
+		layoutIfNeeded();
 		return getCharIndexForAbsolutePoint(point, _physicalLines);
 	}
 
@@ -237,14 +245,12 @@ public class TextLayout {
 		return result;
 	}
 
-	private static final Logger LOG = LoggerFactory.getLogger(TextLayout.class);
-
 	public int getCharIndexForPhysicalLine(int number) {
 		try {
 			return getCharIndexForAbsolutePhysicalPoint(new Point(0, number));
 		} catch (InvalidLocationException e) {
-			LOG.debug("Reached end: " + _buffer.getLength());
-			return _buffer.getLength();
+			LOG.debug("Reached end: " + _text.length());
+			return _text.length();
 		}
 	}
 }

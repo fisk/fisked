@@ -2,6 +2,7 @@ package org.fisked;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Stack;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
@@ -31,7 +32,7 @@ public class Application implements IApplication {
 	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(Application.class);
 
 	private EventLoop _loop;
-	private Window _primaryWindow;
+	private final Stack<Window> _primaryWindowStack = new Stack<>();
 	private volatile Throwable _exception;
 	private String[] _argv;
 	private Thread _shutdownHook;
@@ -65,7 +66,7 @@ public class Application implements IApplication {
 
 	@Override
 	public Window getPrimaryWindow() {
-		return _primaryWindow;
+		return _primaryWindowStack.peek();
 	}
 
 	private void processArguments(BufferWindow window) {
@@ -121,7 +122,7 @@ public class Application implements IApplication {
 				BufferWindow window = new BufferWindow(windowRect);
 				processArguments(window);
 
-				setPrimaryWindow(window);
+				pushPrimaryWindow(window);
 			} catch (Exception e) {
 				LOG.error("Can't get console service: ", e);
 			}
@@ -135,10 +136,30 @@ public class Application implements IApplication {
 	}
 
 	@Override
-	public void setPrimaryWindow(Window window) {
-		_primaryWindow = window;
-		_loop.setPrimaryResponder(_primaryWindow);
-		_primaryWindow.draw();
+	public void pushPrimaryWindow(Window window) {
+		LOG.debug("Pushed window: " + window);
+		_primaryWindowStack.push(window);
+		_loop.setPrimaryResponder(window);
+		window.setNeedsFullRedraw();
+		window.draw();
+	}
+
+	@Override
+	public Window popPrimaryWindow() {
+		if (_primaryWindowStack.isEmpty()) {
+			exit(0);
+		}
+		_primaryWindowStack.pop();
+		Window window = _primaryWindowStack.peek();
+		if (window != null) {
+			_loop.setPrimaryResponder(window);
+			window.setNeedsFullRedraw();
+			window.draw();
+		} else {
+			exit(0);
+		}
+		LOG.debug("Popped window: " + window);
+		return window;
 	}
 
 	public void setException(Throwable throwable) {

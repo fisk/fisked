@@ -10,7 +10,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.fisked.renderingengine.service.models.AttributedString;
-import org.fisked.text.ITextDecorator;
+import org.fisked.text.IBufferDecorator;
 import org.fisked.util.Singleton;
 
 public class SourceDecoratorFactory {
@@ -31,7 +31,7 @@ public class SourceDecoratorFactory {
 		ParseTreeListener create(LexerType lexer, ParserType parser, CommonTokenStream stream, AttributedString string);
 	}
 
-	public <LexerType extends Lexer, ParserType extends Parser> ITextDecorator createDecorator(
+	public <LexerType extends Lexer, ParserType extends Parser> IBufferDecorator createDecorator(
 			LexerFactory<LexerType> lexerFactory, ParserFactory<ParserType> parserFactory,
 			ParseTreeListenerFactory<LexerType, ParserType> visitorFactory, String rootRuleName) {
 		return (state, callback) -> {

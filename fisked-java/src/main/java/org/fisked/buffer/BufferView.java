@@ -7,7 +7,7 @@ import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;
-import org.fisked.text.ITextDecorator;
+import org.fisked.text.IBufferDecorator;
 import org.fisked.theme.ThemeManager;
 
 public class BufferView extends View {
@@ -26,7 +26,7 @@ public class BufferView extends View {
 		super.drawInRect(drawingRect, context);
 
 		Buffer buffer = _controller.getBuffer();
-		ITextDecorator decorator = buffer.getSourceDecorator();
+		IBufferDecorator decorator = buffer.getSourceDecorator();
 
 		AttributedString attributedString = buffer.getBufferTextState().decorate(decorator).copy();
 

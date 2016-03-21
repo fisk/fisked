@@ -6,7 +6,7 @@ import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.renderingengine.service.models.Range;
-import org.fisked.text.ITextDecorator;
+import org.fisked.text.IBufferDecorator;
 import org.fisked.util.concurrency.Dispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public class BufferTextState implements CharSequence {
 		_attributedString = attributedString;
 	}
 
-	public AttributedString decorate(ITextDecorator decorator) {
+	public AttributedString decorate(IBufferDecorator decorator) {
 		LOG.debug("State decoration requested");
 		if (!_decorationRequested) {
 			LOG.debug("State decoration requesting decoration");

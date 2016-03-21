@@ -4,10 +4,10 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.fisked.buffer.BufferTextState;
 import org.fisked.language.SourceDecoratorFactory;
 import org.fisked.renderingengine.service.models.AttributedString;
-import org.fisked.text.ITextDecorator;
+import org.fisked.text.IBufferDecorator;
 
-public class JavaSourceDecorator implements ITextDecorator {
-	private final ITextDecorator _delegate;
+public class JavaSourceDecorator implements IBufferDecorator {
+	private final IBufferDecorator _delegate;
 
 	public JavaSourceDecorator() {
 		SourceDecoratorFactory factory = SourceDecoratorFactory.getInstance();
@@ -21,7 +21,7 @@ public class JavaSourceDecorator implements ITextDecorator {
 	}
 
 	@Override
-	public void decorate(BufferTextState state, ITextDecoratorCallback callback) {
+	public void decorate(BufferTextState state, IBufferDecoratorCallback callback) {
 		_delegate.decorate(state, callback);
 	}
 }

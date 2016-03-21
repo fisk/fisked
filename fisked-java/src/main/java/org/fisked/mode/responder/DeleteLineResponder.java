@@ -61,7 +61,7 @@ public class DeleteLineResponder implements IInputResponder {
 		Buffer buffer = _window.getBuffer();
 		int start = getLineStart();
 		int lineEnd = getLineEnd() + 1;
-		int end = Math.min(lineEnd, buffer.getLength());
+		int end = Math.min(lineEnd, buffer.length());
 		start -= lineEnd - end;
 		start = Math.max(start, 0);
 		Range lineRange = new Range(start, end - start);

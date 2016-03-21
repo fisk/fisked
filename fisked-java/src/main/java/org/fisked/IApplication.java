@@ -5,7 +5,9 @@ import org.fisked.buffer.drawing.Window;
 public interface IApplication {
 	void exit(int status);
 
-	void setPrimaryWindow(Window window);
+	void pushPrimaryWindow(Window window);
 
 	Window getPrimaryWindow();
+
+	Window popPrimaryWindow();
 }

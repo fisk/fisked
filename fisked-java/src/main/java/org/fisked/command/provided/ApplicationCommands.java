@@ -38,7 +38,7 @@ public class ApplicationCommands {
 			_quitCommand = cm.registerHandler("q", (BufferWindow window, String[] argv) -> {
 				try (IBehaviorConnection<IApplication> applicationBC = BEHAVIORS
 						.getBehaviorConnection(IApplication.class).get()) {
-					applicationBC.getBehavior().exit(0);
+					applicationBC.getBehavior().popPrimaryWindow();
 				} catch (Exception e) {
 					LOG.error("Couldn't shut down gracefully.");
 					System.exit(-1);

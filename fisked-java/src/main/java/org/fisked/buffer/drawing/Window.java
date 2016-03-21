@@ -18,8 +18,11 @@ public class Window implements IInputResponder, IDrawable {
 	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(Window.class);
 
 	protected View _rootView;
+	protected Rectangle _windowRect;
+	protected IInputResponder _primaryResponder;
 
 	public Window(Rectangle windowRect) {
+		_windowRect = windowRect;
 	}
 
 	public void setRootView(View rootView) {
@@ -32,12 +35,21 @@ public class Window implements IInputResponder, IDrawable {
 
 	@Override
 	public RecognitionState recognizesInput(Event input) {
-		return RecognitionState.NotRecognized;
+		IInputResponder responder = _primaryResponder;
+		if (responder == null)
+			return RecognitionState.NotRecognized;
+		RecognitionState status = responder.recognizesInput(input);
+		if (status == RecognitionState.Recognized) {
+			setNeedsFullRedraw();
+		}
+		return status;
 	}
 
 	@Override
 	public void onRecognize() {
-
+		IInputResponder responder = _primaryResponder;
+		if (responder != null)
+			responder.onRecognize();
 	}
 
 	@Override

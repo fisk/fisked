@@ -107,6 +107,7 @@ public class EmailProfileVendor implements IEmailProfileVendor {
 			}
 
 			profile.setName(name);
+			profile.setEmail(email);
 			profile.setReceiveServer(receiveServer);
 			profile.setSendServer(sendServer);
 

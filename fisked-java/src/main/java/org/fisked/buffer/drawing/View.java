@@ -97,7 +97,6 @@ public class View implements IInputRecognizer, IDrawable {
 
 	public void drawInRect(Rectangle drawingRect, IRenderingContext context) {
 		if (_backgroundColor != null && _backgroundColor.equals(getParentBackgroundColor())) {
-
 			context.clearRect(drawingRect, _backgroundColor);
 		}
 	}

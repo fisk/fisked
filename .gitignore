@@ -5,3 +5,4 @@
 .settings
 fisked-java/fisked.log
 /fisked.properties
+servers.db

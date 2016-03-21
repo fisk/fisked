@@ -10,11 +10,15 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.fisked.renderingengine.service.models.AttributedString;
+import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Range;
-import org.fisked.text.ITextDecorator;
+import org.fisked.text.IBufferDecorator;
 import org.fisked.text.TextLayout;
+import org.fisked.text.TextLayout.InvalidLocationException;
 
-public class Buffer {
+import jline.internal.Log;
+
+public class Buffer implements CharSequence {
 	private AttributedString _string = null;
 	private final StringBuilder _stringBuilder = new StringBuilder();
 	private volatile BufferTextState _state = new BufferTextState("", null);
@@ -48,7 +52,7 @@ public class Buffer {
 		return _fileContext;
 	}
 
-	public ITextDecorator getSourceDecorator() {
+	public IBufferDecorator getSourceDecorator() {
 		if (_fileContext != null) {
 			return _fileContext.getSourceDecorator();
 		} else {
@@ -75,6 +79,11 @@ public class Buffer {
 		_state = new BufferTextState(fileContent, null);
 	}
 
+	public Buffer(String string) {
+		_stringBuilder.append(string);
+		_state = new BufferTextState(string, null);
+	}
+
 	public Cursor getCursor() {
 		return _cursor;
 	}
@@ -86,6 +95,11 @@ public class Buffer {
 	public void setTextLayout(TextLayout layout) {
 		_layout = layout;
 		_cursor = new Cursor(layout);
+		try {
+			_cursor.setAbsolutePoint(new Point(0, 0), true);
+		} catch (InvalidLocationException e) {
+			Log.debug("Couldn't set curser to 0, 0: ", e);
+		}
 	}
 
 	public TextLayout getTextLayout() {
@@ -173,10 +187,6 @@ public class Buffer {
 		}
 	}
 
-	public int getLength() {
-		return _stringBuilder.length();
-	}
-
 	private final UndoLog _undoLog = new UndoLog(this);
 
 	public UndoLog getUndoLog() {
@@ -191,5 +201,20 @@ public class Buffer {
 	public void redo() {
 		_undoLog.redo();
 		dirtyAttributedString();
+	}
+
+	@Override
+	public int length() {
+		return _stringBuilder.length();
+	}
+
+	@Override
+	public char charAt(int index) {
+		return _stringBuilder.charAt(index);
+	}
+
+	@Override
+	public CharSequence subSequence(int start, int end) {
+		return _stringBuilder.subSequence(start, end);
 	}
 }

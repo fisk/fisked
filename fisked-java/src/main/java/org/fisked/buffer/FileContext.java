@@ -6,11 +6,11 @@ import org.apache.commons.io.FilenameUtils;
 import org.fisked.language.java.JavaSourceDecorator;
 import org.fisked.language.java.SourceDecoratorQueue;
 import org.fisked.renderingengine.service.models.AttributedString;
-import org.fisked.text.ITextDecorator;
+import org.fisked.text.IBufferDecorator;
 
 public class FileContext {
 	private final File _file;
-	private ITextDecorator _decorator;
+	private IBufferDecorator _decorator;
 
 	private boolean hasExtension(String extension) {
 		return FilenameUtils.getExtension(_file.getName()).equals("java");
@@ -29,7 +29,7 @@ public class FileContext {
 		return _file;
 	}
 
-	public ITextDecorator getSourceDecorator() {
+	public IBufferDecorator getSourceDecorator() {
 		return _decorator;
 	}
 

@@ -43,6 +43,7 @@ public class SMTPEmailSendService implements IEmailSendService {
 			return;
 		}
 
+		ClassLoader tcl = Thread.currentThread().getContextClassLoader();
 		Thread.currentThread().setContextClassLoader(Message.class.getClassLoader());
 
 		if (server.getHost() == null) {
@@ -112,6 +113,8 @@ public class SMTPEmailSendService implements IEmailSendService {
 			callback.success(email, profile);
 		} catch (MessagingException e) {
 			callback.error(email, profile, e);
+		} finally {
+			Thread.currentThread().setContextClassLoader(tcl);
 		}
 	}
 
