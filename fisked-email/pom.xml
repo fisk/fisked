@@ -1,11 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>fisked-email</artifactId>
 	<parent>
 		<groupId>fisked</groupId>
 		<artifactId>fisked</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.1.0</version>
 	</parent>
 	<packaging>bundle</packaging>
 	<repositories>
@@ -42,7 +41,7 @@
 		<dependency>
 			<groupId>fisked</groupId>
 			<artifactId>fisked-behavior</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.1.0</version>
 			<type>bundle</type>
 		</dependency>
 		<dependency>
@@ -56,7 +55,7 @@
 		<dependency>
 			<groupId>fisked</groupId>
 			<artifactId>fisked-util</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.1.0</version>
 			<type>bundle</type>
 		</dependency>
 	</dependencies>
@@ -118,5 +117,6 @@
 	</build>
 	<scm>
 		<url>git@github.com:fisk/fisked.git</url>
-	</scm>
+	  <tag>fisked-0.1.0</tag>
+  </scm>
 </project>
