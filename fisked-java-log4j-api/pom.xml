@@ -3,7 +3,7 @@
 	<parent>
 	    <groupId>fisked</groupId>
 	    <artifactId>fisked</artifactId>
-	    <version>0.1.0</version>
+	    <version>0.1.1-SNAPSHOT</version>
     </parent>
 	<artifactId>fisked-java-log4j-api</artifactId>
 	<packaging>bundle</packaging>

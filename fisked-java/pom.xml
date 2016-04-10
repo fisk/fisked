@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>fisked</groupId>
 		<artifactId>fisked</artifactId>
-		<version>0.1.0</version>
+		<version>0.1.1-SNAPSHOT</version>
 	</parent>
 	<packaging>bundle</packaging>
 	<repositories>
@@ -25,12 +25,12 @@
 		<dependency>
 			<groupId>fisked</groupId>
 			<artifactId>fisked-launcher</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>fisked</groupId>
 			<artifactId>fisked-eval-api</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -77,7 +77,7 @@
 		<dependency>
 			<groupId>fisked</groupId>
 			<artifactId>fisked-behavior</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.mail</groupId>
@@ -90,12 +90,12 @@
 		<dependency>
 			<groupId>fisked</groupId>
 			<artifactId>fisked-util</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>fisked</groupId>
 			<artifactId>fisked-email</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -171,6 +171,6 @@
 	</build>
 	<scm>
 		<url>git@github.com:fisk/fisked.git</url>
-	  <tag>fisked-0.1.0</tag>
+	  <tag>HEAD</tag>
   </scm>
 </project>
