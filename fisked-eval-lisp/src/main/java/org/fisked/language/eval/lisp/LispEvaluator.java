@@ -3,10 +3,6 @@ package org.fisked.language.eval.lisp;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
 import org.apache.felix.ipojo.annotations.Bind;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
@@ -14,6 +10,7 @@ import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.ServiceProperty;
 import org.apache.felix.ipojo.annotations.Unbind;
+import org.armedbear.lisp.Interpreter;
 import org.fisked.language.eval.service.ISourceEvaluator;
 import org.fisked.language.eval.service.ISourceEvaluatorManager;
 import org.fisked.language.eval.service.SourceEvaluatorInformation;
@@ -33,22 +30,18 @@ public class LispEvaluator implements ISourceEvaluator {
 	private ISourceEvaluatorManager _manager;
 	private SourceEvaluatorInformation _info;
 
-	private ScriptEngine _engine;
+	private Interpreter _engine;
 
-	private ScriptEngine getEngine() {
+	private Interpreter getEngine() {
 		if (_engine == null) {
-			_engine = new ScriptEngineManager().getEngineByExtension("lisp");
+			_engine = Interpreter.createInstance();
 		}
 		return _engine;
 	}
 
 	@Override
 	public String evaluate(String val) {
-		try {
-			return getEngine().eval(val).toString();
-		} catch (ScriptException e) {
-			return e.getMessage();
-		}
+		return getEngine().eval(val).printObject();
 	}
 
 	@Bind
