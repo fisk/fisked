@@ -5,8 +5,6 @@ import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.IRecognitionAction;
 import org.fisked.responder.RecognitionState;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SearchTextResponder implements IInputResponder {
 	private final BufferWindow _window;
@@ -16,15 +14,16 @@ public class SearchTextResponder implements IInputResponder {
 	private int _charIndexBefore = -1;
 	private IRecognitionAction _action;
 
-	private final static Logger LOG = LoggerFactory.getLogger(SearchTextResponder.class);
-
 	public SearchTextResponder(BufferWindow window) {
 		_window = window;
 	}
 
-	private void goForward() {
-		int currentPosition = _window.getBuffer().getPointIndex();
+	private void goForward(boolean next) {
 		String str = _window.getBuffer().toString();
+		int currentPosition = _window.getBuffer().getPointIndex();
+		if (next) {
+			currentPosition = Math.min(currentPosition + 1, _window.getBuffer().length());
+		}
 		int newIndex = str.indexOf(_searchString.toString(), currentPosition);
 		if (newIndex == -1) {
 			_window.getBuffer().getCursor().setCharIndex(_charIndexBefore, true);
@@ -33,9 +32,12 @@ public class SearchTextResponder implements IInputResponder {
 		}
 	}
 
-	private void goBackward() {
-		int currentPosition = _window.getBuffer().getPointIndex();
+	private void goBackward(boolean next) {
 		String str = _window.getBuffer().toString();
+		int currentPosition = _window.getBuffer().getPointIndex();
+		if (next) {
+			currentPosition = Math.max(currentPosition - 1, 0);
+		}
 		int newIndex = str.lastIndexOf(_searchString.toString(), currentPosition);
 		if (newIndex == -1) {
 			_window.getBuffer().getCursor().setCharIndex(_charIndexBefore, true);
@@ -44,19 +46,19 @@ public class SearchTextResponder implements IInputResponder {
 		}
 	}
 
-	private void goToNextSearch() {
+	private void goToNextSearch(boolean next) {
 		if (_isSearchingForward) {
-			goForward();
+			goForward(next);
 		} else {
-			goBackward();
+			goBackward(next);
 		}
 	}
 
-	private void goToPrevSearch() {
+	private void goToPrevSearch(boolean next) {
 		if (_isSearchingForward) {
-			goBackward();
+			goBackward(next);
 		} else {
-			goForward();
+			goForward(next);
 		}
 	}
 
@@ -67,12 +69,17 @@ public class SearchTextResponder implements IInputResponder {
 				if (nextEvent.isReturn()) {
 					_isSearching = false;
 					_window.getCommandController().setCommandFeedback(null);
-					_searchString = new StringBuilder();
 				} else if (nextEvent.isCharacter()) {
 					char character = nextEvent.getCharacter();
 					_searchString.append(character);
-					goToNextSearch();
-					_window.getCommandController().setCommandFeedback("/" + _searchString.toString());
+					goToNextSearch(false);
+					String prefix;
+					if (_isSearchingForward) {
+						prefix = "/";
+					} else {
+						prefix = "?";
+					}
+					_window.getCommandController().setCommandFeedback(prefix + _searchString.toString());
 				} else if (nextEvent.isEscape()) {
 					_searchString = new StringBuilder();
 					_isSearching = false;
@@ -80,22 +87,24 @@ public class SearchTextResponder implements IInputResponder {
 					_window.getCommandController().setCommandFeedback(null);
 					_searchString = new StringBuilder();
 				}
+				_window.setNeedsFullRedraw();
 			};
-			_window.setNeedsFullRedraw();
 			return RecognitionState.Recognized;
 		} else {
 			if (nextEvent.isCharacter('n')) {
 				_action = () -> {
-					goToNextSearch();
+					_charIndexBefore = _window.getBuffer().getPointIndex();
+					goToNextSearch(true);
+					_window.setNeedsFullRedraw();
 				};
-				_window.setNeedsFullRedraw();
 				return RecognitionState.Recognized;
 			}
 			if (nextEvent.isCharacter('N')) {
 				_action = () -> {
-					goToPrevSearch();
+					_charIndexBefore = _window.getBuffer().getPointIndex();
+					goToPrevSearch(true);
+					_window.setNeedsFullRedraw();
 				};
-				_window.setNeedsFullRedraw();
 				return RecognitionState.Recognized;
 			}
 			if (nextEvent.isCharacter('/')) {
@@ -103,17 +112,20 @@ public class SearchTextResponder implements IInputResponder {
 					_isSearchingForward = true;
 					_isSearching = true;
 					_charIndexBefore = _window.getBuffer().getPointIndex();
+					_searchString = new StringBuilder();
 					_window.getCommandController().setCommandFeedback("/");
+					_window.setNeedsFullRedraw();
 				};
-				_window.setNeedsFullRedraw();
 				return RecognitionState.Recognized;
 			} else if (nextEvent.isCharacter('?')) {
 				_action = () -> {
 					_isSearchingForward = false;
 					_isSearching = true;
 					_charIndexBefore = _window.getBuffer().getPointIndex();
+					_searchString = new StringBuilder();
+					_window.getCommandController().setCommandFeedback("?");
+					_window.setNeedsFullRedraw();
 				};
-				_window.setNeedsFullRedraw();
 				return RecognitionState.Recognized;
 			}
 		}

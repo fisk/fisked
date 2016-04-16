@@ -1,9 +1,13 @@
 package org.fisked.command;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.command.api.ICommandManager;
+import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputRecognizer;
@@ -66,7 +70,14 @@ public class CommandController implements IInputRecognizer {
 		handleCommand(command);
 	}
 
+	Pattern searchReplacePattern = Pattern.compile("s/(.*)/(.*)/g?");
+
 	private void handleCommand(String command) {
+		Matcher searchPattern = searchReplacePattern.matcher(command);
+		if (searchPattern.matches()) {
+			handleSearchReplace(searchPattern);
+			return;
+		}
 		String[] argv = command.split("\\s+");
 		if (argv.length >= 1) {
 			try (IBehaviorConnection<ICommandManager> commandBC = BEHAVIORS.getBehaviorConnection(ICommandManager.class)
@@ -75,6 +86,30 @@ public class CommandController implements IInputRecognizer {
 			} catch (Exception e) {
 				LOG.error("Command failed: ", e);
 			}
+		}
+	}
+
+	private void handleSearchReplace(Matcher searchPattern) {
+		String searchString = searchPattern.group(1);
+		String replaceString = searchPattern.group(2);
+
+		Pattern pattern = Pattern.compile(searchString);
+		Matcher matcher = pattern.matcher(_window.getBuffer().toString());
+
+		int position = -1;
+
+		int adjust = 0;
+		while (matcher.find()) {
+			int start = matcher.start(0) + adjust;
+			int end = matcher.end(0) + adjust;
+			_window.getBuffer().removeCharsInRangeLogged(new Range(start, end - start));
+			_window.getBuffer().insertStringLogged(start, replaceString);
+			adjust += replaceString.length() - (end - start);
+			position = start;
+		}
+
+		if (position >= 0) {
+			_window.getBuffer().setPointIndex(position);
 		}
 	}
 

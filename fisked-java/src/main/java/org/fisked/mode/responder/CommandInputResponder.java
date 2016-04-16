@@ -2,12 +2,14 @@ package org.fisked.mode.responder;
 
 import org.fisked.buffer.BufferWindow;
 import org.fisked.responder.Event;
-import org.fisked.responder.IInputRecognizer;
+import org.fisked.responder.IInputResponder;
+import org.fisked.responder.IRecognitionAction;
 import org.fisked.responder.RecognitionState;
 
-public class CommandInputResponder implements IInputRecognizer {
+public class CommandInputResponder implements IInputResponder {
 	private boolean _writingCommand = false;
 	private final BufferWindow _window;
+	private IRecognitionAction _action;
 
 	public CommandInputResponder(BufferWindow window) {
 		_window = window;
@@ -16,20 +18,32 @@ public class CommandInputResponder implements IInputRecognizer {
 	@Override
 	public RecognitionState recognizesInput(Event input) {
 		if (_writingCommand) {
-			if (_window.getCommandController().recognizesInput(input) == RecognitionState.NotRecognized) {
-				_writingCommand = false;
-			}
-			_window.setNeedsFullRedraw();
+			_action = () -> {
+				if (_window.getCommandController().recognizesInput(input) == RecognitionState.NotRecognized) {
+					_writingCommand = false;
+				}
+				_window.setNeedsFullRedraw();
+			};
 			return RecognitionState.Recognized;
 		}
-		_window.getCommandController().setCommandFeedback(null);
 		if (input.getCharacter() == ':') {
-			_writingCommand = true;
-			_window.getCommandController().startCommand();
-			_window.setNeedsFullRedraw();
+			_action = () -> {
+				_window.getCommandController().setCommandFeedback(null);
+				_writingCommand = true;
+				_window.getCommandController().startCommand();
+				_window.setNeedsFullRedraw();
+			};
 			return RecognitionState.Recognized;
 		} else {
 			return RecognitionState.NotRecognized;
+		}
+	}
+
+	@Override
+	public void onRecognize() {
+		IRecognitionAction action = _action;
+		if (action != null) {
+			action.onRecognize();
 		}
 	}
 
