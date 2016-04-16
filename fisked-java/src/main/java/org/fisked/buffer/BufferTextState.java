@@ -84,13 +84,11 @@ public class BufferTextState implements CharSequence {
 			}
 		}
 
-		LOG.debug("State decoration something");
-
 		if (result != null) {
 			LOG.debug("State decoration apply deltas");
 			result = last.applyDeltas(result.copy());
 		} else {
-			LOG.debug("State decoration no recoration");
+			LOG.debug("State decoration no decoration");
 			result = new AttributedString(_string);
 		}
 		LOG.debug("State decoration result");

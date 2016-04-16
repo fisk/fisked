@@ -18,6 +18,7 @@ public class Dispatcher {
 
 	public void setMainThread(IRunner mainRunner, Thread thread) {
 		_mainThread = thread;
+		_mainRunner = mainRunner;
 	}
 
 	public <T> Future<T> futureConc(Callable<T> callable) {
