@@ -1,4 +1,5 @@
 # fisked
+
 This is going to be the best new text editor in history.
 Completely written in Java.
 
@@ -29,6 +30,10 @@ Current features:
   - repeaters also work with operators, so 20 d w would delete 20 words for example
   - undo with u and redo with CTRL-r
   - delete current line with dd
+  - search forward with /xxxx
+  - search backward with ?xxxx
+  - go to next match with n
+  - go to previous match with N
 
 * Visual mode
   - select text with basic navigations
@@ -45,6 +50,7 @@ Current features:
   - :ruby evaluates selected text as ruby and inserts it into the document
   - :python evaluates selected text as python and inserts it into the document
   - cancel writing command with ESC
+  - :s/X/Y/g replace X with Y
 
 * Other features
   - Concurrent parsing for syntax coloring
