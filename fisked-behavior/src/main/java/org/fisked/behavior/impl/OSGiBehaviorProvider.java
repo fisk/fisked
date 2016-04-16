@@ -50,11 +50,11 @@ public class OSGiBehaviorProvider implements IBehaviorProvider {
 		final BundleContext bc = FrameworkUtil.getBundle(callerClass).getBundleContext();
 		ServiceReference<T> ref = bc.getServiceReference(targetClass);
 		if (ref != null) {
-			LOG.debug("Found OSGi behavior immediately.");
+			LOG.info("Found OSGi behavior immediately.");
 			return CompletableFuture.completedFuture(new OSGiBehaviorCaller<T>(bc, ref));
 		}
 
-		LOG.debug("Couldn't find OSGi service.");
+		LOG.info("Couldn't find OSGi service.");
 
 		Bundle[] bundles = bc.getBundles();
 		List<Bundle> problemBundles = new ArrayList<>();

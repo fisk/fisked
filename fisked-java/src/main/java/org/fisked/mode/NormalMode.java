@@ -8,6 +8,7 @@ import org.fisked.mode.responder.CommandInputResponder;
 import org.fisked.mode.responder.DeleteLineResponder;
 import org.fisked.mode.responder.InputModeSwitchResponder;
 import org.fisked.mode.responder.MotionActionResponder;
+import org.fisked.mode.responder.SearchTextResponder;
 import org.fisked.mode.responder.VisualModeSwitchResponder;
 import org.fisked.renderingengine.service.IClipboardService;
 import org.fisked.renderingengine.service.models.Color;
@@ -25,6 +26,7 @@ public class NormalMode extends AbstractMode {
 	public NormalMode(BufferWindow window) {
 		super(window);
 		addResponder(new CommandInputResponder(_window));
+		addResponder(new SearchTextResponder(_window));
 		addResponder(new InputModeSwitchResponder(_window));
 		addResponder(new VisualModeSwitchResponder(_window));
 		addResponder(new BasicNavigationResponder(_window));

@@ -47,14 +47,14 @@ public class NormalBehaviorProvider implements IBehaviorProvider {
 		Object mapResult = _map.get(targetClass);
 		if (mapResult != null) {
 			T service = targetClass.cast(mapResult);
-			LOG.debug("Found normal behavior.");
+			LOG.info("Found normal behavior.");
 			return CompletableFuture.completedFuture(new NormalBehaviorCaller<T>(service));
 		}
 		if (_parent != null) {
-			LOG.debug("Calling up.");
+			LOG.info("Calling up.");
 			return _parent.getBehaviorConnection(callerClass, targetClass);
 		} else {
-			LOG.debug("No behavior found.");
+			LOG.info("No behavior found.");
 			return null;
 		}
 	}

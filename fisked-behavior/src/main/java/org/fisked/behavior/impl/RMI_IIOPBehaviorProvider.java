@@ -56,12 +56,12 @@ public class RMI_IIOPBehaviorProvider implements IBehaviorProvider {
 	@Override
 	public <C, T> Future<IBehaviorConnection<T>> getBehaviorConnection(Class<C> callerClass, Class<T> targetClass) {
 		if (!Remote.class.isAssignableFrom(targetClass)) {
-			LOG.debug("Not RMI class.");
+			LOG.info("Not RMI class.");
 			if (_parent != null) {
-				LOG.debug("Calling up.");
+				LOG.info("Calling up.");
 				return _parent.getBehaviorConnection(callerClass, targetClass);
 			} else {
-				LOG.debug("Could not find behavior.");
+				LOG.info("Could not find behavior.");
 				return null;
 			}
 		}

@@ -9,7 +9,7 @@
     </Console>
   </Appenders>
   <Loggers>
-    <Root level="trace">
+    <Root level="debug">
       <AppenderRef ref="File"/>
     </Root>
     <Logger name="org.fisked.util.ConsolePrinter" level="error">

@@ -20,7 +20,7 @@ public class CompositionBehaviorProvider implements IBehaviorProvider {
 	public <C, T> Future<IBehaviorConnection<T>> getBehaviorConnection(Class<C> callerClass, Class<T> targetClass) {
 		if (_providerList.size() == 0)
 			return null;
-		LOG.debug("Calling up.");
+		LOG.info("Calling up.");
 		IBehaviorProvider provider = _providerList.get(_providerList.size() - 1);
 		Future<IBehaviorConnection<T>> result = provider.getBehaviorConnection(callerClass, targetClass);
 		return result;
