@@ -93,12 +93,20 @@ public class CommandController implements IInputRecognizer {
 		String searchString = searchPattern.group(1);
 		String replaceString = searchPattern.group(2);
 
+		int adjust = 0;
+		String bufferString = _window.getBuffer().toString();
+		Range searchRange = _window.getBufferController().getSelection();
+
+		if (searchRange != null) {
+			bufferString = bufferString.substring(searchRange.getStart(), searchRange.getEnd());
+			adjust += searchRange.getStart();
+		}
+
 		Pattern pattern = Pattern.compile(searchString);
-		Matcher matcher = pattern.matcher(_window.getBuffer().toString());
+		Matcher matcher = pattern.matcher(bufferString);
 
 		int position = -1;
 
-		int adjust = 0;
 		while (matcher.find()) {
 			int start = matcher.start(0) + adjust;
 			int end = matcher.end(0) + adjust;
@@ -109,7 +117,8 @@ public class CommandController implements IInputRecognizer {
 		}
 
 		if (position >= 0) {
-			_window.getBuffer().setPointIndex(position);
+			_window.getBuffer().getCursor().setCharIndex(position, true);
+			_window.getBufferController().setSelection(null);
 		}
 	}
 

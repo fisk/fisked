@@ -34,6 +34,7 @@ Current features:
   - search backward with ?xxxx
   - go to next match with n
   - go to previous match with N
+  - :s/X/Y/g replace X with Y
 
 * Visual mode
   - select text with basic navigations
@@ -41,6 +42,7 @@ Current features:
   - switch selection endpoints with o
   - copy selection with y
   - exit with ESC
+  - :s/X/Y/g replace X in selection with Y
 
 * Commands (enter by writing colon)
   - :e <file> opens file
@@ -50,7 +52,6 @@ Current features:
   - :ruby evaluates selected text as ruby and inserts it into the document
   - :python evaluates selected text as python and inserts it into the document
   - cancel writing command with ESC
-  - :s/X/Y/g replace X with Y
 
 * Other features
   - Concurrent parsing for syntax coloring
