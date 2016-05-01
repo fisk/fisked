@@ -1,25 +1,21 @@
 package org.fisked.mode;
 
-import org.fisked.behavior.BehaviorConnectionFactory;
-import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.BufferController;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.Cursor;
+import org.fisked.buffer.registers.RegisterManager;
 import org.fisked.mode.responder.BasicNavigationResponder;
 import org.fisked.mode.responder.CommandInputResponder;
 import org.fisked.mode.responder.NormalModeSwitchResponder;
-import org.fisked.renderingengine.service.IClipboardService;
+import org.fisked.mode.responder.SearchTextResponder;
 import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Face;
 import org.fisked.renderingengine.service.models.Range;
 import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.fisked.responder.register.RegisterRecognizer;
 
 public class VisualMode extends AbstractMode {
-	private final static Logger LOG = LoggerFactory.getLogger(NormalMode.class);
-	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(NormalMode.class);
 	private Cursor _activeCursor = _window.getBuffer().getCursor();
 	private Cursor _inactiveCursor = Cursor.makeCursorFromCharIndex(_activeCursor.getCharIndex(),
 			_window.getTextLayout());
@@ -44,10 +40,52 @@ public class VisualMode extends AbstractMode {
 		_window.getBufferController().setSelection(null);
 	}
 
+	private void addCopyResponder() {
+		RegisterRecognizer registerRecognizer = new RegisterRecognizer();
+		addResponder(EventRecognition.builder().optional(registerRecognizer).require(EventRecognition.recognizer("y"))
+				.build(() -> {
+					Range selection = getSelectionRange();
+					CharSequence string = _window.getBuffer().getCharSequence().subSequence(selection.getStart(),
+							selection.getEnd());
+					RegisterManager.getInstance().setRegister(registerRecognizer.getRegister(), string.toString());
+					clearSelection();
+					_window.switchToNormalMode();
+				}));
+	}
+
+	private void addDeleteResponder() {
+		RegisterRecognizer registerRecognizer = new RegisterRecognizer();
+		addResponder(EventRecognition.builder().optional(registerRecognizer).require(EventRecognition.recognizer("d"))
+				.build(() -> {
+					Range selection = getSelectionRange();
+					CharSequence string = _window.getBuffer().getCharSequence().subSequence(selection.getStart(),
+							selection.getEnd());
+					RegisterManager.getInstance().setRegister(registerRecognizer.getRegister(), string.toString());
+					_window.getBuffer().removeCharsInRangeLogged(selection);
+					clearSelection();
+					_window.switchToNormalMode();
+				}));
+	}
+
+	private void addReplaceResponder() {
+		RegisterRecognizer registerRecognizer = new RegisterRecognizer();
+		addResponder(EventRecognition.builder().optional(registerRecognizer).require(EventRecognition.recognizer("c"))
+				.build(() -> {
+					Range selection = getSelectionRange();
+					CharSequence string = _window.getBuffer().getCharSequence().subSequence(selection.getStart(),
+							selection.getEnd());
+					RegisterManager.getInstance().setRegister(registerRecognizer.getRegister(), string.toString());
+					_window.getBuffer().removeCharsInRangeLogged(selection);
+					clearSelection();
+					_window.switchToInputMode(0);
+				}));
+	}
+
 	public VisualMode(BufferWindow window) {
 		super(window);
 
 		addResponder(new CommandInputResponder(_window));
+		addResponder(new SearchTextResponder(_window));
 		NormalModeSwitchResponder normalModeSwitch = new NormalModeSwitchResponder(_window);
 		addResponder(normalModeSwitch, () -> {
 			normalModeSwitch.onRecognize();
@@ -66,41 +104,9 @@ public class VisualMode extends AbstractMode {
 			_inactiveCursor = _activeCursor;
 			_activeCursor = other;
 		});
-		addResponder((Event nextEvent) -> {
-			return EventRecognition.matchesExact(nextEvent, "d");
-		} , () -> {
-			Range selection = getSelectionRange();
-			_window.getBuffer().removeCharsInRangeLogged(selection);
-			clearSelection();
-			_window.switchToNormalMode();
-		});
-		addResponder((Event nextEvent) -> {
-			return EventRecognition.matchesExact(nextEvent, "c");
-		} , () -> {
-			Range selection = getSelectionRange();
-			_window.getBuffer().removeCharsInRangeLogged(selection);
-			clearSelection();
-			_window.switchToInputMode(0);
-		});
-		addResponder((Event nextEvent) -> {
-			return EventRecognition.matchesExact(nextEvent, "y");
-		} , () -> {
-			Range selection = getSelectionRange();
-			CharSequence string = _window.getBuffer().getCharSequence().subSequence(selection.getStart(),
-					selection.getEnd());
-			setClipboard(string.toString());
-			clearSelection();
-			_window.switchToNormalMode();
-		});
-	}
-
-	public void setClipboard(String text) {
-		try (IBehaviorConnection<IClipboardService> clipboardBC = BEHAVIORS
-				.getBehaviorConnection(IClipboardService.class).get()) {
-			clipboardBC.getBehavior().setClipboard(text);
-		} catch (Exception e) {
-			LOG.error("Exception in clipboard: ", e);
-		}
+		addDeleteResponder();
+		addReplaceResponder();
+		addCopyResponder();
 	}
 
 	@Override

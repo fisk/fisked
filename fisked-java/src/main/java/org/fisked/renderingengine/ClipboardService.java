@@ -1,43 +1,33 @@
 package org.fisked.renderingengine;
 
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
-
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.fisked.renderingengine.service.IClipboardService;
+import org.fisked.util.OSDetector;
 
 @Component(immediate = true, publicFactory = false)
 @Instantiate
 @Provides
 public class ClipboardService implements IClipboardService {
-	private final Clipboard clipboard = new Clipboard("Clipboard");
+	private final IClipboardService _implementation = getImplementation();
 
-	@Override
-	public String getClipboard() {
-		String result = "";
-		Transferable contents = clipboard.getContents(null);
-		boolean hasTransferableText = contents != null && contents.isDataFlavorSupported(DataFlavor.stringFlavor);
-		if (hasTransferableText) {
-			try {
-				result = (String) contents.getTransferData(DataFlavor.stringFlavor);
-				if (result == null)
-					result = "";
-			} catch (UnsupportedFlavorException | IOException e) {
-			}
+	private IClipboardService getImplementation() {
+		if (OSDetector.isMac()) {
+			return new MacClipboardService();
+		} else {
+			return new DefaultClipboardService();
 		}
-		return result;
 	}
 
 	@Override
-	public void setClipboard(String text) {
-		StringSelection selection = new StringSelection(text);
-		clipboard.setContents(selection, selection);
+	public String getClipboard() {
+		return _implementation.getClipboard();
+	}
+
+	@Override
+	public void setClipboard(String value) {
+		_implementation.setClipboard(value);
 	}
 
 }

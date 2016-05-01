@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>fisked</groupId>
 	<artifactId>fisked</artifactId>
@@ -28,9 +29,19 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-core</artifactId>
+				<version>6.0.0</version>
+			</dependency>
+			<dependency>
 				<groupId>org.jsoup</groupId>
 				<artifactId>jsoup</artifactId>
 				<version>1.8.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.testng</groupId>
+				<artifactId>testng</artifactId>
+				<version>6.9.10</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.felix</groupId>
@@ -148,9 +159,19 @@
 				<version>20160212</version>
 			</dependency>
 			<dependency>
-   				<groupId>org.armedbear.lisp</groupId>
-    			<artifactId>abcl</artifactId>
-    			<version>1.0.1</version>
+				<groupId>org.armedbear.lisp</groupId>
+				<artifactId>abcl</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-analyzers-common</artifactId>
+				<version>6.0.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-queryparser</artifactId>
+				<version>6.0.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -165,6 +186,6 @@
 	</build>
 	<scm>
 		<connection>scm:git:git@github.com:fisk/fisked.git</connection>
-	  <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 </project>

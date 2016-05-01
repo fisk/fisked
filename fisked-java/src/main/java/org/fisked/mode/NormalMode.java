@@ -40,6 +40,7 @@ public class NormalMode extends AbstractMode {
 					LOG.error("Exception in clipboard: ", e);
 				}
 				_window.switchToNormalMode();
+				_window.setNeedsFullRedraw();
 				return RecognitionState.Recognized;
 			}
 			return RecognitionState.NotRecognized;
@@ -55,6 +56,7 @@ public class NormalMode extends AbstractMode {
 					LOG.error("Exception in clipboard: ", e);
 				}
 				_window.switchToNormalMode();
+				_window.setNeedsFullRedraw();
 				return RecognitionState.Recognized;
 			}
 			return RecognitionState.NotRecognized;

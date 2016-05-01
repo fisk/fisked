@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>fisked-executable</artifactId>
 	<packaging>pom</packaging>
@@ -141,6 +142,18 @@
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-analyzers-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-queryparser</artifactId>
 		</dependency>
 	</dependencies>
 	<build>
@@ -352,6 +365,18 @@
 								<artifactItem>
 									<groupId>org.jsoup</groupId>
 									<artifactId>jsoup</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.lucene</groupId>
+									<artifactId>lucene-core</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.lucene</groupId>
+									<artifactId>lucene-analyzers-common</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.lucene</groupId>
+									<artifactId>lucene-queryparser</artifactId>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${HOME}/.fisked/bundle</outputDirectory>

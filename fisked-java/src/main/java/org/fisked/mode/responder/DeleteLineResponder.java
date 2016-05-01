@@ -2,6 +2,7 @@ package org.fisked.mode.responder;
 
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
+import org.fisked.buffer.registers.RegisterManager;
 import org.fisked.renderingengine.service.models.Range;
 import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
@@ -65,6 +66,9 @@ public class DeleteLineResponder implements IInputResponder {
 		start -= lineEnd - end;
 		start = Math.max(start, 0);
 		Range lineRange = new Range(start, end - start);
+
+		String string = buffer.toString().substring(lineRange.getStart(), lineRange.getEnd());
+		RegisterManager.getInstance().setRegister(RegisterManager.UNNAMED_REGISTER, string);
 
 		if (lineRange.getLength() != 0) {
 			buffer.removeCharsInRangeLogged(lineRange);

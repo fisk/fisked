@@ -1,6 +1,7 @@
 package org.fisked.mode.responder;
 
 import org.fisked.buffer.BufferWindow;
+import org.fisked.buffer.registers.RegisterManager;
 import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.IInputResponder;
@@ -24,6 +25,8 @@ public class MotionActionResponder implements IInputResponder {
 			return EventRecognition.matchesJoined(event, "d", motionRecognizer);
 		} , () -> {
 			MotionRange range = motionRecognizer.getMotionRange();
+			String str = _window.getBuffer().toString().substring(range.getStart(), range.getEnd());
+			RegisterManager.getInstance().setRegister(RegisterManager.UNNAMED_REGISTER, str);
 			_window.getBuffer().removeCharsInRangeLogged(range.getRange());
 			_window.setNeedsFullRedraw();
 		});
