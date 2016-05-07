@@ -61,6 +61,10 @@ public class TwinCursor implements Traversable {
 		return new TwinCursor(_primaryCursor.clone(), _otherCursor.clone());
 	}
 
+	public void resetOther() {
+		_otherCursor = _primaryCursor.clone();
+	}
+
 	public Traversable getOther() {
 		return _otherCursor;
 	}
