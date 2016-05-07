@@ -32,7 +32,7 @@ import java.util.List;
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferController;
 import org.fisked.buffer.BufferWindow;
-import org.fisked.buffer.Cursor;
+import org.fisked.buffer.cursor.Cursor;
 import org.fisked.buffer.registers.RegisterManager;
 import org.fisked.mode.responder.BasicNavigationResponder;
 import org.fisked.mode.responder.CommandInputResponder;

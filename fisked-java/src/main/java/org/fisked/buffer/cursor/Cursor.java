@@ -24,13 +24,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.buffer;
+package org.fisked.buffer.cursor;
 
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.text.TextLayout;
 import org.fisked.text.TextLayout.InvalidLocationException;
+import org.fisked.util.traverse.FilterVisitor;
+import org.fisked.util.traverse.Order;
+import org.fisked.util.traverse.Traversable;
+import org.fisked.util.traverse.Traverser;
 
-public class Cursor {
+public class Cursor implements Traversable {
 	private int _charIndex;
 	private Point _relativePoint; // relative point is point on screen with view
 									// top left being 0, 0
@@ -39,6 +43,10 @@ public class Cursor {
 	private int _lastColumn; // last column of any command that changes cursor
 								// position side-ways
 	private final TextLayout _layout;
+
+	public static Traverser<Cursor> getFilterTraverser(Order order, FilterVisitor<Cursor> visitor, Traversable root) {
+		return new Traverser<Cursor>(visitor, root, order);
+	}
 
 	protected Cursor(int charIndex, Point relativePoint, Point absolutePoint, int lastColumn, TextLayout layout) {
 		_charIndex = charIndex;
@@ -110,5 +118,10 @@ public class Cursor {
 		if (changeLastColumn) {
 			_lastColumn = relativePoint.getX();
 		}
+	}
+
+	@Override
+	public Traversable clone() {
+		return new Cursor(_charIndex, _relativePoint, _absolutePoint, _lastColumn, _layout);
 	}
 }

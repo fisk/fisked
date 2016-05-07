@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.apache.commons.io.IOUtils;
+import org.fisked.buffer.cursor.Cursor;
 import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Range;
