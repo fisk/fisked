@@ -22,7 +22,7 @@ public class MacClipboardService implements IClipboardService {
 	public void setClipboard(String value) {
 		LOG.debug("Set mac clipboard: " + value);
 		ShellCommandExecution sh = new ShellCommandExecution("pbcopy");
-		sh.setInputSource(value);
+		sh.setInputString(value);
 		sh.executeSync();
 		LOG.debug("Set mac clipboard");
 	}

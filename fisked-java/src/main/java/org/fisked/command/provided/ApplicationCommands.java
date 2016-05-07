@@ -40,7 +40,7 @@ public class ApplicationCommands {
 						.getBehaviorConnection(IApplication.class).get()) {
 					applicationBC.getBehavior().popPrimaryWindow();
 				} catch (Exception e) {
-					LOG.error("Couldn't shut down gracefully.");
+					LOG.error("Couldn't shut down gracefully.", e);
 					System.exit(-1);
 				}
 			});

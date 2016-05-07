@@ -4,6 +4,8 @@ import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.renderingengine.service.models.Size;
+import org.fisked.renderingengine.service.models.selection.Selection;
+import org.fisked.renderingengine.service.models.selection.SelectionMode;
 import org.fisked.text.TextLayout;
 
 public class BufferController {
@@ -11,14 +13,14 @@ public class BufferController {
 	private final BufferView _bufferView;
 	private TextLayout _layout;
 	private final Size _size;
-	private Range _selection;
+	private Selection _selection;
 
-	public Range getSelection() {
+	public Selection getSelection() {
 		return _selection;
 	}
 
-	public void setSelection(Range range) {
-		_selection = range;
+	public void setSelection(Selection selection) {
+		_selection = selection;
 	}
 
 	public BufferController(BufferView bufferView, Size size) {
@@ -61,16 +63,22 @@ public class BufferController {
 	}
 
 	public String getSelectedText() {
-		Range selection = getSelection();
+		Selection selection = getSelection();
 		if (selection == null)
 			return null;
-		CharSequence result = getBuffer().getCharSequence().subSequence(selection.getStart(), selection.getEnd());
+		Range range = selection.getRange();
+		if (selection.getMode() != SelectionMode.NORMAL_MODE)
+			throw new RuntimeException("Not yet implemented");
+		CharSequence result = getBuffer().getCharSequence().subSequence(range.getStart(), range.getEnd());
 		return result.toString();
 	}
 
 	public void setSelectionText(String text) {
-		Range selection = getSelection();
-		getBuffer().removeCharsInRangeLogged(selection);
+		Selection selection = getSelection();
+		Range range = selection.getRange();
+		if (selection.getMode() != SelectionMode.NORMAL_MODE)
+			throw new RuntimeException("Not yet implemented");
+		getBuffer().removeCharsInRangeLogged(range);
 		getBuffer().appendStringAtPointLogged(text);
 		setSelection(null);
 	}

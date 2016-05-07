@@ -6,6 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.renderingengine.service.IClipboardService;
+import org.fisked.renderingengine.service.models.selection.SelectionMode;
+import org.fisked.renderingengine.service.models.selection.TextSelection;
 import org.fisked.util.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,46 +20,46 @@ public class RegisterManager {
 		return Singleton.getInstance(RegisterManager.class);
 	}
 
-	private final Map<String, String> _map = new ConcurrentHashMap<>();
+	private final Map<Character, TextSelection> _map = new ConcurrentHashMap<>();
 
-	public String getRegister(char reg) {
+	public TextSelection getRegister(char reg) {
 		if (reg == SYSTEM_REGISTER) {
 			return getClipboard();
 		} else {
-			return _map.get(Character.toString(reg));
+			return _map.get(reg);
 		}
 	}
 
-	public void setRegister(char reg, String str) {
+	public void setRegister(char reg, TextSelection str) {
 		if (reg == SYSTEM_REGISTER) {
 			setClipboard(str);
 		} else {
-			_map.put(Character.toString(reg), str);
+			_map.put(reg, str);
 		}
 	}
 
-	public void setClipboard(String text) {
+	private void setClipboard(TextSelection text) {
 		try (IBehaviorConnection<IClipboardService> clipboardBC = BEHAVIORS
 				.getBehaviorConnection(IClipboardService.class).get()) {
 			LOG.debug("Setting clipboard: " + text);
-			clipboardBC.getBehavior().setClipboard(text);
+			clipboardBC.getBehavior().setClipboard(text.getText());
 			LOG.debug("Clipboard success.");
 		} catch (Exception e) {
 			LOG.error("Exception in clipboard: ", e);
-			_map.put(Character.toString(SYSTEM_REGISTER), text);
+			_map.put(SYSTEM_REGISTER, text);
 		}
 	}
 
-	public String getClipboard() {
+	private TextSelection getClipboard() {
 		try (IBehaviorConnection<IClipboardService> clipboardBC = BEHAVIORS
 				.getBehaviorConnection(IClipboardService.class).get()) {
 			LOG.debug("Getting clipboard");
 			String result = clipboardBC.getBehavior().getClipboard();
 			LOG.debug("Clipboard success: " + result);
-			return result;
+			return new TextSelection(SelectionMode.NORMAL_MODE, result);
 		} catch (Exception e) {
 			LOG.error("Exception in clipboard: ", e);
-			return _map.get(Character.toString(SYSTEM_REGISTER));
+			return _map.get(SYSTEM_REGISTER);
 		}
 	}
 

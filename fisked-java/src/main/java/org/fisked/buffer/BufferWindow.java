@@ -14,12 +14,17 @@ import org.fisked.mode.VisualMode;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.renderingengine.service.models.Point;
 import org.fisked.renderingengine.service.models.Rectangle;
+import org.fisked.renderingengine.service.models.selection.SelectionMode;
 import org.fisked.responder.Event;
 import org.fisked.responder.RecognitionState;
 import org.fisked.settings.Settings;
 import org.fisked.text.TextLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BufferWindow extends Window {
+	private final static Logger LOG = LoggerFactory.getLogger(BufferWindow.class);
+
 	private final ModeLineController _modeLineController;
 	private final ModeLineView _modeLineView;
 
@@ -126,17 +131,19 @@ public class BufferWindow extends Window {
 		context.moveTo(point.getX(), point.getY());
 	}
 
-	public void switchToInputMode(int preactions) {
+	public void switchToInputMode() {
+		LOG.debug("Switching to input mode.");
 		if (_currentMode != null && _currentMode instanceof InputMode)
 			return;
 		if (_currentMode != null)
 			_currentMode.deactivate();
-		_currentMode = new InputMode(this, preactions);
+		_currentMode = new InputMode(this);
 		_currentMode.activate();
 		setNeedsFullRedraw();
 	}
 
 	public void switchToNormalMode() {
+		LOG.debug("Switching to normal mode.");
 		if (_currentMode != null && _currentMode instanceof NormalMode)
 			return;
 		if (_currentMode != null)
@@ -146,12 +153,13 @@ public class BufferWindow extends Window {
 		setNeedsFullRedraw();
 	}
 
-	public void switchToVisualMode() {
+	public void switchToVisualMode(SelectionMode mode) {
+		LOG.debug("Switching to visual mode.");
 		if (_currentMode != null && _currentMode instanceof VisualMode)
 			return;
 		if (_currentMode != null)
 			_currentMode.deactivate();
-		_currentMode = new VisualMode(this);
+		_currentMode = new VisualMode(this, mode);
 		_currentMode.activate();
 		setNeedsFullRedraw();
 	}

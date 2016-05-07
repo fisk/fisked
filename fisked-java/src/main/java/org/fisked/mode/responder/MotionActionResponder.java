@@ -2,6 +2,8 @@ package org.fisked.mode.responder;
 
 import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.registers.RegisterManager;
+import org.fisked.renderingengine.service.models.selection.SelectionMode;
+import org.fisked.renderingengine.service.models.selection.TextSelection;
 import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.IInputResponder;
@@ -26,7 +28,8 @@ public class MotionActionResponder implements IInputResponder {
 		} , () -> {
 			MotionRange range = motionRecognizer.getMotionRange();
 			String str = _window.getBuffer().toString().substring(range.getStart(), range.getEnd());
-			RegisterManager.getInstance().setRegister(RegisterManager.UNNAMED_REGISTER, str);
+			RegisterManager.getInstance().setRegister(RegisterManager.UNNAMED_REGISTER,
+					new TextSelection(SelectionMode.NORMAL_MODE, str));
 			_window.getBuffer().removeCharsInRangeLogged(range.getRange());
 			_window.setNeedsFullRedraw();
 		});
@@ -35,7 +38,7 @@ public class MotionActionResponder implements IInputResponder {
 		} , () -> {
 			MotionRange range = motionRecognizer.getMotionRange();
 			_window.getBuffer().removeCharsInRangeLogged(range.getRange());
-			_window.switchToInputMode(0);
+			_window.switchToInputMode();
 		});
 	}
 

@@ -62,13 +62,6 @@ public class TextNavigator {
 
 	public void scrollUp() {
 		Rectangle rect = _layout.getClippingRect();
-
-		// TODO: Figure out the escape sequences for scrolling
-		// ServiceManager sm = ServiceManager.getInstance();
-		// int start = rect.getOrigin().getY();
-		// int end = start + rect.getSize().getHeight();
-		// sm.getConsoleService().scrollTextRegionUp(new Range(start, end));
-
 		int y = Math.max(rect.getOrigin().getY() - 1, 0);
 		Rectangle newRect = new Rectangle(new Point(rect.getOrigin().getX(), y), rect.getSize());
 		_layout.setClippingRect(newRect);
@@ -76,15 +69,15 @@ public class TextNavigator {
 	}
 
 	public void scrollDown() {
+		Buffer buffer = getBuffer();
 		Rectangle rect = _layout.getClippingRect();
-
-		// TODO: Figure out the escape sequences for scrolling
-		// ServiceManager sm = ServiceManager.getInstance();
-		// int start = rect.getOrigin().getY();
-		// int end = start + rect.getSize().getHeight();
-		// sm.getConsoleService().scrollTextRegionDown(new Range(start, end));
-
-		int y = rect.getOrigin().getY() + 1;
+		int prevY = rect.getOrigin().getY();
+		int maxY = _layout.getAbsoluteLogicalPointForCharIndex(buffer.length()).getY();
+		if (prevY == maxY) {
+			// Can't scroll below last line.
+			return;
+		}
+		int y = prevY + 1;
 		Rectangle newRect = new Rectangle(new Point(rect.getOrigin().getX(), y), rect.getSize());
 		_layout.setClippingRect(newRect);
 		_layout.setNeedsLayout();

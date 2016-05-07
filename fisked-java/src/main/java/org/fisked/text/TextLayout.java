@@ -124,7 +124,7 @@ public class TextLayout {
 
 		int i = 0;
 
-		for (Line currentLine : _logicalLines) {
+		for (Line currentLine : lines) {
 			if (i + currentLine._value.length() >= charIndex) {
 				column = charIndex - i;
 				break;
@@ -135,11 +135,6 @@ public class TextLayout {
 			if (currentLine._trailingEndline) {
 				i++;
 			}
-			line++;
-		}
-
-		if (column >= _rect.getSize().getWidth()) {
-			column = 0;
 			line++;
 		}
 
@@ -155,9 +150,15 @@ public class TextLayout {
 		layoutIfNeeded();
 		Point point = getPointForCharIndexAtOffset(charIndex, _rect.getOrigin().getY(), _logicalLines);
 		int line = point.getY();
+		int column = point.getX();
+
+		if (column >= _rect.getSize().getWidth()) {
+			column = 0;
+			line++;
+		}
 
 		if (line >= 0 && line <= _rect.getSize().getHeight())
-			return point;
+			return new Point(column, line);
 
 		return null;
 	}
@@ -165,11 +166,6 @@ public class TextLayout {
 	public Point getAbsolutePhysicalPointForCharIndex(int charIndex) {
 		layoutIfNeeded();
 		return getPointForCharIndexAtOffset(charIndex, 0, _physicalLines);
-	}
-
-	public Point getRelativePhysicalPointForCharIndex(int charIndex) {
-		layoutIfNeeded();
-		return getPointForCharIndexAtOffset(charIndex, _rect.getOrigin().getY(), _physicalLines);
 	}
 
 	public int getColumnAtCharIndex(int index) {
@@ -187,11 +183,6 @@ public class TextLayout {
 	public int getCharIndexForAbsoluteLogicalPoint(Point point) throws InvalidLocationException {
 		layoutIfNeeded();
 		return getCharIndexForAbsolutePoint(point, _logicalLines);
-	}
-
-	public int getCharIndexForRelativePhysicalPoint(Point point) throws InvalidLocationException {
-		layoutIfNeeded();
-		return getCharIndexForAbsolutePhysicalPoint(point);
 	}
 
 	public int getCharIndexForAbsolutePhysicalPoint(Point point) throws InvalidLocationException {

@@ -6,19 +6,28 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.lang.ProcessBuilder.Redirect;
 
 import org.fisked.util.concurrency.Dispatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ShellCommandExecution {
-	private final String _command;
+	private final static Logger LOG = LoggerFactory.getLogger(ShellCommandExecution.class);
+
+	private final String[] _command;
 	private final ProcessBuilder _processBuilder;
 	private String _inputString;
 
-	public void setInputSource(String string) {
+	public void setInputString(String string) {
 		_inputString = string;
 	}
 
-	public ShellCommandExecution(String command) {
+	public void redirectInput() {
+		_processBuilder.redirectInput(Redirect.INHERIT);
+	}
+
+	public ShellCommandExecution(String... command) {
 		_command = command;
 		_processBuilder = new ProcessBuilder(_command);
 		_processBuilder.redirectErrorStream(true);
@@ -87,7 +96,8 @@ public class ShellCommandExecution {
 			feedInput(process);
 			process.waitFor();
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			LOG.error("Could not run command: ", e);
+			return new ExecutionResult("", -1);
 		}
 
 		StringBuilder result = new StringBuilder();
@@ -99,8 +109,11 @@ public class ShellCommandExecution {
 				result.append(line);
 			}
 			status = process.exitValue();
+			LOG.debug(String.join(" ", _command));
+			LOG.debug(result.toString());
 			return new ExecutionResult(result.toString(), status);
 		} catch (Throwable e) {
+			LOG.error("Could interpret command output: ", e);
 			return new ExecutionResult("", -1);
 		}
 	}

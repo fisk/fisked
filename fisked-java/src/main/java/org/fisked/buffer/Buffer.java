@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 import org.apache.commons.io.IOUtils;
 import org.fisked.renderingengine.service.models.AttributedString;
@@ -28,6 +29,25 @@ public class Buffer implements CharSequence {
 	private TextLayout _layout;
 	private Cursor _cursor;
 	private final Map<String, Object> _map = new HashMap<String, Object>();
+
+	private final Stack<Integer> _undoMergeScope = new Stack<>();
+
+	public void pushUndoScope() {
+		_undoMergeScope.push(0);
+	}
+
+	public void popUndoScope() {
+		int merges = _undoMergeScope.pop();
+		_undoLog.merge(merges);
+	}
+
+	private void incUndoScope() {
+		if (_undoMergeScope.isEmpty()) {
+			return;
+		}
+		int current = _undoMergeScope.pop();
+		_undoMergeScope.push(current + 1);
+	}
 
 	public BufferTextState getBufferTextState() {
 		return _state;
@@ -128,6 +148,7 @@ public class Buffer implements CharSequence {
 
 	public void removeCharsInRangeLogged(Range selection) {
 		_undoLog.logDeleteString(selection);
+		incUndoScope();
 		removeCharsInRange(selection);
 	}
 
@@ -163,6 +184,7 @@ public class Buffer implements CharSequence {
 
 	public void insertStringLogged(int position, String string) {
 		_undoLog.logInsertString(position, string);
+		incUndoScope();
 		insertString(position, string);
 	}
 
@@ -188,10 +210,6 @@ public class Buffer implements CharSequence {
 	}
 
 	private final UndoLog _undoLog = new UndoLog(this);
-
-	public UndoLog getUndoLog() {
-		return _undoLog;
-	}
 
 	public void undo() {
 		_undoLog.undo();

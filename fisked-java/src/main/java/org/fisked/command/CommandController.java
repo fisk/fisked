@@ -5,10 +5,13 @@ import java.util.regex.Pattern;
 
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
+import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.command.api.ICommandManager;
 import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;
+import org.fisked.renderingengine.service.models.selection.Selection;
+import org.fisked.renderingengine.service.models.selection.SelectionMode;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputRecognizer;
 import org.fisked.responder.RecognitionState;
@@ -95,11 +98,14 @@ public class CommandController implements IInputRecognizer {
 
 		int adjust = 0;
 		String bufferString = _window.getBuffer().toString();
-		Range searchRange = _window.getBufferController().getSelection();
+		Selection selection = _window.getBufferController().getSelection();
 
-		if (searchRange != null) {
-			bufferString = bufferString.substring(searchRange.getStart(), searchRange.getEnd());
-			adjust += searchRange.getStart();
+		if (selection != null) {
+			Range range = selection.getRange();
+			if (selection.getMode() != SelectionMode.NORMAL_MODE)
+				throw new RuntimeException("Not yet implemented");
+			bufferString = bufferString.substring(range.getStart(), range.getEnd());
+			adjust += range.getStart();
 		}
 
 		Pattern pattern = Pattern.compile(searchString);
@@ -107,17 +113,22 @@ public class CommandController implements IInputRecognizer {
 
 		int position = -1;
 
+		Buffer buffer = _window.getBuffer();
+		buffer.pushUndoScope();
+
 		while (matcher.find()) {
 			int start = matcher.start(0) + adjust;
 			int end = matcher.end(0) + adjust;
-			_window.getBuffer().removeCharsInRangeLogged(new Range(start, end - start));
-			_window.getBuffer().insertStringLogged(start, replaceString);
+			buffer.removeCharsInRangeLogged(new Range(start, end - start));
+			buffer.insertStringLogged(start, replaceString);
 			adjust += replaceString.length() - (end - start);
 			position = start;
 		}
 
+		buffer.popUndoScope();
+
 		if (position >= 0) {
-			_window.getBuffer().getCursor().setCharIndex(position, true);
+			buffer.getCursor().setCharIndex(position, true);
 			_window.getBufferController().setSelection(null);
 		}
 	}

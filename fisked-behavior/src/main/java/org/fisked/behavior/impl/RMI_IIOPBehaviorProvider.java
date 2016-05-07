@@ -11,6 +11,7 @@ import javax.rmi.PortableRemoteObject;
 
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.behavior.IBehaviorProvider;
+import org.fisked.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +20,8 @@ public class RMI_IIOPBehaviorProvider implements IBehaviorProvider {
 	private final static Logger LOG = LoggerFactory.getLogger(RMI_IIOPBehaviorProvider.class);
 
 	{
-		ProcessBuilder processBuilder = new ProcessBuilder("orbd", "-ORBInitialPort", "1050");
+		ProcessBuilder processBuilder = new ProcessBuilder("orbd", "-port", "1050", "-defaultdb",
+				FileUtil.getFiskedFile("orb.db").getAbsolutePath());
 		processBuilder.redirectErrorStream(true);
 		try {
 			processBuilder.start();

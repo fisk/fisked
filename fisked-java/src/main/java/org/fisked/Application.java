@@ -150,6 +150,9 @@ public class Application implements IApplication {
 			exit(0);
 		}
 		_primaryWindowStack.pop();
+		if (_primaryWindowStack.isEmpty()) {
+			exit(0);
+		}
 		Window window = _primaryWindowStack.peek();
 		if (window != null) {
 			_loop.setPrimaryResponder(window);

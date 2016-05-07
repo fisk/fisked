@@ -23,4 +23,8 @@ public class FileUtil {
 		}
 		return file;
 	}
+
+	public static File getFiskedFile(String string) {
+		return new File(getFiskedHome(), string);
+	}
 }

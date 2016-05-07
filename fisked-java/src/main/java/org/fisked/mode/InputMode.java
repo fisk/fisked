@@ -10,11 +10,12 @@ public class InputMode extends AbstractMode {
 
 	private final TextInputResponder _textInputResponder;
 
-	public InputMode(BufferWindow window, int preactions) {
+	public InputMode(BufferWindow window) {
 		super(window);
 		addResponder(new NormalModeSwitchResponder(_window));
-		_textInputResponder = new TextInputResponder(_window, preactions);
+		_textInputResponder = new TextInputResponder(_window);
 		addResponder(_textInputResponder);
+		window.getBuffer().pushUndoScope();
 	}
 
 	@Override
@@ -29,7 +30,7 @@ public class InputMode extends AbstractMode {
 
 	@Override
 	public void deactivate() {
-		getWindow().getBuffer().getUndoLog().merge(_textInputResponder.getNumActions());
+		getWindow().getBuffer().popUndoScope();
 	}
 
 	@Override

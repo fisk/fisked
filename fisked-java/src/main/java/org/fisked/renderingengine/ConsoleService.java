@@ -1,6 +1,12 @@
 package org.fisked.renderingengine;
 
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.Reader;
 import java.util.Stack;
 
 import org.apache.felix.ipojo.annotations.Component;
@@ -13,6 +19,8 @@ import org.fisked.renderingengine.service.models.Color;
 import org.fisked.renderingengine.service.models.Range;
 import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.settings.Settings;
+import org.fisked.util.FileUtil;
+import org.fisked.util.shell.ShellCommandExecution;
 
 import jline.console.ConsoleReader;
 
@@ -20,13 +28,23 @@ import jline.console.ConsoleReader;
 @Instantiate
 @Provides
 public class ConsoleService implements IConsoleService {
-	private ConsoleReader _reader;
+	private ConsoleReader _jline;
+	private InputStream _in;
+	private OutputStream _out;
+	private Reader _reader;
 	private final Stack<RenderingContext> _renderingContexts = new Stack<>();
+	private String _original_stty;
 
 	public ConsoleService() {
 		try {
-			_reader = new ConsoleReader();
-			_reader.getTerminal().setEchoEnabled(false);
+			System.setProperty("jline.configuration", FileUtil.getFiskedFile("jlinerc").getAbsolutePath());
+			System.setProperty("jline.inputrc", FileUtil.getFiskedFile("inputrc").getAbsolutePath());
+			_in = new FileInputStream(FileDescriptor.in);
+			_out = System.out;
+			_reader = new InputStreamReader(_in, "UTF-8");
+
+			_jline = new ConsoleReader("fisked", _in, _out, null);
+			_jline.getTerminal().setEchoEnabled(false);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -34,7 +52,7 @@ public class ConsoleService implements IConsoleService {
 
 	private void print(String string) {
 		try {
-			_reader.print(string);
+			_jline.print(string);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -51,7 +69,7 @@ public class ConsoleService implements IConsoleService {
 	@Override
 	public void flush() {
 		try {
-			_reader.flush();
+			_jline.flush();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -59,17 +77,17 @@ public class ConsoleService implements IConsoleService {
 
 	@Override
 	public int getChar() throws IOException {
-		return _reader.readCharacter();
+		return _reader.read();
 	}
 
 	@Override
 	public int getScreenWidth() {
-		return _reader.getTerminal().getWidth();
+		return _jline.getTerminal().getWidth();
 	}
 
 	@Override
 	public int getScreenHeight() {
-		return _reader.getTerminal().getHeight();
+		return _jline.getTerminal().getHeight();
 	}
 
 	class RenderingContext implements IRenderingContext {
@@ -152,6 +170,13 @@ public class ConsoleService implements IConsoleService {
 
 	@Override
 	public void activate() {
+		ShellCommandExecution execution = new ShellCommandExecution("stty", "-g");
+		execution.redirectInput();
+		_original_stty = execution.executeSync().getResult();
+		execution = new ShellCommandExecution("stty", "raw");
+		execution.redirectInput();
+		execution.executeSync();
+
 		csi();
 		print("?1049h");
 		print("\u001B%G");
@@ -162,8 +187,11 @@ public class ConsoleService implements IConsoleService {
 	public void deactivate() {
 		csi();
 		print("?1049l");
-		_reader.shutdown();
+		_jline.shutdown();
 		flush();
+		ShellCommandExecution execution = new ShellCommandExecution("stty", _original_stty);
+		execution.redirectInput();
+		execution.executeSync();
 	}
 
 	private ICursorService _cursor = null;

@@ -157,13 +157,13 @@ public class Launcher {
 		synchronized (this) {
 			notify();
 		}
+		System.exit(_stopCode);
 	}
 
 	private void finalExit() {
 		try {
 			_felix.stop();
 			_felix.waitForStop(0);
-			System.exit(_stopCode);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
@@ -173,15 +173,18 @@ public class Launcher {
 	public static void main(String[] args) {
 		Launcher launcher = new Launcher(args);
 		launcher.start();
-		synchronized (launcher) {
-			while (!launcher._stopRequested) {
+		launcher.waitForExitLoop();
+	}
+
+	private void waitForExitLoop() {
+		synchronized (this) {
+			while (!_stopRequested) {
 				try {
-					launcher.wait();
+					wait();
 				} catch (InterruptedException e) {
 				}
 			}
+			finalExit();
 		}
-
-		launcher.finalExit();
 	}
 }
