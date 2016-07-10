@@ -26,6 +26,7 @@
  *******************************************************************************/
 package org.fisked.command;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -123,16 +124,14 @@ public class CommandController implements IInputRecognizer {
 		String searchString = searchPattern.group(1);
 		String replaceString = searchPattern.group(2);
 
-		_window.getBufferController().getFatTextSelections();
-
-		IntervalTree<FatTextSelection> ranges = _window.getBufferController().getFatTextSelections();
+		List<FatTextSelection> ranges = _window.getBufferController().getFatTextSelections();
 
 		Buffer buffer = _window.getBuffer();
 		try (UndoScope us = buffer.createUndoScope()) {
 			IntervalTree<String> intervalTree = new IntervalTree<>();
 
 			String bufferString = _window.getBuffer().toString();
-			ranges.forEach((Range cursorRange, FatTextSelection selection) -> {
+			ranges.forEach((FatTextSelection selection) -> {
 				for (Range range : selection.getRanges()) {
 					intervalTree.add(range, bufferString.substring(range.getStart(), range.getEnd()));
 				}

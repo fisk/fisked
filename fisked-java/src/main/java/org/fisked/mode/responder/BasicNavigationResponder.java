@@ -77,18 +77,22 @@ public class BasicNavigationResponder implements IInputResponder {
 		_responders.addResponder("h", () -> {
 			_navigator.moveLeft();
 			_navigator.scrollUpIfNeeded();
+			_window.setNeedsFullRedraw();
 		});
 		_responders.addResponder("l", () -> {
 			_navigator.moveRight();
 			_navigator.scrollDownIfNeeded();
+			_window.setNeedsFullRedraw();
 		});
 		_responders.addResponder("j", () -> {
 			_navigator.moveDown();
 			_navigator.scrollDownIfNeeded();
+			_window.setNeedsFullRedraw();
 		});
 		_responders.addResponder("k", () -> {
 			_navigator.moveUp();
 			_navigator.scrollUpIfNeeded();
+			_window.setNeedsFullRedraw();
 		});
 	}
 

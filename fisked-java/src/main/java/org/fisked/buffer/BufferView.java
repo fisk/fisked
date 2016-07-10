@@ -26,7 +26,6 @@
  *******************************************************************************/
 package org.fisked.buffer;
 
-import org.fisked.buffer.cursor.FatTextSelection;
 import org.fisked.buffer.drawing.View;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.text.IBufferDecorator;
@@ -64,9 +63,10 @@ public class BufferView extends View {
 		Color selectionBackgroundColor = ThemeManager.getThemeManager().getCurrentTheme().getSelectionBackgroundColor();
 		Color selectionForegroundColor = ThemeManager.getThemeManager().getCurrentTheme().getSelectionForegroundColor();
 
-		IntervalTree<FatTextSelection> selections = _controller.getFatTextSelections();
+		IntervalTree<String> selections = _controller.getInnerSelections();
 
 		if (selections.isEmpty()) {
+			LOG.debug("Empty selection");
 			_controller.drawBuffer(drawingRect, (Point point, String str, int offset) -> {
 				AttributedString attributedSubstring = attributedString.substring(offset, offset + str.length());
 				context.moveTo(drawingRect.getOrigin().getX(), point.getY());
@@ -79,18 +79,16 @@ public class BufferView extends View {
 				Range queryRange = new Range(offset, str.length());
 				LOG.debug("Query range: " + queryRange);
 
-				selections.forEachIntersect(queryRange, (Range cursorRange, FatTextSelection selection) -> {
-					LOG.debug("Intersection: " + cursorRange);
-					for (Range range : selection.getRanges()) {
-						int relativeSelectionStart = Math.max(range.getStart() - offset, 0);
-						int relativeSelectionEnd = Math.min(range.getEnd() - offset, str.length());
+				selections.forEachIntersect(queryRange, (Range range, String string) -> {
+					LOG.debug("Intersection: " + range);
+					int relativeSelectionStart = Math.max(range.getStart() - offset, 0);
+					int relativeSelectionEnd = Math.min(range.getEnd() - offset, str.length());
 
-						if (relativeSelectionEnd - relativeSelectionStart > 0) {
-							attributedSubstring.setForegroundColor(selectionForegroundColor, relativeSelectionStart,
-									relativeSelectionEnd);
-							attributedSubstring.setBackgroundColor(selectionBackgroundColor, relativeSelectionStart,
-									relativeSelectionEnd);
-						}
+					if (relativeSelectionEnd - relativeSelectionStart > 0) {
+						attributedSubstring.setForegroundColor(selectionForegroundColor, relativeSelectionStart,
+								relativeSelectionEnd);
+						attributedSubstring.setBackgroundColor(selectionBackgroundColor, relativeSelectionStart,
+								relativeSelectionEnd);
 					}
 				});
 

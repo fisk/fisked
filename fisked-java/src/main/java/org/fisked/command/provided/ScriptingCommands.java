@@ -27,6 +27,7 @@
 package org.fisked.command.provided;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.Future;
 
 import org.apache.commons.io.FileUtils;
@@ -77,37 +78,41 @@ public class ScriptingCommands {
 		Wrapper<Integer> lastIndex = new Wrapper<>();
 
 		try (UndoScope us = buffer.createUndoScope()) {
-			window.getBufferController().getFatTextSelections()
-					.forEachReverse((Range range, FatTextSelection selection) -> {
-						lastIndex.setValue(range.getStart());
-						LOG.debug("Evaluating script of type: " + language);
-						String text = selection.getText();
-						try (IBehaviorConnection<ISourceEvaluatorManager> managerBC = BEHAVIORS
-								.getBehaviorConnection(ISourceEvaluatorManager.class).get()) {
-							managerBC.getBehavior().getEvaluator(language, (evaluator) -> {
-								LOG.debug("Running script:\n" + text);
-								String result;
-								try {
-									result = evaluator.evaluate(text);
-									Log.debug("Result: " + result);
-								} catch (Throwable e) {
-									result = e.getMessage();
-								}
-								if (result != null) {
-									Range selectionRange = selection.getRanges().get(0);
-									int startIndex = selectionRange.getStart();
-									buffer.removeCharsInRangeLogged(selectionRange);
-									buffer.insertString(startIndex, result);
-									window.switchToNormalMode();
-								} else {
-									LOG.debug("Evaluator did not reply.");
-									window.getCommandController().setCommandFeedback("Evaluator did not reply.");
-								}
-							});
-						} catch (Exception e) {
-							LOG.error("Can't evaluate source: ", e);
+			List<FatTextSelection> list = window.getBufferController().getFatTextSelections();
+
+			for (int i = list.size() - 1; i >= 0; i--) {
+				FatTextSelection selection = list.get(i);
+
+				LOG.debug("Evaluating script of type: " + language);
+				String text = selection.getText();
+				try (IBehaviorConnection<ISourceEvaluatorManager> managerBC = BEHAVIORS
+						.getBehaviorConnection(ISourceEvaluatorManager.class).get()) {
+					managerBC.getBehavior().getEvaluator(language, (evaluator) -> {
+						LOG.debug("Running script:\n" + text);
+						String result;
+						try {
+							result = evaluator.evaluate(text);
+							Log.debug("Result: " + result);
+						} catch (Throwable e) {
+							result = e.getMessage();
+						}
+						if (result != null) {
+							Range selectionRange = selection.getRanges().get(0);
+							int startIndex = selectionRange.getStart();
+							buffer.removeCharsInRangeLogged(selectionRange);
+							buffer.insertString(startIndex, result);
+							lastIndex.setValue(selectionRange.getStart());
+							window.switchToNormalMode();
+						} else {
+							LOG.debug("Evaluator did not reply.");
+							window.getCommandController().setCommandFeedback("Evaluator did not reply.");
 						}
 					});
+				} catch (Exception e) {
+					LOG.error("Can't evaluate source: ", e);
+				}
+			}
+
 			window.getBufferController().collapseCursors(lastIndex.getValue());
 			window.getCommandController().setCommandFeedback("Can't evaluate script without selection.");
 		}

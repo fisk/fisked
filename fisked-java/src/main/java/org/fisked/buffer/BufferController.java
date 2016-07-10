@@ -41,8 +41,11 @@ import org.fisked.util.models.Range;
 import org.fisked.util.models.Rectangle;
 import org.fisked.util.models.Size;
 import org.fisked.util.models.selection.SelectionMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BufferController {
+	private final static Logger LOG = LoggerFactory.getLogger(BufferController.class);
 	private Buffer _buffer;
 	private final BufferView _bufferView;
 	private TextLayout _layout;
@@ -222,14 +225,16 @@ public class BufferController {
 		}
 	}
 
-	public IntervalTree<FatTextSelection> getFatTextSelections() {
-		IntervalTree<FatTextSelection> result = new IntervalTree<>();
+	public List<FatTextSelection> getFatTextSelections() {
+		if (_mode == SelectionMode.INVALID_MODE)
+			return new ArrayList<FatTextSelection>();
+		List<FatTextSelection> result = new ArrayList<>();
 		IFilterVisitor<TwinCursor> visitor = new IFilterVisitor<TwinCursor>() {
 			@Override
 			public boolean visit(TwinCursor traversable) {
 				Range range = traversable.getSortedOtherRange();
 				FatTextSelection selection = getFatTextSelection(range, _mode, traversable);
-				result.add(range, selection);
+				result.add(selection);
 				return true;
 			}
 		};
@@ -238,11 +243,13 @@ public class BufferController {
 	}
 
 	public IntervalTree<String> getInnerSelections() {
+		if (_mode == SelectionMode.INVALID_MODE)
+			return new IntervalTree<String>();
 		IntervalTree<String> result = new IntervalTree<>();
 		IFilterVisitor<TwinCursor> visitor = new IFilterVisitor<TwinCursor>() {
 			@Override
 			public boolean visit(TwinCursor traversable) {
-				Range range = traversable.getOtherRange();
+				Range range = traversable.getSortedOtherRange();
 				FatTextSelection selection = getFatTextSelection(range, _mode, traversable);
 				for (Range innerRange : selection.getRanges()) {
 					String str = _buffer.subSequence(innerRange.getStart(), innerRange.getEnd()).toString();

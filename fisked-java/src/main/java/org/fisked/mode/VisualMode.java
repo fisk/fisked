@@ -58,10 +58,9 @@ public class VisualMode extends AbstractMode {
 				.build(() -> {
 					StringBuilder builder = new StringBuilder();
 					Wrapper<Integer> firstIndex = new Wrapper<>();
-					_window.getBufferController().getFatTextSelections()
-							.forEach((Range range, FatTextSelection selection) -> {
-								builder.append(selection);
-							});
+					_window.getBufferController().getFatTextSelections().forEach((FatTextSelection selection) -> {
+						builder.append(selection);
+					});
 					TextSelection selection = new TextSelection(_mode, builder.toString());
 					RegisterManager.getInstance().setRegister(registerRecognizer.getRegister(), selection);
 					_window.getBufferController().collapseCursors(firstIndex.getValue());
@@ -76,10 +75,9 @@ public class VisualMode extends AbstractMode {
 					Buffer buffer = _window.getBuffer();
 					StringBuilder builder = new StringBuilder();
 					Wrapper<Integer> firstIndex = new Wrapper<>();
-					_window.getBufferController().getFatTextSelections()
-							.forEach((Range range, FatTextSelection selection) -> {
-								builder.append(selection);
-							});
+					_window.getBufferController().getFatTextSelections().forEach((FatTextSelection selection) -> {
+						builder.append(selection);
+					});
 					TextSelection selectionText = new TextSelection(_mode, builder.toString());
 					RegisterManager.getInstance().setRegister(registerRecognizer.getRegister(), selectionText);
 
@@ -101,10 +99,9 @@ public class VisualMode extends AbstractMode {
 					Buffer buffer = _window.getBuffer();
 					StringBuilder builder = new StringBuilder();
 					Wrapper<Integer> firstIndex = new Wrapper<>();
-					_window.getBufferController().getFatTextSelections()
-							.forEach((Range range, FatTextSelection selection) -> {
-								builder.append(selection);
-							});
+					_window.getBufferController().getFatTextSelections().forEach((FatTextSelection selection) -> {
+						builder.append(selection);
+					});
 					TextSelection selectionText = new TextSelection(_mode, builder.toString());
 					RegisterManager.getInstance().setRegister(registerRecognizer.getRegister(), selectionText);
 

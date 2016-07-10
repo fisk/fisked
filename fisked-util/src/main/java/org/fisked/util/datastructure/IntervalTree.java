@@ -29,11 +29,15 @@ package org.fisked.util.datastructure;
 import java.util.TreeMap;
 
 import org.fisked.util.models.Range;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Only supports disjoint ranges for now. Will improve if there is need...
  */
 public class IntervalTree<T> {
+	private final static Logger LOG = LoggerFactory.getLogger(IntervalTree.class);
+
 	private static class Entry<T> {
 		Range _range;
 		T _value;
@@ -47,6 +51,7 @@ public class IntervalTree<T> {
 	private final TreeMap<Integer, Entry<T>> _tree = new TreeMap<>();
 
 	public void add(Range range, T value) {
+		LOG.debug("Add: " + range);
 		_tree.put(range.getStart(), new Entry<T>(range, value));
 	}
 
@@ -93,8 +98,11 @@ public class IntervalTree<T> {
 			Entry<T> entry;
 			if (first) {
 				java.util.Map.Entry<Integer, Entry<T>> innerEntry = _tree.floorEntry(next);
-				if (innerEntry == null)
-					return;
+				if (innerEntry == null) {
+					innerEntry = _tree.ceilingEntry(next);
+					if (innerEntry == null)
+						return;
+				}
 				entry = innerEntry.getValue();
 			} else {
 				java.util.Map.Entry<Integer, Entry<T>> innerEntry = _tree.ceilingEntry(next);
@@ -102,10 +110,15 @@ public class IntervalTree<T> {
 					return;
 				entry = innerEntry.getValue();
 			}
+			LOG.debug("Intersect try: " + next + range + ", " + entry._range);
 			if (range.intersection(entry._range) != null) {
+				LOG.debug("Intersected");
 				closure.doit(entry._range, entry._value);
 			}
-			next = entry._range.getEnd() + 1;
+			next = entry._range.getEnd();
+			if (entry._range.getLength() == 0) {
+				next++;
+			}
 			first = false;
 		}
 	}
