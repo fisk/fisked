@@ -24,28 +24,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.renderingengine.service.models.selection;
+package org.fisked.util.models.selection;
 
-import org.fisked.renderingengine.service.models.Range;
-
-public class Selection {
-	private final Range _range;
+public class TextSelection {
 	private final SelectionMode _mode;
+	private final String _text;
 
-	public Selection(int start, int length, SelectionMode mode) {
-		this(new Range(start, length), mode);
-	}
-
-	public Selection(Range range, SelectionMode mode) {
-		_range = range;
+	public TextSelection(SelectionMode mode, String text) {
 		_mode = mode;
+		_text = text;
 	}
 
-	public Range getRange() {
-		return _range;
-	}
-
-	public SelectionMode getMode() {
+	public SelectionMode getSelectionMode() {
 		return _mode;
 	}
+
+	public String getText() {
+		return _text;
+	}
+
+	public TextSelection withMode(SelectionMode mode) {
+		return new TextSelection(mode, _text);
+	}
+
 }

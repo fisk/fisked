@@ -28,11 +28,11 @@ package org.fisked.command;
 
 import org.fisked.buffer.drawing.View;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
-import org.fisked.renderingengine.service.models.AttributedString;
-import org.fisked.renderingengine.service.models.Color;
-import org.fisked.renderingengine.service.models.Point;
-import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.theme.ThemeManager;
+import org.fisked.util.models.AttributedString;
+import org.fisked.util.models.Color;
+import org.fisked.util.models.Point;
+import org.fisked.util.models.Rectangle;
 
 public class CommandView extends View {
 	private CommandController _controller;

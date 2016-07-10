@@ -29,10 +29,10 @@ package org.fisked.text;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.fisked.renderingengine.service.models.Point;
-import org.fisked.renderingengine.service.models.Range;
-import org.fisked.renderingengine.service.models.Rectangle;
-import org.fisked.renderingengine.service.models.Size;
+import org.fisked.util.models.Point;
+import org.fisked.util.models.Range;
+import org.fisked.util.models.Rectangle;
+import org.fisked.util.models.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,6 +125,8 @@ public class TextLayout {
 		int offset = 0;
 		int fromY = _rect.getOrigin().getY();
 		int toY = Math.min(fromY + _rect.getSize().getHeight(), _logicalLines.size());
+
+		LOG.debug("Logical string from y: " + fromY + ", to y: " + toY);
 
 		for (int lineNum = 0; lineNum < fromY; lineNum++) {
 			Line line = _logicalLines.get(lineNum);

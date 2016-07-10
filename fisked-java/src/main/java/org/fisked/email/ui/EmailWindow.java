@@ -33,8 +33,8 @@ import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.drawing.View;
 import org.fisked.buffer.drawing.Window;
-import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.InputResponderChain;
+import org.fisked.util.models.Rectangle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

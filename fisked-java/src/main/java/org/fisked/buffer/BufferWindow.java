@@ -39,14 +39,14 @@ import org.fisked.mode.InputMode;
 import org.fisked.mode.NormalMode;
 import org.fisked.mode.VisualMode;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
-import org.fisked.renderingengine.service.models.Point;
-import org.fisked.renderingengine.service.models.Range;
-import org.fisked.renderingengine.service.models.Rectangle;
-import org.fisked.renderingengine.service.models.selection.SelectionMode;
 import org.fisked.responder.Event;
 import org.fisked.responder.RecognitionState;
 import org.fisked.settings.Settings;
 import org.fisked.text.TextLayout;
+import org.fisked.util.models.Point;
+import org.fisked.util.models.Range;
+import org.fisked.util.models.Rectangle;
+import org.fisked.util.models.selection.SelectionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,7 +154,7 @@ public class BufferWindow extends Window {
 
 	@Override
 	public void drawPoint(IRenderingContext context) {
-		Point point = _bufferController.getLogicalPoint();
+		Point point = _bufferController.getPrimaryLogicalPoint();
 		point = point.addedBy(_bufferView.getClippingRect().getOrigin());
 		context.moveTo(point.getX(), point.getY());
 	}

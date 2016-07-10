@@ -30,13 +30,14 @@ import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.renderingengine.service.IConsoleService;
-import org.fisked.renderingengine.service.models.Face;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputRecognizer;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.IRecognitionAction;
 import org.fisked.responder.InputResponderChain;
 import org.fisked.responder.RecognitionState;
+import org.fisked.util.models.Face;
+import org.fisked.util.models.selection.SelectionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +46,13 @@ public abstract class AbstractMode implements IInputResponder {
 	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(AbstractMode.class);
 	protected BufferWindow _window;
 	protected InputResponderChain _responders = new InputResponderChain();
+	protected SelectionMode _mode;
+	protected int _cursor;
 
-	public AbstractMode(BufferWindow window) {
+	public AbstractMode(BufferWindow window, SelectionMode mode, int cursor) {
 		_window = window;
+		_mode = mode;
+		_cursor = cursor;
 	}
 
 	abstract public String getModeName();
@@ -71,14 +76,16 @@ public abstract class AbstractMode implements IInputResponder {
 	public abstract Face getModelineFace();
 
 	public void activate() {
+		_window.getBufferController().setSelectionMode(_mode);
+		changeCursor(_cursor);
 	}
 
 	public void deactivate() {
 	}
 
-	protected final int CURSOR_BLOCK = 0;
-	protected final int CURSOR_VERTICAL_BAR = 1;
-	protected final int CURSOR_UNDERLINE = 2;
+	protected final static int CURSOR_BLOCK = 0;
+	protected final static int CURSOR_VERTICAL_BAR = 1;
+	protected final static int CURSOR_UNDERLINE = 2;
 
 	protected void changeCursor(int cursor) {
 		try (IBehaviorConnection<IConsoleService> consoleBC = BEHAVIORS.getBehaviorConnection(IConsoleService.class)

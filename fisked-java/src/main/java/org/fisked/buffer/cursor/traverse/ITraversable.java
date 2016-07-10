@@ -24,12 +24,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.util.traverse;
+package org.fisked.buffer.cursor.traverse;
 
-public interface Traversable {
-	default <T extends Traversable> void traverse(Order order, Visitor visitor) {
-		visitor.visit(this);
-	}
+public interface ITraversable {
+	public boolean traverse(IVertexOrderer orderer, IVisitor visitor);
 
-	Traversable clone();
+	ITraversable clone();
 }

@@ -40,13 +40,15 @@ import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.ICursorService;
-import org.fisked.renderingengine.service.models.AttributedString;
-import org.fisked.renderingengine.service.models.Color;
-import org.fisked.renderingengine.service.models.Range;
-import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.settings.Settings;
 import org.fisked.util.FileUtil;
+import org.fisked.util.models.AttributedString;
+import org.fisked.util.models.Color;
+import org.fisked.util.models.Range;
+import org.fisked.util.models.Rectangle;
 import org.fisked.util.shell.ShellCommandExecution;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jline.console.ConsoleReader;
 
@@ -54,6 +56,7 @@ import jline.console.ConsoleReader;
 @Instantiate
 @Provides
 public class ConsoleService implements IConsoleService {
+	private final static Logger LOG = LoggerFactory.getLogger(ConsoleService.class);
 	private ConsoleReader _jline;
 	private InputStream _in;
 	private OutputStream _out;
@@ -196,6 +199,7 @@ public class ConsoleService implements IConsoleService {
 
 	@Override
 	public void activate() {
+		LOG.debug("Console service activate");
 		ShellCommandExecution execution = new ShellCommandExecution("stty", "-g");
 		execution.redirectInput();
 		_original_stty = execution.executeSync().getResult();
@@ -211,6 +215,7 @@ public class ConsoleService implements IConsoleService {
 
 	@Override
 	public void deactivate() {
+		LOG.debug("Console service deactivate");
 		csi();
 		print("?1049l");
 		_jline.shutdown();

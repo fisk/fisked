@@ -24,20 +24,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.util.traverse;
+package org.fisked.util.models.selection;
 
-public class Traverser<T extends Traversable> {
-	protected final Traversable _root;
-	protected final Order _order;
-	protected final Visitor _visitor;
+import org.fisked.util.models.Range;
 
-	public Traverser(Visitor visitor, Traversable root, Order order) {
-		_root = root;
-		_order = order;
-		_visitor = visitor;
+public class Selection {
+	private final Range _range;
+	private final SelectionMode _mode;
+
+	public Selection(int start, int length, SelectionMode mode) {
+		this(new Range(start, length), mode);
 	}
 
-	public void traverse() {
-		_root.traverse(_order, _visitor);
+	public Selection(Range range, SelectionMode mode) {
+		_range = range;
+		_mode = mode;
+	}
+
+	public Range getRange() {
+		return _range;
+	}
+
+	public SelectionMode getMode() {
+		return _mode;
 	}
 }

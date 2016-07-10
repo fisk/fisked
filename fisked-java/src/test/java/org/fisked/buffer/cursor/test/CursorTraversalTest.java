@@ -24,40 +24,47 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.renderingengine.service.models;
+package org.fisked.buffer.cursor.test;
 
-public class Face {
-	private final Color _backgroundColor;
-	private final Color _foregroundColor;
-	private final boolean _bold;
-	
-	public Face(Color backgroundColor, Color foregroundColor, boolean bold) {
-		_backgroundColor = backgroundColor;
-		_foregroundColor = foregroundColor;
-		_bold = bold;
-	}
-	
-	public Face(Color backgroundColor, Color foregroundColor) {
-		this(backgroundColor, foregroundColor, false);
-	}
-	
-	public boolean getBold() {
-		return _bold;
-	}
-	
-	public Color getBackgroundColor() {
-		return _backgroundColor;
-	}
-	
-	public Color getForegroundColor() {
-		return _foregroundColor;
+import org.fisked.buffer.cursor.Cursor;
+import org.fisked.buffer.cursor.CursorCollection;
+import org.fisked.buffer.cursor.traverse.IFilterVisitor;
+import org.fisked.text.TextLayout;
+import org.fisked.util.models.Size;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+public class CursorTraversalTest {
+	private static class Value<T> {
+		private T _value;
+
+		public Value(T value) {
+			_value = value;
+		}
+
+		public T get() {
+			return _value;
+		}
+
+		public void set(T value) {
+			_value = value;
+		}
 	}
 
-	public Face inverted() {
-		return new Face(_foregroundColor, _backgroundColor, _bold);
-	}
-
-	public Face withBackgroundColor(Color backgroundColor) {
-		return new Face(_foregroundColor, backgroundColor, _bold);
+	@Test
+	void testCursorTraversal() {
+		TextLayout layout = new TextLayout("a", new Size(1, 1));
+		CursorCollection collection = new CursorCollection(layout);
+		collection.init(0);
+		Value<Boolean> found = new Value<Boolean>(false);
+		IFilterVisitor<Cursor> visitor = new IFilterVisitor<Cursor>() {
+			@Override
+			public boolean visit(Cursor traversable) {
+				found.set(true);
+				return true;
+			}
+		};
+		collection.doFiltered(visitor);
+		Assert.assertTrue(found.get(), "Didn't find cursor");
 	}
 }

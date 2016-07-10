@@ -27,10 +27,10 @@
 package org.fisked.mode.responder;
 
 import org.fisked.buffer.BufferWindow;
-import org.fisked.renderingengine.service.models.selection.SelectionMode;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.RecognitionState;
+import org.fisked.util.models.selection.SelectionMode;
 
 public class VisualModeSwitchResponder implements IInputResponder {
 	private final BufferWindow _window;

@@ -29,15 +29,16 @@ package org.fisked.mode;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.mode.responder.NormalModeSwitchResponder;
 import org.fisked.mode.responder.TextInputResponder;
-import org.fisked.renderingengine.service.models.Color;
-import org.fisked.renderingengine.service.models.Face;
+import org.fisked.util.models.Color;
+import org.fisked.util.models.Face;
+import org.fisked.util.models.selection.SelectionMode;
 
 public class InputMode extends AbstractMode {
 
 	private final TextInputResponder _textInputResponder;
 
 	public InputMode(BufferWindow window) {
-		super(window);
+		super(window, SelectionMode.INVALID_MODE, CURSOR_VERTICAL_BAR);
 		addResponder(new NormalModeSwitchResponder(_window));
 		_textInputResponder = new TextInputResponder(_window);
 		addResponder(_textInputResponder);
@@ -51,7 +52,7 @@ public class InputMode extends AbstractMode {
 
 	@Override
 	public void activate() {
-		changeCursor(CURSOR_VERTICAL_BAR);
+		super.activate();
 	}
 
 	@Override

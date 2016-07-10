@@ -28,6 +28,7 @@ package org.fisked.responder.motion;
 
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
+import org.fisked.buffer.cursor.Cursor;
 import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.NumberPrefixResponder;
@@ -77,12 +78,12 @@ public class GoToLineMotion implements IMotion {
 	}
 
 	@Override
-	public MotionRange getMotionRange() {
+	public MotionRange getMotionRange(Cursor cursor) {
 		Buffer buffer = _window.getBuffer();
 		int index = buffer.getTextLayout().getCharIndexForPhysicalLine(_number);
 		LOG.debug("Go to line: " + _number + ", index: " + index);
 
-		return new MotionRange(buffer.getPointIndex(), index);
+		return new MotionRange(cursor.getCharIndex(), index);
 	}
 
 }

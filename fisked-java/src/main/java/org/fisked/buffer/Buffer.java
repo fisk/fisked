@@ -37,14 +37,13 @@ import java.util.Stack;
 
 import org.apache.commons.io.IOUtils;
 import org.fisked.buffer.cursor.Cursor;
-import org.fisked.renderingengine.service.models.AttributedString;
-import org.fisked.renderingengine.service.models.Point;
-import org.fisked.renderingengine.service.models.Range;
+import org.fisked.buffer.cursor.CursorCollection;
+import org.fisked.buffer.cursor.traverse.CursorReverseDFSOrderer;
+import org.fisked.buffer.cursor.traverse.IFilterVisitor;
 import org.fisked.text.IBufferDecorator;
 import org.fisked.text.TextLayout;
-import org.fisked.text.TextLayout.InvalidLocationException;
-
-import jline.internal.Log;
+import org.fisked.util.models.AttributedString;
+import org.fisked.util.models.Range;
 
 public class Buffer implements CharSequence {
 	private AttributedString _string = null;
@@ -54,10 +53,29 @@ public class Buffer implements CharSequence {
 
 	private FileContext _fileContext = null;
 	private TextLayout _layout;
-	private Cursor _cursor;
+	private CursorCollection _cursorCollection;
 	private final Map<String, Object> _map = new HashMap<String, Object>();
 
 	private final Stack<Integer> _undoMergeScope = new Stack<>();
+
+	public class UndoScope implements AutoCloseable {
+		public UndoScope() {
+			pushUndoScope();
+		}
+
+		@Override
+		public void close() {
+			popUndoScope();
+		}
+	}
+
+	public UndoScope createUndoScope() {
+		return new UndoScope();
+	}
+
+	public CursorCollection getCursorCollection() {
+		return _cursorCollection;
+	}
 
 	public void pushUndoScope() {
 		_undoMergeScope.push(0);
@@ -131,22 +149,10 @@ public class Buffer implements CharSequence {
 		_state = new BufferTextState(string, null);
 	}
 
-	public Cursor getCursor() {
-		return _cursor;
-	}
-
-	public void setCursor(Cursor cursor) {
-		_cursor = cursor;
-	}
-
 	public void setTextLayout(TextLayout layout) {
 		_layout = layout;
-		_cursor = new Cursor(layout);
-		try {
-			_cursor.setAbsolutePoint(new Point(0, 0), true);
-		} catch (InvalidLocationException e) {
-			Log.debug("Couldn't set curser to 0, 0: ", e);
-		}
+		_cursorCollection = new CursorCollection(layout);
+		_cursorCollection.init();
 	}
 
 	public TextLayout getTextLayout() {
@@ -159,18 +165,28 @@ public class Buffer implements CharSequence {
 		}
 	}
 
-	public void removeCharAtPointLogged() {
-		if (_cursor.getCharIndex() == 0 || _stringBuilder.length() == 0)
+	private void removeCharAtPointLogged(Cursor cursor) {
+		if (cursor.getCharIndex() == 0 || _stringBuilder.length() == 0)
 			return;
-		int index = _cursor.getCharIndex() - 1;
+		int index = cursor.getCharIndex() - 1;
 		removeCharsInRangeLogged(new Range(index, 1));
+	}
+
+	public void removeCharAtPointLogged() {
+		IFilterVisitor<Cursor> visitor = new IFilterVisitor<Cursor>() {
+			@Override
+			public boolean visit(Cursor cursor) {
+				removeCharAtPointLogged(cursor);
+				return true;
+			}
+		};
+		_cursorCollection.doFiltered(visitor, new CursorReverseDFSOrderer());
 	}
 
 	public void removeCharsInRange(Range selection) {
 		_state = _state.deleteString(selection);
 		_stringBuilder.delete(selection.getStart(), selection.getEnd());
 		dirtyAttributedString();
-		_cursor.setCharIndex(selection.getStart(), true);
 	}
 
 	public void removeCharsInRangeLogged(Range selection) {
@@ -181,16 +197,6 @@ public class Buffer implements CharSequence {
 
 	public void appendCharAtPointLogged(char character) {
 		appendStringAtPointLogged(Character.toString(character));
-	}
-
-	public int getPointIndex() {
-		return _cursor.getCharIndex();
-	}
-
-	public void setPointIndex(int pointIndex) {
-		if (pointIndex >= 0 && pointIndex <= _stringBuilder.length()) {
-			_cursor.setCharIndex(pointIndex, true);
-		}
 	}
 
 	@Override
@@ -206,7 +212,6 @@ public class Buffer implements CharSequence {
 		_state = _state.insertString(position, string);
 		_stringBuilder.insert(position, string);
 		dirtyAttributedString();
-		_cursor.setCharIndex(position + string.length(), true);
 	}
 
 	public void insertStringLogged(int position, String string) {
@@ -215,9 +220,20 @@ public class Buffer implements CharSequence {
 		insertString(position, string);
 	}
 
-	public void appendStringAtPointLogged(String string) {
-		int index = _cursor.getCharIndex();
+	private void appendStringAtPointLogged(Cursor cursor, String string) {
+		int index = cursor.getCharIndex();
 		insertStringLogged(index, string);
+	}
+
+	public void appendStringAtPointLogged(String string) {
+		IFilterVisitor<Cursor> visitor = new IFilterVisitor<Cursor>() {
+			@Override
+			public boolean visit(Cursor cursor) {
+				appendStringAtPointLogged(cursor, string);
+				return true;
+			}
+		};
+		_cursorCollection.doFiltered(visitor, new CursorReverseDFSOrderer());
 	}
 
 	public String getFileName() {

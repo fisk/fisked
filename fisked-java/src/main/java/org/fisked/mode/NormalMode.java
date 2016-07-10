@@ -37,11 +37,12 @@ import org.fisked.mode.responder.MotionActionResponder;
 import org.fisked.mode.responder.SearchTextResponder;
 import org.fisked.mode.responder.VisualModeSwitchResponder;
 import org.fisked.renderingengine.service.IClipboardService;
-import org.fisked.renderingengine.service.models.Color;
-import org.fisked.renderingengine.service.models.Face;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.RecognitionState;
 import org.fisked.text.TextNavigator;
+import org.fisked.util.models.Color;
+import org.fisked.util.models.Face;
+import org.fisked.util.models.selection.SelectionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,7 @@ public class NormalMode extends AbstractMode {
 	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(NormalMode.class);
 
 	public NormalMode(BufferWindow window) {
-		super(window);
+		super(window, SelectionMode.INVALID_MODE, CURSOR_UNDERLINE);
 		addResponder(new CommandInputResponder(_window));
 		addResponder(new SearchTextResponder(_window));
 		addResponder(new InputModeSwitchResponder(_window));
@@ -89,13 +90,13 @@ public class NormalMode extends AbstractMode {
 		});
 		addResponder(nextEvent -> {
 			return EventRecognition.matchesExact(nextEvent, "u");
-		} , () -> {
+		}, () -> {
 			_window.getBuffer().undo();
 			_window.setNeedsFullRedraw();
 		});
 		addResponder(nextEvent -> {
 			return nextEvent.isControlChar('r') ? RecognitionState.Recognized : RecognitionState.NotRecognized;
-		} , () -> {
+		}, () -> {
 			_window.getBuffer().redo();
 			_window.setNeedsFullRedraw();
 		});
@@ -109,7 +110,7 @@ public class NormalMode extends AbstractMode {
 
 	@Override
 	public void activate() {
-		changeCursor(CURSOR_UNDERLINE);
+		super.activate();
 	}
 
 	@Override

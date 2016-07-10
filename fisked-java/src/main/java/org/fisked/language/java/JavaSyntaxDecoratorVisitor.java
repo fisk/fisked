@@ -39,8 +39,8 @@ import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.fisked.renderingengine.service.models.AttributedString;
-import org.fisked.renderingengine.service.models.Color;
+import org.fisked.util.models.AttributedString;
+import org.fisked.util.models.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

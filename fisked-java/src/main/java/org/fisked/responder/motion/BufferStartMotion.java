@@ -27,15 +27,14 @@
 package org.fisked.responder.motion;
 
 import org.fisked.buffer.BufferWindow;
+import org.fisked.buffer.cursor.Cursor;
 import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.RecognitionState;
 
 public class BufferStartMotion implements IMotion {
-	private BufferWindow _window;
-	
+
 	public BufferStartMotion(BufferWindow window) {
-		_window = window;
 	}
 
 	@Override
@@ -44,8 +43,8 @@ public class BufferStartMotion implements IMotion {
 	}
 
 	@Override
-	public MotionRange getMotionRange() {
-		return new MotionRange(_window.getBuffer().getPointIndex(), 0);
+	public MotionRange getMotionRange(Cursor cursor) {
+		return new MotionRange(cursor.getCharIndex(), 0);
 	}
 
 }

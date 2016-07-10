@@ -26,52 +26,88 @@
  *******************************************************************************/
 package org.fisked.buffer.cursor;
 
-import org.fisked.util.traverse.FilterVisitor;
-import org.fisked.util.traverse.Order;
-import org.fisked.util.traverse.Traversable;
-import org.fisked.util.traverse.Traverser;
-import org.fisked.util.traverse.Visitor;
+import org.fisked.buffer.cursor.traverse.ITraversable;
+import org.fisked.buffer.cursor.traverse.IVertexOrderer;
+import org.fisked.buffer.cursor.traverse.IVisitor;
+import org.fisked.util.models.Range;
 
-public class TwinCursor implements Traversable {
-	private Traversable _primaryCursor;
-	private Traversable _otherCursor;
+public class TwinCursor implements ITraversable {
+	private Cursor _primaryCursor;
+	private Cursor _otherCursor;
 
-	public static Traverser<TwinCursor> getFilterTraverser(Order order, FilterVisitor<TwinCursor> visitor,
-			Traversable root) {
-		return new Traverser<TwinCursor>(visitor, root, order);
-	}
-
-	public TwinCursor(Traversable primaryCursor, Traversable otherCursor) {
+	public TwinCursor(Cursor primaryCursor, Cursor otherCursor) {
 		_primaryCursor = primaryCursor;
 		_otherCursor = otherCursor;
 	}
 
-	public TwinCursor(Traversable cursor) {
+	public TwinCursor(Cursor cursor) {
 		_primaryCursor = cursor;
-		_otherCursor = cursor.clone();
+		_otherCursor = null;
 	}
 
 	@Override
-	public void traverse(Order order, Visitor visitor) {
-		_primaryCursor.traverse(order, visitor);
-	}
-
-	@Override
-	public Traversable clone() {
-		return new TwinCursor(_primaryCursor.clone(), _otherCursor.clone());
+	public ITraversable clone() {
+		return new TwinCursor((Cursor) _primaryCursor.clone(), (Cursor) _otherCursor.clone());
 	}
 
 	public void resetOther() {
-		_otherCursor = _primaryCursor.clone();
+		_otherCursor = (Cursor) _primaryCursor.clone();
 	}
 
-	public Traversable getOther() {
+	public void clearOtherSorted() {
+		Range range = getOtherRange();
+		_primaryCursor.setCharIndex(range.getStart(), true);
+		_otherCursor = null;
+	}
+
+	public void clearOther() {
+		_otherCursor = null;
+	}
+
+	public Cursor getOther() {
 		return _otherCursor;
 	}
 
+	public Cursor getPrimary() {
+		return _primaryCursor;
+	}
+
+	public Range getOtherRange() {
+		Cursor primary = _primaryCursor;
+		if (_otherCursor == null) {
+			return new Range(primary.getCharIndex(), 0);
+		}
+		Cursor other = _otherCursor;
+		if (other == null) {
+			return null;
+		}
+		int start = primary.getCharIndex();
+		int end = other.getCharIndex();
+		return new Range(start, end - start);
+	}
+
+	public Range getSortedOtherRange() {
+		Cursor primary = _primaryCursor;
+		if (_otherCursor == null) {
+			return new Range(primary.getCharIndex(), 0);
+		}
+		Cursor other = _otherCursor;
+		if (other == null) {
+			return null;
+		}
+		int start = Math.min(primary.getCharIndex(), other.getCharIndex());
+		int end = Math.max(primary.getCharIndex(), other.getCharIndex());
+		return new Range(start, end - start);
+	}
+
 	public void switchOther() {
-		Traversable other = _otherCursor;
+		Cursor other = _otherCursor;
 		_otherCursor = _primaryCursor;
 		_primaryCursor = other;
+	}
+
+	@Override
+	public boolean traverse(IVertexOrderer orderer, IVisitor visitor) {
+		return orderer.traverse(this, visitor);
 	}
 }

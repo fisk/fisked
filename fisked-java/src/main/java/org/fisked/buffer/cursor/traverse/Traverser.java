@@ -24,16 +24,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.util.traverse;
+package org.fisked.buffer.cursor.traverse;
 
-public interface FilterVisitor<V extends Traversable> extends Visitor {
-	void filteredVisit(V traversable);
+public class Traverser<T extends ITraversable, O extends IVertexOrderer> {
+	protected final ITraversable _root;
+	protected final O _orderer;
+	protected final IVisitor _visitor;
 
-	default void filteredVisit(Object traversable) {
+	public Traverser(IVisitor visitor, ITraversable root, O orderer) {
+		_root = root;
+		_orderer = orderer;
+		_visitor = visitor;
 	}
 
-	@Override
-	default <T extends Traversable> void visit(T traversable) {
-		filteredVisit(traversable);
+	public void traverse() {
+		_root.traverse(_orderer, _visitor);
 	}
 }

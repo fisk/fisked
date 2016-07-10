@@ -29,39 +29,61 @@ package org.fisked.buffer.cursor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.fisked.util.traverse.Order;
-import org.fisked.util.traverse.Traversable;
-import org.fisked.util.traverse.Visitor;
+import org.fisked.buffer.cursor.traverse.ITraversable;
+import org.fisked.buffer.cursor.traverse.IVertexOrderer;
+import org.fisked.buffer.cursor.traverse.IVisitor;
 
-public class HierarchyCursor implements Traversable {
-	private final List<Traversable> _children = new ArrayList<Traversable>();
+public class HierarchyCursor implements ITraversable {
+	private final List<ITraversable> _children = new ArrayList<ITraversable>();
+	private ITraversable _primary;
 
 	public HierarchyCursor() {
 	}
 
-	public void addChild(Traversable child) {
+	public HierarchyCursor(ITraversable primary) {
+		_primary = primary;
+		addChild(primary);
+	}
+
+	public ITraversable getPrimary() {
+		return _primary;
+	}
+
+	public void setPrimary(ITraversable traversable) {
+		_primary = traversable;
+	}
+
+	public void addChild(ITraversable child) {
 		_children.add(child);
 	}
 
-	public List<Traversable> getChildren() {
+	public List<ITraversable> getChildren() {
 		return _children;
 	}
 
-	@Override
-	public <T extends Traversable> void traverse(Order order, Visitor visitor) {
-		if (order != Order.PostOrder) {
-			throw new RuntimeException("Not implemented yet");
-		}
-		for (Traversable child : _children) {
-			child.traverse(order, visitor);
-		}
+	public void replaceChild(int index, ITraversable traversable) {
+		_children.remove(index);
+		_children.add(index, traversable);
+	}
+
+	public void clear() {
+		_children.clear();
 	}
 
 	@Override
-	public Traversable clone() {
+	public boolean traverse(IVertexOrderer orderer, IVisitor visitor) {
+		return orderer.traverse(this, visitor);
+	}
+
+	@Override
+	public ITraversable clone() {
 		HierarchyCursor result = new HierarchyCursor();
-		for (Traversable child : _children) {
-			result.addChild(child.clone());
+		for (ITraversable child : _children) {
+			ITraversable clone = child.clone();
+			if (child == _primary) {
+				result.setPrimary(clone);
+			}
+			result.addChild(clone);
 		}
 		return result;
 	}

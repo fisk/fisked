@@ -31,9 +31,10 @@ import java.util.regex.Pattern;
 
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
-import org.fisked.renderingengine.service.models.Point;
-import org.fisked.renderingengine.service.models.Rectangle;
+import org.fisked.buffer.cursor.Cursor;
 import org.fisked.text.TextLayout.InvalidLocationException;
+import org.fisked.util.models.Point;
+import org.fisked.util.models.Rectangle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,40 +45,50 @@ public class TextNavigator {
 
 	private final static Logger LOG = LoggerFactory.getLogger(TextNavigator.class);
 
+	private Cursor getPrimaryCursor() {
+		return _buffer.getCursorCollection().getPrimaryCursor();
+	}
+
+	private boolean isPrimary(Cursor cursor) {
+		return cursor == getPrimaryCursor();
+	}
+
 	private Buffer getBuffer() {
 		return _buffer;
 	}
 
-	private int getIndex() {
-		return getBuffer().getPointIndex();
+	private int getIndex(Cursor cursor) {
+		return cursor.getCharIndex();
 	}
 
-	private Point getAbsolutePoint() {
-		return getBuffer().getCursor().getAbsolutePoint();
+	private Point getAbsolutePoint(Cursor cursor) {
+		return cursor.getAbsolutePoint();
 	}
 
-	private void setAbsolutePoint(Point point, boolean updateLastColumn) {
+	private void setAbsolutePoint(Cursor cursor, Point point, boolean updateLastColumn) {
 		try {
-			getBuffer().getCursor().setAbsolutePoint(point, updateLastColumn);
+			cursor.setAbsolutePoint(point, updateLastColumn);
 		} catch (InvalidLocationException e) {
 			LOG.error("Invalid location: " + point.toString());
 		}
 	}
 
-	private void setIndex(int index, boolean updateLastColumn) {
-		getBuffer().getCursor().setCharIndex(index, false);
-		scrollDownIfNeeded();
-		scrollUpIfNeeded();
-		getBuffer().getCursor().setCharIndex(index, updateLastColumn);
+	private void setIndex(Cursor cursor, int index, boolean updateLastColumn) {
+		cursor.setCharIndex(index, false);
+		if (isPrimary(cursor)) {
+			scrollDownIfNeeded();
+			scrollUpIfNeeded();
+		}
+		cursor.setCharIndex(index, updateLastColumn);
 		_window.setNeedsFullRedraw();
 	}
 
-	public void moveToIndexAndScroll(int index) {
-		setIndex(index, true);
+	public void moveToIndexAndScroll(Cursor cursor, int index) {
+		setIndex(cursor, index, true);
 	}
 
-	private int getLastColumn() {
-		return getBuffer().getCursor().getLastColumn();
+	private int getLastColumn(Cursor cursor) {
+		return cursor.getLastColumn();
 	}
 
 	public TextNavigator(BufferWindow window) {
@@ -110,147 +121,169 @@ public class TextNavigator {
 	}
 
 	public void moveLeft() {
-		int newIndex = getIndex() - 1;
-		if (newIndex >= 0) {
-			setIndex(newIndex, true);
-		}
+		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+			int newIndex = getIndex(cursor) - 1;
+			if (newIndex >= 0) {
+				setIndex(cursor, newIndex, true);
+			}
+		});
 	}
 
 	public void moveRight() {
-		int newIndex = getIndex() + 1;
-		if (newIndex <= _buffer.getCharSequence().length()) {
-			setIndex(newIndex, true);
-		}
+		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+			int newIndex = getIndex(cursor) + 1;
+			if (newIndex <= _buffer.getCharSequence().length()) {
+				setIndex(cursor, newIndex, true);
+			}
+		});
 	}
 
 	public void moveDown() {
-		Point point = getAbsolutePoint();
-		Point newPoint = new Point(getLastColumn(), point.getY() + 1);
-		setAbsolutePoint(newPoint, false);
+		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+			Point point = getAbsolutePoint(cursor);
+			Point newPoint = new Point(getLastColumn(cursor), point.getY() + 1);
+			setAbsolutePoint(cursor, newPoint, false);
+		});
 	}
 
 	public void moveUp() {
-		Point point = getAbsolutePoint();
-		Point newPoint = new Point(getLastColumn(), point.getY() - 1);
-		setAbsolutePoint(newPoint, false);
+		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+			Point point = getAbsolutePoint(cursor);
+			Point newPoint = new Point(getLastColumn(cursor), point.getY() - 1);
+			setAbsolutePoint(cursor, newPoint, false);
+		});
 	}
 
 	public void moveToTheBeginningOfLine() {
-		int newIndex = getIndex();
-		if (newIndex == 0) {
-			return;
-		}
-		if (!String.valueOf(_buffer.getCharSequence().charAt(newIndex - 1)).matches(".")) {
-			return;
-		}
-		newIndex--;
-		while (newIndex >= 0 && String.valueOf(_buffer.getCharSequence().charAt(newIndex)).matches(".")) {
+		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+			int newIndex = getIndex(cursor);
+			if (newIndex == 0) {
+				return;
+			}
+			if (!String.valueOf(_buffer.getCharSequence().charAt(newIndex - 1)).matches(".")) {
+				return;
+			}
 			newIndex--;
-		}
-		setIndex(++newIndex, true);
+			while (newIndex >= 0 && String.valueOf(_buffer.getCharSequence().charAt(newIndex)).matches(".")) {
+				newIndex--;
+			}
+			setIndex(cursor, ++newIndex, true);
+		});
 	}
 
 	public void moveToTheEndOfLine() {
-		int newIndex = getIndex();
-		if (newIndex == _buffer.getCharSequence().length()) {
-			return;
-		}
-		if (!String.valueOf(_buffer.getCharSequence().charAt(newIndex)).matches(".")) {
-			return;
-		}
-		newIndex++;
-		while (newIndex < _buffer.getCharSequence().length()
-				&& String.valueOf(_buffer.getCharSequence().charAt(newIndex)).matches(".")) {
+		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+			int newIndex = getIndex(cursor);
+			if (newIndex == _buffer.getCharSequence().length()) {
+				return;
+			}
+			if (!String.valueOf(_buffer.getCharSequence().charAt(newIndex)).matches(".")) {
+				return;
+			}
 			newIndex++;
-		}
-		setIndex(newIndex, true);
+			while (newIndex < _buffer.getCharSequence().length()
+					&& String.valueOf(_buffer.getCharSequence().charAt(newIndex)).matches(".")) {
+				newIndex++;
+			}
+			setIndex(cursor, newIndex, true);
+		});
 	}
 
 	Pattern _nextWordPattern = Pattern.compile("\\s([^\\s]+)");
 
 	public void moveToNextWord() {
-		int index = getIndex();
-		CharSequence string = _buffer.getCharSequence();
-		Matcher matcher = _nextWordPattern.matcher(string);
-		if (matcher.find(index)) {
-			int newIndex = matcher.start(1);
-			setIndex(newIndex, true);
-		}
+		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+			int index = getIndex(cursor);
+			CharSequence string = _buffer.getCharSequence();
+			Matcher matcher = _nextWordPattern.matcher(string);
+			if (matcher.find(index)) {
+				int newIndex = matcher.start(1);
+				setIndex(cursor, newIndex, true);
+			}
+		});
 	}
 
 	Pattern _endOfWordPattern = Pattern.compile("([^\\s]+)(\\s|$)");
 
 	public void moveToEndOfWord() {
-		int index = getIndex() + 1;
-		CharSequence string = _buffer.getCharSequence();
-		if (index >= string.length())
-			return;
-		Matcher matcher = _endOfWordPattern.matcher(string);
-		if (matcher.find(index)) {
-			int newIndex = matcher.end(1) - 1;
-			if (newIndex > 0) {
-				setIndex(newIndex, true);
+		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+			int index = getIndex(cursor) + 1;
+			CharSequence string = _buffer.getCharSequence();
+			if (index >= string.length())
+				return;
+			Matcher matcher = _endOfWordPattern.matcher(string);
+			if (matcher.find(index)) {
+				int newIndex = matcher.end(1) - 1;
+				if (newIndex > 0) {
+					setIndex(cursor, newIndex, true);
+				}
 			}
-		}
+		});
 	}
 
 	Pattern _previousWordPattern = Pattern.compile("([^\\s]+)(\\s|$)");
 
 	public void moveToPreviousWord() {
-		int index = getIndex();
-		CharSequence string = _buffer.getCharSequence();
-		StringBuilder reverse = new StringBuilder(_buffer.getCharSequence()).reverse();
-		int length = string.length();
-		Matcher matcher = _previousWordPattern.matcher(reverse);
-		if (matcher.find(length - index)) {
-			int newIndex = matcher.end(1);
-			setIndex(length - newIndex, true);
-		}
+		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+			int index = getIndex(cursor);
+			CharSequence string = _buffer.getCharSequence();
+			StringBuilder reverse = new StringBuilder(_buffer.getCharSequence()).reverse();
+			int length = string.length();
+			Matcher matcher = _previousWordPattern.matcher(reverse);
+			if (matcher.find(length - index)) {
+				int newIndex = matcher.end(1);
+				setIndex(cursor, length - newIndex, true);
+			}
+		});
 	}
 
 	public void moveCursorDownIfNeeded() {
-		Point point = getBuffer().getCursor().getAbsolutePoint();
+		Point point = getPrimaryCursor().getAbsolutePoint();
 		while (point.getY() < getBuffer().getTextLayout().getClippingRect().getOrigin().getY()) {
 			moveDown();
-			point = getBuffer().getCursor().getAbsolutePoint();
+			point = getPrimaryCursor().getAbsolutePoint();
 		}
 	}
 
 	public void moveCursorUpIfNeeded() {
-		Point point = getBuffer().getCursor().getAbsolutePoint();
+		Point point = getPrimaryCursor().getAbsolutePoint();
 		Rectangle rect = _layout.getClippingRect();
 		while (point.getY() >= rect.getOrigin().getY() + rect.getSize().getHeight()) {
 			moveUp();
-			point = getBuffer().getCursor().getAbsolutePoint();
+			point = getPrimaryCursor().getAbsolutePoint();
 			rect = _layout.getClippingRect();
 		}
 	}
 
 	public void scrollUpIfNeeded() {
-		Point point = getBuffer().getCursor().getAbsolutePoint();
+		Point point = getPrimaryCursor().getAbsolutePoint();
 		while (point.getY() < getBuffer().getTextLayout().getClippingRect().getOrigin().getY()) {
 			scrollUp();
-			point = getBuffer().getCursor().getAbsolutePoint();
+			point = getPrimaryCursor().getAbsolutePoint();
 			_window.setNeedsFullRedraw();
 		}
 	}
 
 	public void scrollDownIfNeeded() {
-		Point point = getBuffer().getCursor().getAbsolutePoint();
+		Point point = getPrimaryCursor().getAbsolutePoint();
 		Rectangle rect = _layout.getClippingRect();
 		while (point.getY() >= rect.getOrigin().getY() + rect.getSize().getHeight()) {
 			scrollDown();
-			point = getBuffer().getCursor().getAbsolutePoint();
+			point = getPrimaryCursor().getAbsolutePoint();
 			rect = _layout.getClippingRect();
 			_window.setNeedsFullRedraw();
 		}
 	}
 
 	public void moveToStart() {
-		setIndex(0, true);
+		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+			setIndex(cursor, 0, true);
+		});
 	}
 
 	public void moveToEnd() {
-		setIndex(getBuffer().getCharSequence().length(), true);
+		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+			setIndex(cursor, getBuffer().getCharSequence().length(), true);
+		});
 	}
 }

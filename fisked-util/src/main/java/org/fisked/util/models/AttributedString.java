@@ -24,13 +24,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.renderingengine.service.models;
+package org.fisked.util.models;
 
 import java.text.AttributedCharacterIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.fisked.buffer.BufferTextState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -274,7 +273,7 @@ public class AttributedString implements CharSequence {
 		return substring(start, end);
 	}
 
-	final static Logger LOG = LoggerFactory.getLogger(BufferTextState.class);
+	final static Logger LOG = LoggerFactory.getLogger(AttributedString.class);
 
 	public AttributedString stringByInsertingString(String string, int index) {
 		LOG.debug("string: " + _unattributedString + ", insert: " + string + " at " + index);

@@ -30,10 +30,10 @@ import org.fisked.IApplication;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.drawing.Window;
-import org.fisked.renderingengine.service.models.AttributedString;
-import org.fisked.renderingengine.service.models.Range;
 import org.fisked.text.IBufferDecorator;
 import org.fisked.util.concurrency.Dispatcher;
+import org.fisked.util.models.AttributedString;
+import org.fisked.util.models.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

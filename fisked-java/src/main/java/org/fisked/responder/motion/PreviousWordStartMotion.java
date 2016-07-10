@@ -31,14 +31,15 @@ import java.util.regex.Pattern;
 
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
+import org.fisked.buffer.cursor.Cursor;
 import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.RecognitionState;
 
 public class PreviousWordStartMotion implements IMotion {
-	
-	private BufferWindow _window;
-	
+
+	private final BufferWindow _window;
+
 	public PreviousWordStartMotion(BufferWindow window) {
 		_window = window;
 	}
@@ -49,12 +50,12 @@ public class PreviousWordStartMotion implements IMotion {
 	}
 
 	Pattern _previousWordPattern = Pattern.compile("([^\\s]+)(\\s|$)");
-	
+
 	@Override
-	public MotionRange getMotionRange() {
+	public MotionRange getMotionRange(Cursor cursor) {
 		Buffer buffer = _window.getBuffer();
 
-		int index = buffer.getPointIndex();
+		int index = cursor.getCharIndex();
 		boolean found = false;
 		CharSequence string = buffer.getCharSequence();
 		StringBuilder reverse = new StringBuilder(string).reverse();
@@ -65,8 +66,8 @@ public class PreviousWordStartMotion implements IMotion {
 			found = true;
 			index = length - newIndex;
 		}
-		
-		return new MotionRange(buffer.getPointIndex(), found ? index : buffer.getPointIndex());
+
+		return new MotionRange(cursor.getCharIndex(), found ? index : cursor.getCharIndex());
 	}
 
 }

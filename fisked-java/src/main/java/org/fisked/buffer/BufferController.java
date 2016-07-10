@@ -26,27 +26,48 @@
  *******************************************************************************/
 package org.fisked.buffer;
 
-import org.fisked.renderingengine.service.models.Point;
-import org.fisked.renderingengine.service.models.Range;
-import org.fisked.renderingengine.service.models.Rectangle;
-import org.fisked.renderingengine.service.models.Size;
-import org.fisked.renderingengine.service.models.selection.Selection;
-import org.fisked.renderingengine.service.models.selection.SelectionMode;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.fisked.buffer.Buffer.UndoScope;
+import org.fisked.buffer.cursor.Cursor;
+import org.fisked.buffer.cursor.FatTextSelection;
+import org.fisked.buffer.cursor.TwinCursor;
+import org.fisked.buffer.cursor.traverse.IFilterVisitor;
 import org.fisked.text.TextLayout;
+import org.fisked.util.datastructure.IntervalTree;
+import org.fisked.util.models.Point;
+import org.fisked.util.models.Range;
+import org.fisked.util.models.Rectangle;
+import org.fisked.util.models.Size;
+import org.fisked.util.models.selection.SelectionMode;
 
 public class BufferController {
 	private Buffer _buffer;
 	private final BufferView _bufferView;
 	private TextLayout _layout;
 	private final Size _size;
-	private Selection _selection;
+	private SelectionMode _mode = SelectionMode.NORMAL_MODE;
 
-	public Selection getSelection() {
-		return _selection;
+	public SelectionMode getSelectionMode() {
+		return _mode;
 	}
 
-	public void setSelection(Selection selection) {
-		_selection = selection;
+	public void setSelectionMode(SelectionMode mode) {
+		_mode = mode;
+		IFilterVisitor<TwinCursor> visitor = new IFilterVisitor<TwinCursor>() {
+			@Override
+			public boolean visit(TwinCursor traversable) {
+				if (mode == SelectionMode.INVALID_MODE) {
+					traversable.clearOther();
+				} else {
+					traversable.resetOther();
+				}
+				return true;
+			}
+		};
+		_buffer.getCursorCollection().doFiltered(visitor);
+
 	}
 
 	public BufferController(BufferView bufferView, Size size) {
@@ -67,9 +88,12 @@ public class BufferController {
 		return _bufferView;
 	}
 
-	public Point getLogicalPoint() {
-		int index = _buffer.getPointIndex();
-		return _layout.getRelativeLogicalPointForCharIndex(index);
+	public Point getPrimaryLogicalPoint() {
+		return _buffer.getCursorCollection().getPrimaryCursor().getRelativePoint();
+	}
+
+	public Point getPrimaryAbsolutePoint() {
+		return _buffer.getCursorCollection().getPrimaryCursor().getAbsolutePoint();
 	}
 
 	public void setBuffer(Buffer buffer) {
@@ -88,24 +112,178 @@ public class BufferController {
 		});
 	}
 
-	public String getSelectedText() {
-		Selection selection = getSelection();
-		if (selection == null)
-			return null;
-		Range range = selection.getRange();
-		if (selection.getMode() != SelectionMode.NORMAL_MODE)
-			throw new RuntimeException("Not yet implemented");
-		CharSequence result = getBuffer().getCharSequence().subSequence(range.getStart(), range.getEnd());
-		return result.toString();
+	private FatTextSelection getFatTextSelection(Range range, SelectionMode mode, TwinCursor cursor) {
+		List<Range> ranges = new ArrayList<>();
+		switch (mode) {
+		case LINE_MODE: {
+			// Recalculate contiguous range to next case block
+			Point startPoint = _layout.getAbsolutePhysicalPointForCharIndex(range.getStart());
+			Point endPoint = _layout.getAbsolutePhysicalPointForCharIndex(range.getEnd());
+
+			int minY = Math.min(startPoint.getY(), endPoint.getY());
+			int maxY = Math.max(startPoint.getY(), endPoint.getY());
+
+			int minIndex;
+			int maxIndex;
+
+			try {
+				minIndex = _layout.getCharIndexForAbsolutePhysicalPoint(new Point(0, minY));
+			} catch (Exception e) {
+				minIndex = 0;
+			}
+
+			try {
+				maxIndex = _layout.getCharIndexForAbsolutePhysicalPoint(new Point(0, maxY + 1));
+			} catch (Exception e) {
+				maxIndex = _buffer.length();
+			}
+
+			range = new Range(minIndex, maxIndex - minIndex);
+		}
+		case NORMAL_MODE: {
+			// Contiguous text
+			String str = _buffer.getCharSequence().subSequence(range.getStart(), range.getEnd()).toString();
+			ranges.add(range);
+
+			return new FatTextSelection(mode, str, ranges, cursor);
+		}
+		case BLOCK_MODE: {
+			StringBuilder stringBuilder = new StringBuilder();
+			Point startPoint = _layout.getAbsolutePhysicalPointForCharIndex(range.getStart());
+			Point endPoint = _layout.getAbsolutePhysicalPointForCharIndex(range.getEnd());
+
+			int minY = Math.min(startPoint.getY(), endPoint.getY());
+			int maxY = Math.max(startPoint.getY(), endPoint.getY());
+			int minX = Math.min(startPoint.getX(), endPoint.getX());
+			int maxX = Math.max(startPoint.getX(), endPoint.getX());
+
+			for (int i = minY; i <= maxY; i++) {
+				int minIndex;
+				int maxIndex;
+				int lineEnd;
+
+				try {
+					lineEnd = _layout.getCharIndexForAbsolutePhysicalPoint(new Point(0, i + 1));
+				} catch (Exception e) {
+					lineEnd = _buffer.length();
+				}
+				try {
+					minIndex = _layout.getCharIndexForAbsolutePhysicalPoint(new Point(minX, i));
+				} catch (Exception e) {
+					minIndex = lineEnd;
+				}
+				try {
+					maxIndex = _layout.getCharIndexForAbsolutePhysicalPoint(new Point(maxX, i));
+				} catch (Exception e) {
+					maxIndex = lineEnd;
+				}
+
+				ranges.add(new Range(minIndex, maxIndex - minIndex));
+				stringBuilder.append(_buffer.subSequence(minIndex, maxIndex));
+			}
+			return new FatTextSelection(SelectionMode.BLOCK_MODE, stringBuilder.toString(), ranges, cursor);
+		}
+		default:
+		}
+		return null;
 	}
 
-	public void setSelectionText(String text) {
-		Selection selection = getSelection();
-		Range range = selection.getRange();
-		if (selection.getMode() != SelectionMode.NORMAL_MODE)
-			throw new RuntimeException("Not yet implemented");
-		getBuffer().removeCharsInRangeLogged(range);
-		getBuffer().appendStringAtPointLogged(text);
-		setSelection(null);
+	public String getMergedSelectedText() {
+		StringBuilder builder = new StringBuilder();
+		IFilterVisitor<TwinCursor> visitor = new IFilterVisitor<TwinCursor>() {
+			@Override
+			public boolean visit(TwinCursor traversable) {
+				Range range = traversable.getOtherRange();
+				FatTextSelection selection = getFatTextSelection(range, _mode, traversable);
+				builder.append(selection.getText());
+				return true;
+			}
+		};
+		_buffer.getCursorCollection().doFiltered(visitor);
+		return builder.toString();
+	}
+
+	public void setMergedSelectionText(String text) {
+		try (UndoScope us = _buffer.createUndoScope()) {
+			IFilterVisitor<TwinCursor> visitor = new IFilterVisitor<TwinCursor>() {
+				@Override
+				public boolean visit(TwinCursor traversable) {
+					Range range = traversable.getOtherRange();
+					FatTextSelection selection = getFatTextSelection(range, _mode, traversable);
+					for (int i = selection.getRanges().size() - 1; i >= 0; i--) {
+						_buffer.removeCharsInRangeLogged(selection.getRanges().get(i));
+					}
+					int startIndex = selection.getRanges().get(0).getStart();
+					_buffer.insertStringLogged(startIndex, text);
+					return true;
+				}
+			};
+			_buffer.getCursorCollection().doFilteredReverse(visitor);
+		}
+	}
+
+	public IntervalTree<FatTextSelection> getFatTextSelections() {
+		IntervalTree<FatTextSelection> result = new IntervalTree<>();
+		IFilterVisitor<TwinCursor> visitor = new IFilterVisitor<TwinCursor>() {
+			@Override
+			public boolean visit(TwinCursor traversable) {
+				Range range = traversable.getSortedOtherRange();
+				FatTextSelection selection = getFatTextSelection(range, _mode, traversable);
+				result.add(range, selection);
+				return true;
+			}
+		};
+		_buffer.getCursorCollection().doFilteredReverse(visitor);
+		return result;
+	}
+
+	public IntervalTree<String> getInnerSelections() {
+		IntervalTree<String> result = new IntervalTree<>();
+		IFilterVisitor<TwinCursor> visitor = new IFilterVisitor<TwinCursor>() {
+			@Override
+			public boolean visit(TwinCursor traversable) {
+				Range range = traversable.getOtherRange();
+				FatTextSelection selection = getFatTextSelection(range, _mode, traversable);
+				for (Range innerRange : selection.getRanges()) {
+					String str = _buffer.subSequence(innerRange.getStart(), innerRange.getEnd()).toString();
+					result.add(innerRange, str);
+				}
+				return true;
+			}
+		};
+		_buffer.getCursorCollection().doFilteredReverse(visitor);
+		return result;
+	}
+
+	public void collapseCursors(int charIndex) {
+		_buffer.getCursorCollection().collapseCursors(charIndex);
+	}
+
+	public void switchToOther() {
+		IFilterVisitor<TwinCursor> visitor = new IFilterVisitor<TwinCursor>() {
+			@Override
+			public boolean visit(TwinCursor traversable) {
+				traversable.switchOther();
+				return true;
+			}
+		};
+		_buffer.getCursorCollection().doFiltered(visitor);
+	}
+
+	public interface DoCursorClosure {
+		void doit(Cursor cursor);
+	}
+
+	public void doCursorsLogged(DoCursorClosure closure) {
+		try (UndoScope us = _buffer.createUndoScope()) {
+			IFilterVisitor<Cursor> visitor = new IFilterVisitor<Cursor>() {
+				@Override
+				public boolean visit(Cursor traversable) {
+					closure.doit(traversable);
+					return true;
+				}
+			};
+			_buffer.getCursorCollection().doFiltered(visitor);
+		}
 	}
 }

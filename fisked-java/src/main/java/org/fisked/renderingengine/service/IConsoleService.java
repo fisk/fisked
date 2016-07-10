@@ -28,10 +28,10 @@ package org.fisked.renderingengine.service;
 
 import java.io.IOException;
 
-import org.fisked.renderingengine.service.models.AttributedString;
-import org.fisked.renderingengine.service.models.Color;
-import org.fisked.renderingengine.service.models.Range;
-import org.fisked.renderingengine.service.models.Rectangle;
+import org.fisked.util.models.AttributedString;
+import org.fisked.util.models.Color;
+import org.fisked.util.models.Range;
+import org.fisked.util.models.Rectangle;
 
 public interface IConsoleService {
 	void activate();

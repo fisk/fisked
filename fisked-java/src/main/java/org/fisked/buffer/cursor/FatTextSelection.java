@@ -24,34 +24,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.renderingengine.service.models;
+package org.fisked.buffer.cursor;
 
-public class Color {
-	private final short _color;
-	
-	public static final Color BLACK =   new Color((short) 0);
-	public static final Color RED =     new Color((short) 1);
-	public static final Color GREEN =   new Color((short) 2);
-	public static final Color YELLOW =  new Color((short) 3);
-	public static final Color BLUE =    new Color((short) 4);
-	public static final Color MAGENTA = new Color((short) 5);
-	public static final Color CYAN = 	new Color((short) 6);
-	public static final Color WHITE = 	new Color((short) 7);
+import java.util.List;
 
-	public static final Color NORMAL =  new Color((short)9);
-	
-	public Color(short color) {
-		_color = color;
+import org.fisked.util.models.Range;
+import org.fisked.util.models.selection.SelectionMode;
+import org.fisked.util.models.selection.TextSelection;
+
+public class FatTextSelection extends TextSelection {
+	private final TwinCursor _cursor;
+	private final List<Range> _ranges;
+
+	public FatTextSelection(SelectionMode mode, String text, List<Range> ranges, TwinCursor cursor) {
+		super(mode, text);
+		_ranges = ranges;
+		_cursor = cursor;
 	}
-	
-	public short getRawColor() {
-		return _color;
+
+	public List<Range> getRanges() {
+		return _ranges;
 	}
-	
-	public boolean equals(Object object) {
-		if (object == null) return false;
-		if (!(object instanceof Color)) return false;
-		Color color = (Color)object;
-		return color._color == _color;
+
+	public TwinCursor getCursor() {
+		return _cursor;
 	}
 }

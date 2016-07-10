@@ -31,8 +31,8 @@ import java.io.File;
 import org.apache.commons.io.FilenameUtils;
 import org.fisked.language.java.JavaSourceDecorator;
 import org.fisked.language.java.SourceDecoratorQueue;
-import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.text.IBufferDecorator;
+import org.fisked.util.models.AttributedString;
 
 public class FileContext {
 	private final File _file;

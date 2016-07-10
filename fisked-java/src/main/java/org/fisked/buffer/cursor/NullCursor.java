@@ -24,22 +24,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.renderingengine.service.models;
+package org.fisked.buffer.cursor;
 
-public class Size {
-	private final int _width;
-	private final int _height;
-	
-	public Size(int width, int height) {
-		_width = width;
-		_height = height;
+import org.fisked.buffer.cursor.traverse.ITraversable;
+import org.fisked.buffer.cursor.traverse.IVertexOrderer;
+import org.fisked.buffer.cursor.traverse.IVisitor;
+
+public class NullCursor implements ITraversable {
+	@Override
+	public boolean traverse(IVertexOrderer orderer, IVisitor visitor) {
+		return orderer.traverse(this, visitor);
 	}
-	
-	public int getWidth() {
-		return _width;
-	}
-	
-	public int getHeight() {
-		return _height;
+
+	@Override
+	public ITraversable clone() {
+		return this;
 	}
 }

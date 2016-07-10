@@ -29,8 +29,8 @@ package org.fisked.language.java;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.fisked.buffer.BufferTextState;
 import org.fisked.language.SourceDecoratorFactory;
-import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.text.IBufferDecorator;
+import org.fisked.util.models.AttributedString;
 
 public class JavaSourceDecorator implements IBufferDecorator {
 	private final IBufferDecorator _delegate;

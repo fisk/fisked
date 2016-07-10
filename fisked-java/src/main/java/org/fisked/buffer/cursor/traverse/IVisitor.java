@@ -24,8 +24,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.renderingengine.service.models.selection;
+package org.fisked.buffer.cursor.traverse;
 
-public enum SelectionMode {
-	NORMAL_MODE, LINE_MODE, BLOCK_MODE
+import org.fisked.buffer.cursor.Cursor;
+import org.fisked.buffer.cursor.CursorCollection;
+import org.fisked.buffer.cursor.HierarchyCursor;
+import org.fisked.buffer.cursor.NullCursor;
+import org.fisked.buffer.cursor.TwinCursor;
+
+public interface IVisitor {
+	boolean visit(Cursor traversable);
+
+	boolean visit(CursorCollection traversable);
+
+	boolean visit(HierarchyCursor traversable);
+
+	boolean visit(TwinCursor traversable);
+
+	boolean visit(NullCursor traversable);
 }

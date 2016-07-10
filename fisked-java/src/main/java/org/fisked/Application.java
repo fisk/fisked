@@ -42,11 +42,11 @@ import org.fisked.buffer.drawing.Window;
 import org.fisked.launcher.service.ILauncherService;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.ICursorService;
-import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.EventLoop;
 import org.fisked.util.ConsolePrinter;
 import org.fisked.util.FileUtil;
 import org.fisked.util.concurrency.Dispatcher;
+import org.fisked.util.models.Rectangle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

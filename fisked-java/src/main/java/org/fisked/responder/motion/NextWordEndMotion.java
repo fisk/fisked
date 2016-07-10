@@ -31,14 +31,15 @@ import java.util.regex.Pattern;
 
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
+import org.fisked.buffer.cursor.Cursor;
 import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.RecognitionState;
 
 public class NextWordEndMotion implements IMotion {
-	
-	private BufferWindow _window;
-	
+
+	private final BufferWindow _window;
+
 	public NextWordEndMotion(BufferWindow window) {
 		_window = window;
 	}
@@ -48,12 +49,12 @@ public class NextWordEndMotion implements IMotion {
 		return EventRecognition.matchesExact(nextEvent, "e");
 	}
 
-	private Pattern _endOfWordPattern = Pattern.compile("([^\\s]+)(\\s|$)");
-	
+	private final Pattern _endOfWordPattern = Pattern.compile("([^\\s]+)(\\s|$)");
+
 	@Override
-	public MotionRange getMotionRange() {
+	public MotionRange getMotionRange(Cursor cursor) {
 		Buffer buffer = _window.getBuffer();
-		int index = buffer.getPointIndex() + 1;
+		int index = cursor.getCharIndex() + 1;
 		boolean found = false;
 		CharSequence string = buffer.getCharSequence();
 		if (index < string.length()) {
@@ -66,8 +67,8 @@ public class NextWordEndMotion implements IMotion {
 				}
 			}
 		}
-		
-		return new MotionRange(buffer.getPointIndex(), found ? index : buffer.getPointIndex());
+
+		return new MotionRange(cursor.getCharIndex(), found ? index : cursor.getCharIndex());
 	}
 
 }

@@ -28,9 +28,9 @@ package org.fisked.buffer.drawing.listview;
 
 import org.fisked.buffer.drawing.View;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
-import org.fisked.renderingengine.service.models.AttributedString;
-import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.InputResponderChain;
+import org.fisked.util.models.AttributedString;
+import org.fisked.util.models.Rectangle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

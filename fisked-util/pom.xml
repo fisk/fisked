@@ -24,7 +24,8 @@
     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>fisked-util</artifactId>
 	<parent>
@@ -41,8 +42,8 @@
 	</repositories>
 	<dependencies>
 		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>maven-bundle-plugin</artifactId>
+			<groupId>com.github.davidmoten</groupId>
+			<artifactId>rtree</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -123,6 +124,6 @@
 	</build>
 	<scm>
 		<url>git@github.com:fisk/fisked.git</url>
-	  <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 </project>

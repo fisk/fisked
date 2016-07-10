@@ -30,8 +30,8 @@ import java.util.List;
 
 import org.fisked.buffer.drawing.View;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
-import org.fisked.renderingengine.service.models.AttributedString;
-import org.fisked.renderingengine.service.models.Rectangle;
+import org.fisked.util.models.AttributedString;
+import org.fisked.util.models.Rectangle;
 
 public class ModeLineView extends View {
 	

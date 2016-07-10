@@ -27,7 +27,7 @@
 package org.fisked.text;
 
 import org.fisked.buffer.BufferTextState;
-import org.fisked.renderingengine.service.models.AttributedString;
+import org.fisked.util.models.AttributedString;
 
 public interface IBufferDecorator {
 	public interface IBufferDecoratorCallback {

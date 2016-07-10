@@ -26,7 +26,12 @@
  *******************************************************************************/
 package org.fisked.mode.responder;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.fisked.buffer.Buffer.UndoScope;
 import org.fisked.buffer.BufferWindow;
+import org.fisked.buffer.cursor.Cursor;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.IRecognitionAction;
@@ -37,98 +42,128 @@ public class SearchTextResponder implements IInputResponder {
 	private boolean _isSearching = false;
 	private StringBuilder _searchString = new StringBuilder();
 	private boolean _isSearchingForward = true;
-	private int _charIndexBefore = -1;
 	private IRecognitionAction _action;
+	private List<BeforeInfo> _beforeInfo;
+
+	private class BeforeInfo {
+		int _charIndex = 1;
+		Cursor _cursor;
+
+		BeforeInfo(Cursor cursor) {
+			_cursor = cursor;
+		}
+	}
 
 	public SearchTextResponder(BufferWindow window) {
 		_window = window;
 	}
 
-	private void goForward(boolean next) {
+	private void goForward(Cursor cursor, int charIndexBefore, boolean next) {
 		String str = _window.getBuffer().toString();
-		int currentPosition = _window.getBuffer().getPointIndex();
+		int currentPosition = cursor.getCharIndex();
 		if (next) {
 			currentPosition = Math.min(currentPosition + 1, _window.getBuffer().length());
 		}
 		int newIndex = str.indexOf(_searchString.toString(), currentPosition);
 		if (newIndex == -1) {
-			_window.getBuffer().getCursor().setCharIndex(_charIndexBefore, true);
+			cursor.setCharIndex(charIndexBefore, true);
 		} else {
-			_window.getBuffer().getCursor().setCharIndex(newIndex, true);
+			cursor.setCharIndex(newIndex, true);
 		}
 	}
 
-	private void goBackward(boolean next) {
+	private void goBackward(Cursor cursor, int charIndexBefore, boolean next) {
 		String str = _window.getBuffer().toString();
-		int currentPosition = _window.getBuffer().getPointIndex();
+		int currentPosition = cursor.getCharIndex();
 		if (next) {
 			currentPosition = Math.max(currentPosition - 1, 0);
 		}
 		int newIndex = str.lastIndexOf(_searchString.toString(), currentPosition);
 		if (newIndex == -1) {
-			_window.getBuffer().getCursor().setCharIndex(_charIndexBefore, true);
+			cursor.setCharIndex(charIndexBefore, true);
 		} else {
-			_window.getBuffer().getCursor().setCharIndex(newIndex, true);
+			cursor.setCharIndex(newIndex, true);
 		}
 	}
 
-	private void goToNextSearch(boolean next) {
+	private void goToNextSearch(Cursor cursor, int charIndexBefore, boolean next) {
 		if (_isSearchingForward) {
-			goForward(next);
+			goForward(cursor, charIndexBefore, next);
 		} else {
-			goBackward(next);
+			goBackward(cursor, charIndexBefore, next);
 		}
 	}
 
-	private void goToPrevSearch(boolean next) {
+	private void goToPrevSearch(Cursor cursor, int charIndexBefore, boolean next) {
 		if (_isSearchingForward) {
-			goBackward(next);
+			goBackward(cursor, charIndexBefore, next);
 		} else {
-			goForward(next);
+			goForward(cursor, charIndexBefore, next);
 		}
+	}
+
+	private void doSearchAction(Event nextEvent) {
+		_action = () -> {
+			if (nextEvent.isReturn()) {
+				_isSearching = false;
+				_beforeInfo = null;
+				_window.getCommandController().setCommandFeedback(null);
+			} else if (nextEvent.isCharacter()) {
+				char character = nextEvent.getCharacter();
+				_searchString.append(character);
+				try (UndoScope us = _window.getBuffer().createUndoScope()) {
+					for (BeforeInfo info : _beforeInfo) {
+						goToNextSearch(info._cursor, info._charIndex, false);
+					}
+				}
+				String prefix;
+				if (_isSearchingForward) {
+					prefix = "/";
+				} else {
+					prefix = "?";
+				}
+				_window.getCommandController().setCommandFeedback(prefix + _searchString.toString());
+			} else if (nextEvent.isEscape()) {
+				_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+				});
+				_searchString = new StringBuilder();
+				_isSearching = false;
+				try (UndoScope us = _window.getBuffer().createUndoScope()) {
+					for (BeforeInfo info : _beforeInfo) {
+						info._cursor.setCharIndex(info._charIndex, true);
+					}
+				}
+				_window.getCommandController().setCommandFeedback(null);
+				_searchString = new StringBuilder();
+			}
+			_window.setNeedsFullRedraw();
+		};
 	}
 
 	@Override
 	public RecognitionState recognizesInput(Event nextEvent) {
 		if (_isSearching) {
-			_action = () -> {
-				if (nextEvent.isReturn()) {
-					_isSearching = false;
-					_window.getCommandController().setCommandFeedback(null);
-				} else if (nextEvent.isCharacter()) {
-					char character = nextEvent.getCharacter();
-					_searchString.append(character);
-					goToNextSearch(false);
-					String prefix;
-					if (_isSearchingForward) {
-						prefix = "/";
-					} else {
-						prefix = "?";
-					}
-					_window.getCommandController().setCommandFeedback(prefix + _searchString.toString());
-				} else if (nextEvent.isEscape()) {
-					_searchString = new StringBuilder();
-					_isSearching = false;
-					_window.getBuffer().getCursor().setCharIndex(_charIndexBefore, true);
-					_window.getCommandController().setCommandFeedback(null);
-					_searchString = new StringBuilder();
-				}
-				_window.setNeedsFullRedraw();
-			};
+			doSearchAction(nextEvent);
 			return RecognitionState.Recognized;
 		} else {
 			if (nextEvent.isCharacter('n')) {
 				_action = () -> {
-					_charIndexBefore = _window.getBuffer().getPointIndex();
-					goToNextSearch(true);
+					try (UndoScope us = _window.getBuffer().createUndoScope()) {
+						for (BeforeInfo info : _beforeInfo) {
+							goToNextSearch(info._cursor, info._charIndex, true);
+						}
+					}
 					_window.setNeedsFullRedraw();
 				};
 				return RecognitionState.Recognized;
 			}
 			if (nextEvent.isCharacter('N')) {
 				_action = () -> {
-					_charIndexBefore = _window.getBuffer().getPointIndex();
-					goToPrevSearch(true);
+					try (UndoScope us = _window.getBuffer().createUndoScope()) {
+						for (BeforeInfo info : _beforeInfo) {
+							goToPrevSearch(info._cursor, info._charIndex, true);
+						}
+					}
 					_window.setNeedsFullRedraw();
 				};
 				return RecognitionState.Recognized;
@@ -137,7 +172,12 @@ public class SearchTextResponder implements IInputResponder {
 				_action = () -> {
 					_isSearchingForward = true;
 					_isSearching = true;
-					_charIndexBefore = _window.getBuffer().getPointIndex();
+					_beforeInfo = new ArrayList<>();
+					_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+						BeforeInfo info = new BeforeInfo(cursor);
+						info._charIndex = cursor.getCharIndex();
+						_beforeInfo.add(info);
+					});
 					_searchString = new StringBuilder();
 					_window.getCommandController().setCommandFeedback("/");
 					_window.setNeedsFullRedraw();
@@ -147,7 +187,12 @@ public class SearchTextResponder implements IInputResponder {
 				_action = () -> {
 					_isSearchingForward = false;
 					_isSearching = true;
-					_charIndexBefore = _window.getBuffer().getPointIndex();
+					_beforeInfo = new ArrayList<>();
+					_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+						BeforeInfo info = new BeforeInfo(cursor);
+						info._charIndex = cursor.getCharIndex();
+						_beforeInfo.add(info);
+					});
 					_searchString = new StringBuilder();
 					_window.getCommandController().setCommandFeedback("?");
 					_window.setNeedsFullRedraw();

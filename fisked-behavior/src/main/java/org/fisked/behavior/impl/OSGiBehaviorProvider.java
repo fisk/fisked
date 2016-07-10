@@ -76,11 +76,11 @@ public class OSGiBehaviorProvider implements IBehaviorProvider {
 		final BundleContext bc = FrameworkUtil.getBundle(callerClass).getBundleContext();
 		ServiceReference<T> ref = bc.getServiceReference(targetClass);
 		if (ref != null) {
-			LOG.info("Found OSGi behavior immediately.");
+			LOG.trace("Found OSGi behavior immediately.");
 			return CompletableFuture.completedFuture(new OSGiBehaviorCaller<T>(bc, ref));
 		}
 
-		LOG.info("Couldn't find OSGi service.");
+		LOG.trace("Couldn't find OSGi service.");
 
 		Bundle[] bundles = bc.getBundles();
 		List<Bundle> problemBundles = new ArrayList<>();
@@ -97,7 +97,7 @@ public class OSGiBehaviorProvider implements IBehaviorProvider {
 
 		AtomicInteger needsWait = new AtomicInteger(problemBundles.size());
 
-		LOG.debug("Found that some bundles are pending. Installing listener.");
+		LOG.trace("Found that some bundles are pending. Installing listener.");
 
 		CompletableFuture<IBehaviorConnection<T>> future = new CompletableFuture<IBehaviorConnection<T>>();
 		try {
@@ -133,7 +133,7 @@ public class OSGiBehaviorProvider implements IBehaviorProvider {
 									LOG.error("Pending bundles started, still no service. Ouch.");
 									future.cancel(true);
 								} else {
-									LOG.debug("Pending bundles started, found service.");
+									LOG.trace("Pending bundles started, found service.");
 								}
 							}
 						}

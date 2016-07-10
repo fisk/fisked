@@ -32,15 +32,16 @@ import java.util.regex.Pattern;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.Buffer;
+import org.fisked.buffer.Buffer.UndoScope;
 import org.fisked.buffer.BufferWindow;
+import org.fisked.buffer.cursor.FatTextSelection;
 import org.fisked.command.api.ICommandManager;
-import org.fisked.renderingengine.service.models.Range;
-import org.fisked.renderingengine.service.models.Rectangle;
-import org.fisked.renderingengine.service.models.selection.Selection;
-import org.fisked.renderingengine.service.models.selection.SelectionMode;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputRecognizer;
 import org.fisked.responder.RecognitionState;
+import org.fisked.util.datastructure.IntervalTree;
+import org.fisked.util.models.Range;
+import org.fisked.util.models.Rectangle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,41 +123,41 @@ public class CommandController implements IInputRecognizer {
 		String searchString = searchPattern.group(1);
 		String replaceString = searchPattern.group(2);
 
-		int adjust = 0;
-		String bufferString = _window.getBuffer().toString();
-		Selection selection = _window.getBufferController().getSelection();
+		_window.getBufferController().getFatTextSelections();
 
-		if (selection != null) {
-			Range range = selection.getRange();
-			if (selection.getMode() != SelectionMode.NORMAL_MODE)
-				throw new RuntimeException("Not yet implemented");
-			bufferString = bufferString.substring(range.getStart(), range.getEnd());
-			adjust += range.getStart();
-		}
-
-		Pattern pattern = Pattern.compile(searchString);
-		Matcher matcher = pattern.matcher(bufferString);
-
-		int position = -1;
+		IntervalTree<FatTextSelection> ranges = _window.getBufferController().getFatTextSelections();
 
 		Buffer buffer = _window.getBuffer();
-		buffer.pushUndoScope();
+		try (UndoScope us = buffer.createUndoScope()) {
+			IntervalTree<String> intervalTree = new IntervalTree<>();
 
-		while (matcher.find()) {
-			int start = matcher.start(0) + adjust;
-			int end = matcher.end(0) + adjust;
-			buffer.removeCharsInRangeLogged(new Range(start, end - start));
-			buffer.insertStringLogged(start, replaceString);
-			adjust += replaceString.length() - (end - start);
-			position = start;
+			String bufferString = _window.getBuffer().toString();
+			ranges.forEach((Range cursorRange, FatTextSelection selection) -> {
+				for (Range range : selection.getRanges()) {
+					intervalTree.add(range, bufferString.substring(range.getStart(), range.getEnd()));
+				}
+				selection.getCursor().clearOtherSorted();
+			});
+
+			int first = intervalTree.getStart();
+			Pattern pattern = Pattern.compile(searchString);
+
+			intervalTree.forEachReverse((Range range, String text) -> {
+				String subString = bufferString.substring(range.getStart(), range.getEnd());
+				int adjust = range.getStart();
+				Matcher matcher = pattern.matcher(subString);
+
+				while (matcher.find()) {
+					int start = matcher.start(0) + adjust;
+					int end = matcher.end(0) + adjust;
+					buffer.removeCharsInRangeLogged(new Range(start, end - start));
+					buffer.insertStringLogged(start, replaceString);
+					adjust += replaceString.length() - (end - start);
+				}
+			});
+			_window.getBufferController().collapseCursors(first);
 		}
 
-		buffer.popUndoScope();
-
-		if (position >= 0) {
-			buffer.getCursor().setCharIndex(position, true);
-			_window.getBufferController().setSelection(null);
-		}
 	}
 
 }

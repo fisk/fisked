@@ -24,8 +24,40 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.util.traverse;
+package org.fisked.util.models;
 
-public interface Visitor {
-	<T extends Traversable> void visit(T traversable);
+public class Face {
+	private final Color _backgroundColor;
+	private final Color _foregroundColor;
+	private final boolean _bold;
+	
+	public Face(Color backgroundColor, Color foregroundColor, boolean bold) {
+		_backgroundColor = backgroundColor;
+		_foregroundColor = foregroundColor;
+		_bold = bold;
+	}
+	
+	public Face(Color backgroundColor, Color foregroundColor) {
+		this(backgroundColor, foregroundColor, false);
+	}
+	
+	public boolean getBold() {
+		return _bold;
+	}
+	
+	public Color getBackgroundColor() {
+		return _backgroundColor;
+	}
+	
+	public Color getForegroundColor() {
+		return _foregroundColor;
+	}
+
+	public Face inverted() {
+		return new Face(_foregroundColor, _backgroundColor, _bold);
+	}
+
+	public Face withBackgroundColor(Color backgroundColor) {
+		return new Face(_foregroundColor, backgroundColor, _bold);
+	}
 }

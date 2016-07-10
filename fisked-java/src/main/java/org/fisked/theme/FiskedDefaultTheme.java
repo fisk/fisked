@@ -26,7 +26,7 @@
  *******************************************************************************/
 package org.fisked.theme;
 
-import org.fisked.renderingengine.service.models.Color;
+import org.fisked.util.models.Color;
 
 public class FiskedDefaultTheme implements ITheme {
 

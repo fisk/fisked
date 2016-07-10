@@ -24,30 +24,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.renderingengine.service.models;
+package org.fisked.buffer.cursor.traverse;
 
-public class Point {
-	private final int _x;
-	private final int _y;
-	
-	public Point(int x, int y) {
-		_x = x;
-		_y = y;
-	}
-	
-	public int getX() {
-		return _x;
-	}
-	
-	public int getY() {
-		return _y;
-	}
-	
-	public String toString() {
-		return "{" + _x + ", " + _y + "}";
-	}
+import java.util.List;
 
-	public Point addedBy(Point origin) {
-		return new Point(_x + origin._x, _y + origin._y);
+import org.fisked.buffer.cursor.HierarchyCursor;
+
+public class CursorReverseDFSOrderer extends AbstractCursorOrderer {
+	public boolean traverse(HierarchyCursor traversable, IVisitor visitor) {
+		if (!visitor.visit(traversable)) {
+			return false;
+		}
+		List<ITraversable> children = traversable.getChildren();
+		for (int i = children.size() - 1; i >= 0; i--) {
+			ITraversable child = children.get(i);
+			if (!child.traverse(this, visitor)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

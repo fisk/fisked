@@ -24,27 +24,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.renderingengine.service.models.selection;
+package org.fisked.buffer.cursor.traverse;
 
-public class TextSelection {
-	private final SelectionMode _mode;
-	private final String _text;
+import org.fisked.buffer.cursor.HierarchyCursor;
 
-	public TextSelection(SelectionMode mode, String text) {
-		_mode = mode;
-		_text = text;
+public class CursorPrimaryOrderer extends AbstractCursorOrderer {
+	public boolean traverse(HierarchyCursor traversable, IVisitor visitor) {
+		if (!visitor.visit(traversable)) {
+			return false;
+		}
+		return traversable.getPrimary().traverse(this, visitor);
 	}
-
-	public SelectionMode getSelectionMode() {
-		return _mode;
-	}
-
-	public String getText() {
-		return _text;
-	}
-
-	public TextSelection withMode(SelectionMode mode) {
-		return new TextSelection(mode, _text);
-	}
-
 }

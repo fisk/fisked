@@ -30,12 +30,12 @@ import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
-import org.fisked.renderingengine.service.models.Rectangle;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.RecognitionState;
 import org.fisked.theme.ITheme;
 import org.fisked.theme.ThemeManager;
+import org.fisked.util.models.Rectangle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

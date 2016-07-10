@@ -24,35 +24,34 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.renderingengine.service.models;
+package org.fisked.util.models;
 
-public class Range {
-	private final int _start;
-	private final int _length;
+public class Color {
+	private final short _color;
+	
+	public static final Color BLACK =   new Color((short) 0);
+	public static final Color RED =     new Color((short) 1);
+	public static final Color GREEN =   new Color((short) 2);
+	public static final Color YELLOW =  new Color((short) 3);
+	public static final Color BLUE =    new Color((short) 4);
+	public static final Color MAGENTA = new Color((short) 5);
+	public static final Color CYAN = 	new Color((short) 6);
+	public static final Color WHITE = 	new Color((short) 7);
 
-	public Range(int start, int length) {
-		_start = start;
-		_length = length;
+	public static final Color NORMAL =  new Color((short)9);
+	
+	public Color(short color) {
+		_color = color;
 	}
-
-	public int getStart() {
-		return _start;
+	
+	public short getRawColor() {
+		return _color;
 	}
-
-	public int getLength() {
-		return _length;
-	}
-
-	public int getEnd() {
-		return _start + _length;
-	}
-
-	public Range intersection(Range range) {
-		int start = Math.max(getStart(), range.getStart());
-		int end = Math.min(getEnd(), range.getEnd());
-		if (end <= start) {
-			return null;
-		}
-		return new Range(start, end - start);
+	
+	public boolean equals(Object object) {
+		if (object == null) return false;
+		if (!(object instanceof Color)) return false;
+		Color color = (Color)object;
+		return color._color == _color;
 	}
 }

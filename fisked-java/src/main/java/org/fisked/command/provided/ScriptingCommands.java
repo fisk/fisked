@@ -36,11 +36,19 @@ import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
+import org.fisked.buffer.Buffer;
+import org.fisked.buffer.Buffer.UndoScope;
 import org.fisked.buffer.BufferWindow;
+import org.fisked.buffer.cursor.FatTextSelection;
 import org.fisked.command.api.CommandHandlerReference;
 import org.fisked.command.api.ICommandManager;
 import org.fisked.language.eval.service.ISourceEvaluatorManager;
+import org.fisked.mode.AbstractMode;
+import org.fisked.mode.VisualMode;
 import org.fisked.util.FileUtil;
+import org.fisked.util.Wrapper;
+import org.fisked.util.models.Range;
+import org.fisked.util.models.selection.SelectionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,32 +61,54 @@ public class ScriptingCommands {
 	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(ScriptingCommands.class);
 
 	private void evaluateScript(BufferWindow window, String language) {
-		if (window.getBufferController().getSelection() != null) {
-			LOG.debug("Evaluating script of type: " + language);
-			String text = window.getBufferController().getSelectedText();
-			try (IBehaviorConnection<ISourceEvaluatorManager> managerBC = BEHAVIORS
-					.getBehaviorConnection(ISourceEvaluatorManager.class).get()) {
-				managerBC.getBehavior().getEvaluator(language, (evaluator) -> {
-					LOG.debug("Running script:\n" + text);
-					String result;
-					try {
-						result = evaluator.evaluate(text);
-						Log.debug("Result: " + result);
-					} catch (Throwable e) {
-						result = e.getMessage();
-					}
-					if (result != null) {
-						window.getBufferController().setSelectionText(result);
-						window.switchToNormalMode();
-					} else {
-						LOG.debug("Evaluator did not reply.");
-						window.getCommandController().setCommandFeedback("Evaluator did not reply.");
-					}
-				});
-			} catch (Exception e) {
-				LOG.error("Can't evaluate source: ", e);
-			}
-		} else {
+		AbstractMode mode = window.getCurrentMode();
+		if (!(mode instanceof VisualMode)) {
+			LOG.error("Called evaluate script from outside visual mode.");
+			window.getCommandController().setCommandFeedback("Called evaluate script from outside visual mode.");
+			return;
+		}
+		VisualMode visualMode = (VisualMode) mode;
+		if (visualMode.getMode() == SelectionMode.BLOCK_MODE) {
+			LOG.debug("Not yet supported");
+			window.getCommandController().setCommandFeedback("Can't evaluate scripts in visual block mode.");
+			return;
+		}
+		Buffer buffer = window.getBuffer();
+		Wrapper<Integer> lastIndex = new Wrapper<>();
+
+		try (UndoScope us = buffer.createUndoScope()) {
+			window.getBufferController().getFatTextSelections()
+					.forEachReverse((Range range, FatTextSelection selection) -> {
+						lastIndex.setValue(range.getStart());
+						LOG.debug("Evaluating script of type: " + language);
+						String text = selection.getText();
+						try (IBehaviorConnection<ISourceEvaluatorManager> managerBC = BEHAVIORS
+								.getBehaviorConnection(ISourceEvaluatorManager.class).get()) {
+							managerBC.getBehavior().getEvaluator(language, (evaluator) -> {
+								LOG.debug("Running script:\n" + text);
+								String result;
+								try {
+									result = evaluator.evaluate(text);
+									Log.debug("Result: " + result);
+								} catch (Throwable e) {
+									result = e.getMessage();
+								}
+								if (result != null) {
+									Range selectionRange = selection.getRanges().get(0);
+									int startIndex = selectionRange.getStart();
+									buffer.removeCharsInRangeLogged(selectionRange);
+									buffer.insertString(startIndex, result);
+									window.switchToNormalMode();
+								} else {
+									LOG.debug("Evaluator did not reply.");
+									window.getCommandController().setCommandFeedback("Evaluator did not reply.");
+								}
+							});
+						} catch (Exception e) {
+							LOG.error("Can't evaluate source: ", e);
+						}
+					});
+			window.getBufferController().collapseCursors(lastIndex.getValue());
 			window.getCommandController().setCommandFeedback("Can't evaluate script without selection.");
 		}
 	}

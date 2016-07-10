@@ -27,9 +27,8 @@
 package org.fisked.mode.responder;
 
 import org.fisked.buffer.BufferWindow;
+import org.fisked.buffer.cursor.Cursor;
 import org.fisked.buffer.registers.RegisterManager;
-import org.fisked.renderingengine.service.models.selection.SelectionMode;
-import org.fisked.renderingengine.service.models.selection.TextSelection;
 import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.IInputResponder;
@@ -38,6 +37,8 @@ import org.fisked.responder.LoopResponder;
 import org.fisked.responder.RecognitionState;
 import org.fisked.responder.motion.IMotion.MotionRange;
 import org.fisked.responder.motion.MotionRecognizer;
+import org.fisked.util.models.selection.SelectionMode;
+import org.fisked.util.models.selection.TextSelection;
 
 public class MotionActionResponder implements IInputResponder {
 
@@ -51,19 +52,23 @@ public class MotionActionResponder implements IInputResponder {
 
 		_responders.addResponder((Event event) -> {
 			return EventRecognition.matchesJoined(event, "d", motionRecognizer);
-		} , () -> {
-			MotionRange range = motionRecognizer.getMotionRange();
-			String str = _window.getBuffer().toString().substring(range.getStart(), range.getEnd());
-			RegisterManager.getInstance().setRegister(RegisterManager.UNNAMED_REGISTER,
-					new TextSelection(SelectionMode.NORMAL_MODE, str));
-			_window.getBuffer().removeCharsInRangeLogged(range.getRange());
+		}, () -> {
+			_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+				MotionRange range = motionRecognizer.getMotionRange(cursor);
+				String str = _window.getBuffer().toString().substring(range.getStart(), range.getEnd());
+				RegisterManager.getInstance().setRegister(RegisterManager.UNNAMED_REGISTER,
+						new TextSelection(SelectionMode.NORMAL_MODE, str));
+				_window.getBuffer().removeCharsInRangeLogged(range.getRange());
+			});
 			_window.setNeedsFullRedraw();
 		});
 		_responders.addResponder((Event event) -> {
 			return EventRecognition.matchesJoined(event, "c", motionRecognizer);
-		} , () -> {
-			MotionRange range = motionRecognizer.getMotionRange();
-			_window.getBuffer().removeCharsInRangeLogged(range.getRange());
+		}, () -> {
+			_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+				MotionRange range = motionRecognizer.getMotionRange(cursor);
+				_window.getBuffer().removeCharsInRangeLogged(range.getRange());
+			});
 			_window.switchToInputMode();
 		});
 	}

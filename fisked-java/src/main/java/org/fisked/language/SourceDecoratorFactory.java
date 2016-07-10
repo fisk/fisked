@@ -35,9 +35,9 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.fisked.renderingengine.service.models.AttributedString;
 import org.fisked.text.IBufferDecorator;
 import org.fisked.util.Singleton;
+import org.fisked.util.models.AttributedString;
 
 public class SourceDecoratorFactory {
 

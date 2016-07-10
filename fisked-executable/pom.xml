@@ -181,6 +181,10 @@
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-queryparser</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.github.davidmoten</groupId>
+			<artifactId>rtree</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -231,6 +235,10 @@
 						</goals>
 						<configuration>
 							<artifactItems>
+								<artifactItem>
+									<groupId>com.github.davidmoten</groupId>
+									<artifactId>rtree</artifactId>
+								</artifactItem>
 								<artifactItem>
 									<groupId>org.python</groupId>
 									<artifactId>jython-standalone</artifactId>

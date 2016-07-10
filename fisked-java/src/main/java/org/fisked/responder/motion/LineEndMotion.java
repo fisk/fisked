@@ -28,14 +28,15 @@ package org.fisked.responder.motion;
 
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
+import org.fisked.buffer.cursor.Cursor;
 import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.RecognitionState;
 
 public class LineEndMotion implements IMotion {
-	
-	private BufferWindow _window;
-	
+
+	private final BufferWindow _window;
+
 	public LineEndMotion(BufferWindow window) {
 		_window = window;
 	}
@@ -46,11 +47,11 @@ public class LineEndMotion implements IMotion {
 	}
 
 	@Override
-	public MotionRange getMotionRange() {
+	public MotionRange getMotionRange(Cursor cursor) {
 		Buffer buffer = _window.getBuffer();
 		CharSequence string = buffer.getCharSequence();
 
-		int newIndex = buffer.getPointIndex();
+		int newIndex = cursor.getCharIndex();
 		if (newIndex != string.length()) {
 			if (String.valueOf(string.charAt(newIndex)).matches(".")) {
 				newIndex++;
@@ -59,8 +60,8 @@ public class LineEndMotion implements IMotion {
 				}
 			}
 		}
-		
-		return new MotionRange(buffer.getPointIndex(), newIndex);
+
+		return new MotionRange(cursor.getCharIndex(), newIndex);
 	}
 
 }

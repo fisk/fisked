@@ -34,16 +34,16 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.fisked.renderingengine.service.models.AttributedString;
-import org.fisked.renderingengine.service.models.Color;
-import org.fisked.renderingengine.service.models.Face;
-import org.fisked.renderingengine.service.models.Point;
 import org.fisked.scm.ISCMRepository;
 import org.fisked.scm.SCMRepositoryResolver;
 import org.fisked.settings.Settings;
 import org.fisked.theme.ITheme;
 import org.fisked.theme.ThemeManager;
 import org.fisked.util.concurrency.Dispatcher;
+import org.fisked.util.models.AttributedString;
+import org.fisked.util.models.Color;
+import org.fisked.util.models.Face;
+import org.fisked.util.models.Point;
 
 public class ModeLineController {
 
@@ -190,7 +190,7 @@ public class ModeLineController {
 		Color modelineBackgroundColor = theme.getModelineBackgroundColorLight();
 		Color modeBackgroundColor = modeFace.getBackgroundColor();
 
-		Point point = _window.getBuffer().getCursor().getAbsolutePoint();
+		Point point = _window.getBufferController().getPrimaryAbsolutePoint();
 
 		List<AttributedString> result = new ArrayList<>();
 		result.add(drawFatLeftArrow(modelineBackgroundColor, modeBackgroundColor));

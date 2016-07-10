@@ -29,14 +29,14 @@ package org.fisked.buffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.fisked.renderingengine.service.models.AttributedString;
-import org.fisked.renderingengine.service.models.Face;
-import org.fisked.renderingengine.service.models.Point;
 import org.fisked.settings.Settings;
 import org.fisked.text.TextLayout;
 import org.fisked.text.TextLayout.InvalidLocationException;
 import org.fisked.theme.ITheme;
 import org.fisked.theme.ThemeManager;
+import org.fisked.util.models.AttributedString;
+import org.fisked.util.models.Face;
+import org.fisked.util.models.Point;
 
 public class LineNumberController {
 	private final BufferWindow _window;

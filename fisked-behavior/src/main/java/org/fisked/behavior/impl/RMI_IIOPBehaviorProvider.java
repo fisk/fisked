@@ -84,12 +84,12 @@ public class RMI_IIOPBehaviorProvider implements IBehaviorProvider {
 	@Override
 	public <C, T> Future<IBehaviorConnection<T>> getBehaviorConnection(Class<C> callerClass, Class<T> targetClass) {
 		if (!Remote.class.isAssignableFrom(targetClass)) {
-			LOG.info("Not RMI class.");
+			LOG.trace("Not RMI class.");
 			if (_parent != null) {
-				LOG.info("Calling up.");
+				LOG.trace("Calling up.");
 				return _parent.getBehaviorConnection(callerClass, targetClass);
 			} else {
-				LOG.info("Could not find behavior.");
+				LOG.trace("Could not find behavior.");
 				return null;
 			}
 		}
@@ -102,16 +102,16 @@ public class RMI_IIOPBehaviorProvider implements IBehaviorProvider {
 			context = new InitialContext();
 			objref = context.lookup(targetClass.getName());
 			instance = targetClass.cast(PortableRemoteObject.narrow(objref, targetClass));
-			LOG.debug("Found behavior.");
+			LOG.trace("Found behavior.");
 
 			return CompletableFuture.completedFuture(new RMIIIOPConnection<T>(instance));
 		} catch (Exception e) {
 			LOG.debug("Error retrieving behavior.");
 			if (_parent != null) {
-				LOG.debug("Calling up.");
+				LOG.trace("Calling up.");
 				return _parent.getBehaviorConnection(callerClass, targetClass);
 			} else {
-				LOG.debug("Could not find behavior.");
+				LOG.trace("Could not find behavior.");
 				return null;
 			}
 		}

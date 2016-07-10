@@ -27,15 +27,18 @@
 package org.fisked.mode.responder;
 
 import org.fisked.buffer.Buffer;
+import org.fisked.buffer.Buffer.UndoScope;
 import org.fisked.buffer.BufferWindow;
+import org.fisked.buffer.cursor.Cursor;
+import org.fisked.buffer.cursor.traverse.IFilterVisitor;
 import org.fisked.buffer.registers.RegisterManager;
-import org.fisked.renderingengine.service.models.Range;
-import org.fisked.renderingengine.service.models.selection.SelectionMode;
-import org.fisked.renderingengine.service.models.selection.TextSelection;
 import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.RecognitionState;
+import org.fisked.util.models.Range;
+import org.fisked.util.models.selection.SelectionMode;
+import org.fisked.util.models.selection.TextSelection;
 
 public class DeleteLineResponder implements IInputResponder {
 
@@ -50,11 +53,11 @@ public class DeleteLineResponder implements IInputResponder {
 		return EventRecognition.matchesExact(nextEvent, "dd");
 	}
 
-	private int getLineStart() {
+	private int getLineStart(Cursor cursor) {
 		Buffer buffer = _window.getBuffer();
 		String string = buffer.getCharSequence().toString();
 
-		int newIndex = buffer.getPointIndex();
+		int newIndex = cursor.getCharIndex();
 		if (newIndex != 0) {
 			if (String.valueOf(string.charAt(newIndex - 1)).matches(".")) {
 				newIndex--;
@@ -68,11 +71,11 @@ public class DeleteLineResponder implements IInputResponder {
 		return newIndex;
 	}
 
-	private int getLineEnd() {
+	private int getLineEnd(Cursor cursor) {
 		Buffer buffer = _window.getBuffer();
 		String string = buffer.getCharSequence().toString();
 
-		int newIndex = buffer.getPointIndex();
+		int newIndex = cursor.getCharIndex();
 		if (newIndex != string.length()) {
 			if (String.valueOf(string.charAt(newIndex)).matches(".")) {
 				newIndex++;
@@ -88,19 +91,30 @@ public class DeleteLineResponder implements IInputResponder {
 	@Override
 	public void onRecognize() {
 		Buffer buffer = _window.getBuffer();
-		int start = getLineStart();
-		int lineEnd = getLineEnd() + 1;
-		int end = Math.min(lineEnd, buffer.length());
-		start -= lineEnd - end;
-		start = Math.max(start, 0);
-		Range lineRange = new Range(start, end - start);
 
-		String string = buffer.toString().substring(lineRange.getStart(), lineRange.getEnd());
-		RegisterManager.getInstance().setRegister(RegisterManager.UNNAMED_REGISTER,
-				new TextSelection(SelectionMode.LINE_MODE, string));
+		try (UndoScope us = buffer.createUndoScope()) {
+			IFilterVisitor<Cursor> visitor = new IFilterVisitor<Cursor>() {
+				@Override
+				public boolean visit(Cursor traversable) {
+					int start = getLineStart(traversable);
+					int lineEnd = getLineEnd(traversable) + 1;
+					int end = Math.min(lineEnd, buffer.length());
+					start -= lineEnd - end;
+					start = Math.max(start, 0);
+					Range lineRange = new Range(start, end - start);
 
-		if (lineRange.getLength() != 0) {
-			buffer.removeCharsInRangeLogged(lineRange);
+					String string = buffer.toString().substring(lineRange.getStart(), lineRange.getEnd());
+					RegisterManager.getInstance().setRegister(RegisterManager.UNNAMED_REGISTER,
+							new TextSelection(SelectionMode.LINE_MODE, string));
+
+					if (lineRange.getLength() != 0) {
+						buffer.removeCharsInRangeLogged(lineRange);
+					}
+
+					return true;
+				}
+			};
+			buffer.getCursorCollection().doFilteredReverse(visitor);
 		}
 		_window.setNeedsFullRedraw();
 	}

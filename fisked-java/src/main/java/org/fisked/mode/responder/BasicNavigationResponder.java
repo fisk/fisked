@@ -27,6 +27,7 @@
 package org.fisked.mode.responder;
 
 import org.fisked.buffer.BufferWindow;
+import org.fisked.buffer.cursor.Cursor;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.InputResponderChain;
@@ -48,8 +49,10 @@ public class BasicNavigationResponder implements IInputResponder {
 
 		final MotionRecognizer motionRecognizer = new MotionRecognizer(window);
 		_responders.addResponder(motionRecognizer, () -> {
-			MotionRange range = motionRecognizer.getMotionRange();
-			_navigator.moveToIndexAndScroll(range.getEnd());
+			_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
+				MotionRange range = motionRecognizer.getMotionRange(cursor);
+				_navigator.moveToIndexAndScroll(cursor, range.getEnd());
+			});
 		});
 		_responders.addResponder((Event nextEvent) -> {
 			if (nextEvent.isControlChar('e')) {
@@ -57,7 +60,7 @@ public class BasicNavigationResponder implements IInputResponder {
 				return RecognitionState.Recognized;
 			}
 			return RecognitionState.NotRecognized;
-		} , () -> {
+		}, () -> {
 			_navigator.scrollDown();
 			_navigator.moveCursorDownIfNeeded();
 		});
@@ -67,7 +70,7 @@ public class BasicNavigationResponder implements IInputResponder {
 				return RecognitionState.Recognized;
 			}
 			return RecognitionState.NotRecognized;
-		} , () -> {
+		}, () -> {
 			_navigator.scrollUp();
 			_navigator.moveCursorUpIfNeeded();
 		});

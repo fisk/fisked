@@ -31,7 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
-import org.fisked.renderingengine.service.models.Range;
+import org.fisked.util.models.Range;
 
 public class UndoLog {
 	private final Stack<ReversableAction> _undoEntries = new Stack<>();

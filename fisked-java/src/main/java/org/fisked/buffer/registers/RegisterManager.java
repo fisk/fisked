@@ -32,9 +32,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.renderingengine.service.IClipboardService;
-import org.fisked.renderingengine.service.models.selection.SelectionMode;
-import org.fisked.renderingengine.service.models.selection.TextSelection;
 import org.fisked.util.Singleton;
+import org.fisked.util.models.selection.SelectionMode;
+import org.fisked.util.models.selection.TextSelection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

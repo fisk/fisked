@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.fisked.buffer.BufferWindow;
+import org.fisked.buffer.cursor.Cursor;
 import org.fisked.responder.Event;
 import org.fisked.responder.RecognitionState;
 
@@ -65,8 +66,8 @@ public class MotionRecognizer implements IMotion {
 	}
 
 	@Override
-	public MotionRange getMotionRange() {
-		MotionRange range = _match.getMotionRange();
+	public MotionRange getMotionRange(Cursor cursor) {
+		MotionRange range = _match.getMotionRange(cursor);
 		return range;
 	}
 

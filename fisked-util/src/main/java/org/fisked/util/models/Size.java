@@ -24,22 +24,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.renderingengine.service.models.selection;
+package org.fisked.util.models;
 
-import java.util.List;
-
-import org.fisked.renderingengine.service.models.Range;
-
-public class FatTextSelection extends TextSelection {
-	private final List<Range> _ranges;
-
-	public FatTextSelection(SelectionMode mode, String text, List<Range> ranges) {
-		super(mode, text);
-		_ranges = ranges;
+public class Size {
+	private final int _width;
+	private final int _height;
+	
+	public Size(int width, int height) {
+		_width = width;
+		_height = height;
 	}
-
-	public List<Range> getRanges() {
-		return _ranges;
+	
+	public int getWidth() {
+		return _width;
 	}
-
+	
+	public int getHeight() {
+		return _height;
+	}
 }
