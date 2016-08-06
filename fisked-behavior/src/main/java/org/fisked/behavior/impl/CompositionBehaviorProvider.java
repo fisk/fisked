@@ -57,4 +57,8 @@ public class CompositionBehaviorProvider implements IBehaviorProvider {
 		_providerMap.put(name, provider);
 	}
 
+	public IBehaviorProvider getProvider(String name) {
+		return _providerMap.get(name);
+	}
+
 }

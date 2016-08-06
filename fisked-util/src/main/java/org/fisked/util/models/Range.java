@@ -69,4 +69,13 @@ public class Range implements Comparable<Range> {
 	public String toString() {
 		return "{ " + _start + ", " + (_start + _length) + " }";
 	}
+
+	public int getStartSorted() {
+		int start = getStart();
+		int end = getEnd();
+		if (start > end) {
+			return end;
+		}
+		return start;
+	}
 }

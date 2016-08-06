@@ -29,31 +29,45 @@ package org.fisked.mode.responder;
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.responder.Event;
-import org.fisked.responder.IInputRecognizer;
+import org.fisked.responder.IInputResponder;
+import org.fisked.responder.IRecognitionAction;
 import org.fisked.responder.RecognitionState;
 
-public class TextInputResponder implements IInputRecognizer {
+public class TextInputResponder implements IInputResponder {
 	private final BufferWindow _window;
 
 	public TextInputResponder(BufferWindow window) {
 		_window = window;
 	}
 
+	private IRecognitionAction _action = null;
+
 	@Override
 	public RecognitionState recognizesInput(Event input) {
 		if (input.isBackspace()) {
-			_window.getBuffer().removeCharAtPointLogged();
-			_window.setNeedsFullRedraw();
+			_action = () -> {
+				_window.getBuffer().removeCharAtPointLogged();
+				_window.setNeedsFullRedraw();
+			};
 			return RecognitionState.Recognized;
 		}
-		Buffer buffer = _window.getBuffer();
-		if (input.isReturn()) {
-			buffer.appendCharAtPointLogged('\n');
-		} else {
-			buffer.appendCharAtPointLogged(input.getCharacter());
-		}
-		_window.setNeedsFullRedraw();
+		_action = () -> {
+			Buffer buffer = _window.getBuffer();
+			if (input.isReturn()) {
+				buffer.appendCharAtPointLogged('\n');
+			} else {
+				buffer.appendCharAtPointLogged(input.getCharacter());
+			}
+			_window.setNeedsFullRedraw();
+		};
 		return RecognitionState.Recognized;
+	}
+
+	@Override
+	public void onRecognize() {
+		if (_action != null) {
+			_action.onRecognize();
+		}
 	}
 
 }

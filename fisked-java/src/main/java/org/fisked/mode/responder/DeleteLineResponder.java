@@ -109,6 +109,7 @@ public class DeleteLineResponder implements IInputResponder {
 
 					if (lineRange.getLength() != 0) {
 						buffer.removeCharsInRangeLogged(lineRange);
+						traversable.setCharIndex(start, true);
 					}
 
 					return true;

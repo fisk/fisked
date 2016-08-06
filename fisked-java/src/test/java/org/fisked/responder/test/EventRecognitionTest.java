@@ -30,13 +30,13 @@ import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.IInputRecognizer;
 import org.fisked.responder.RecognitionState;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class EventRecognitionTest {
 
-	Event createEvent(String string) {
+	static Event createEvent(String string) {
 		if (string.length() == 1) {
 			return new Event(string.charAt(0));
 		} else {
@@ -51,13 +51,13 @@ public class EventRecognitionTest {
 		}
 	}
 
-	private Event _testEvent;
-	private Event _estEvent;
-	private Event _teEvent;
-	private Event _testtEvent;
+	private static Event _testEvent;
+	private static Event _estEvent;
+	private static Event _teEvent;
+	private static Event _testtEvent;
 
 	@BeforeClass
-	void setUp() {
+	public static void setUp() {
 		_testEvent = createEvent("test");
 		_estEvent = createEvent("est");
 		_teEvent = createEvent("te");
@@ -65,13 +65,13 @@ public class EventRecognitionTest {
 	}
 
 	@Test
-	void testEvent() {
+	public void testEvent() {
 		Assert.assertEquals("test", _testEvent.getString());
 		Assert.assertEquals("tes", _testEvent.subevent(3).getString());
 	}
 
 	@Test
-	void testTextRecognizer() {
+	public void testTextRecognizer() {
 		IInputRecognizer testRecognizer = EventRecognition.recognizer("test");
 		IInputRecognizer tRecognizer = EventRecognition.recognizer("t");
 
@@ -86,7 +86,7 @@ public class EventRecognitionTest {
 	}
 
 	@Test
-	void testMergeRecognizer() {
+	public void testMergeRecognizer() {
 		IInputRecognizer testRecognizer = EventRecognition.recognizer("test");
 		IInputRecognizer tRecognizer = EventRecognition.recognizer("t");
 		IInputRecognizer estRecognizer = EventRecognition.recognizer("est");

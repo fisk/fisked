@@ -26,8 +26,11 @@
  *******************************************************************************/
 package org.fisked.behavior;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CompletableFuture;
 
 import org.fisked.behavior.impl.CompositionBehaviorProvider;
 import org.fisked.behavior.impl.NormalBehaviorProvider;
@@ -35,18 +38,47 @@ import org.fisked.behavior.impl.OSGiBehaviorProvider;
 import org.fisked.behavior.impl.RMI_IIOPBehaviorProvider;
 import org.fisked.util.Singleton;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
 public class RootBehaviorProvider {
-	private final Map<BundleContext, CompositionBehaviorProvider> _map = new ConcurrentHashMap<>();
+	class SourceCompletions<C, T> {
+		Map<Class<C>, List<CompletableFuture<IBehaviorConnection<T>>>> _futures = new HashMap<>();
+	}
 
-	public <C> CompositionBehaviorProvider getBehaviorProvider(Class<C> callerClass) {
+	private final Map<Class<?>, SourceCompletions<?, ?>> _sourceCompletions = new HashMap<>();
+
+	public synchronized <C, T> void registerFuture(Class<C> callerClass, Class<T> targetClass,
+			CompletableFuture<IBehaviorConnection<T>> future) {
+		@SuppressWarnings("unchecked")
+		SourceCompletions<C, T> completions = (SourceCompletions<C, T>) _sourceCompletions.get(callerClass);
+		if (completions == null) {
+			completions = new SourceCompletions<C, T>();
+			_sourceCompletions.put(callerClass, completions);
+		}
+
+		List<CompletableFuture<IBehaviorConnection<T>>> list = completions._futures.get(targetClass);
+		if (list == null) {
+			list = new ArrayList<>();
+			completions._futures.put(callerClass, list);
+		}
+
+		list.add(future);
+	}
+
+	private final Map<Class<?>, IBehaviorProvider> _classToProvider = new HashMap<>();
+	private final Map<Bundle, IBehaviorProvider> _bundleToProvider = new HashMap<>();
+
+	public synchronized <C> IBehaviorProvider getBehaviorProvider(Class<C> callerClass) {
+		IBehaviorProvider provider = _classToProvider.get(callerClass);
 		Bundle bundle = FrameworkUtil.getBundle(callerClass);
-		BundleContext context = bundle.getBundleContext();
-
-		CompositionBehaviorProvider provider = _map.get(context);
 		if (provider != null) {
+			if (bundle != null) {
+				IBehaviorProvider bundleProvider = _bundleToProvider.get(bundle);
+				CompositionBehaviorProvider intent = new CompositionBehaviorProvider();
+				intent.addProvider("bundle", bundleProvider);
+				intent.addProvider("class", provider);
+				return intent;
+			}
 			return provider;
 		}
 
@@ -58,11 +90,41 @@ public class RootBehaviorProvider {
 		intent.addProvider("rmi_iiop", rmi_iiop);
 		intent.addProvider("normal", normal);
 
-		provider = _map.put(context, intent);
-		if (provider != null) {
-			return provider;
-		}
+		_bundleToProvider.put(bundle, intent);
 		return intent;
+	}
+
+	public synchronized <C, T> void setCallerBehavior(Class<C> callerClass, Class<T> targetClass, T behavior) {
+		CompositionBehaviorProvider provider = (CompositionBehaviorProvider) getBehaviorProvider(callerClass);
+		NormalBehaviorProvider normal = (NormalBehaviorProvider) provider.getProvider("normal");
+		normal.addBehavior(targetClass, behavior);
+
+		@SuppressWarnings("unchecked")
+		SourceCompletions<C, T> completions = (SourceCompletions<C, T>) _sourceCompletions.get(callerClass);
+		if (completions == null) {
+			completions = new SourceCompletions<C, T>();
+			_sourceCompletions.put(callerClass, completions);
+		}
+
+		List<CompletableFuture<IBehaviorConnection<T>>> list = completions._futures.get(targetClass);
+		if (list == null) {
+			list = new ArrayList<>();
+			completions._futures.put(callerClass, list);
+		}
+
+		for (CompletableFuture<IBehaviorConnection<T>> future : list) {
+			future.complete(new IBehaviorConnection<T>() {
+				@Override
+				public void close() throws Exception {
+
+				}
+
+				@Override
+				public T getBehavior() {
+					return behavior;
+				}
+			});
+		}
 	}
 
 	public static RootBehaviorProvider getInstance() {

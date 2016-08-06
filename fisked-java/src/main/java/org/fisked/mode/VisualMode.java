@@ -74,7 +74,6 @@ public class VisualMode extends AbstractMode {
 				.build(() -> {
 					Buffer buffer = _window.getBuffer();
 					StringBuilder builder = new StringBuilder();
-					Wrapper<Integer> firstIndex = new Wrapper<>();
 					_window.getBufferController().getFatTextSelections().forEach((FatTextSelection selection) -> {
 						builder.append(selection);
 					});
@@ -85,9 +84,9 @@ public class VisualMode extends AbstractMode {
 						_window.getBufferController().getInnerSelections().forEach((Range range, String text) -> {
 							buffer.removeCharsInRangeLogged(range);
 						});
+						_window.getBufferController().collapseCursors();
 					}
 
-					_window.getBufferController().collapseCursors(firstIndex.getValue());
 					_window.switchToNormalMode();
 				}));
 	}
@@ -98,7 +97,6 @@ public class VisualMode extends AbstractMode {
 				.build(() -> {
 					Buffer buffer = _window.getBuffer();
 					StringBuilder builder = new StringBuilder();
-					Wrapper<Integer> firstIndex = new Wrapper<>();
 					_window.getBufferController().getFatTextSelections().forEach((FatTextSelection selection) -> {
 						builder.append(selection);
 					});
@@ -109,9 +107,9 @@ public class VisualMode extends AbstractMode {
 						_window.getBufferController().getInnerSelections().forEach((Range range, String text) -> {
 							buffer.removeCharsInRangeLogged(range);
 						});
+						_window.getBufferController().collapseCursors();
 					}
 
-					_window.getBufferController().collapseCursors(firstIndex.getValue());
 					_window.switchToInputMode();
 				}));
 	}

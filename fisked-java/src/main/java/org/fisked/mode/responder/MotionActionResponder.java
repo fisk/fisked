@@ -59,6 +59,7 @@ public class MotionActionResponder implements IInputResponder {
 				RegisterManager.getInstance().setRegister(RegisterManager.UNNAMED_REGISTER,
 						new TextSelection(SelectionMode.NORMAL_MODE, str));
 				_window.getBuffer().removeCharsInRangeLogged(range.getRange());
+				cursor.setCharIndex(range.getRange().getStartSorted(), true);
 			});
 			_window.setNeedsFullRedraw();
 		});

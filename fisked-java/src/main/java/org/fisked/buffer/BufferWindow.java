@@ -214,4 +214,8 @@ public class BufferWindow extends Window {
 	public BufferController getBufferController() {
 		return _bufferController;
 	}
+
+	public void collapseCursors() {
+
+	}
 }

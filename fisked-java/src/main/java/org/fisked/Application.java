@@ -29,16 +29,19 @@ package org.fisked;
 import java.io.File;
 import java.io.IOException;
 import java.util.Stack;
+import java.util.concurrent.Future;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Provides;
+import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.drawing.Window;
+import org.fisked.command.api.ICommandManager;
 import org.fisked.launcher.service.ILauncherService;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.ICursorService;
@@ -62,24 +65,36 @@ public class Application implements IApplication {
 	private volatile Throwable _exception;
 	private String[] _argv;
 	private Thread _shutdownHook;
+	private Thread _mainThread;
+	private ILauncherService _launcher;
+
+	@Requires
+	private IConsoleService _consoleService;
+
+	@Requires
+	private ICommandManager _commandManager;
 
 	@Validate
 	public void start() {
-		try (IBehaviorConnection<ILauncherService> launcherBC = BEHAVIORS.getBehaviorConnection(ILauncherService.class)
-				.get()) {
-			final String[] args = launcherBC.getBehavior().getMainArgs();
-			Thread thread = new Thread() {
-				@Override
-				public void run() {
-					setName("Fisked Main Thread");
-					Application.this.start(args);
-				}
-			};
-			thread.start();
-		} catch (Exception e) {
-			LOG.error("Could not launch application: ", e);
-		}
+		LOG.trace("Starting application.");
+		try {
+			Future<IBehaviorConnection<ILauncherService>> launcherFuture = BEHAVIORS
+					.getBehaviorConnection(ILauncherService.class);
+			if (!launcherFuture.isDone()) {
+				LOG.error("Could not start application as there is no initial launcher registered.");
+				return;
+			}
 
+			try (IBehaviorConnection<ILauncherService> launcherBC = launcherFuture.get()) {
+				ILauncherService launcher = launcherBC.getBehavior();
+				start(launcher);
+			} catch (Exception e) {
+				LOG.error("Could not launch application: ", e);
+			}
+		} catch (Exception e) {
+			LOG.error("Could not start application as there is no initial launcher registered.");
+			return;
+		}
 	}
 
 	@Invalidate
@@ -198,15 +213,34 @@ public class Application implements IApplication {
 	@Override
 	public void exit(int code) {
 		LOG.debug("Exiting fisked gracefully.");
+		if (Thread.currentThread() != _mainThread) {
+			Dispatcher.getInstance().runMain(() -> {
+				exit(code);
+			});
+			return;
+		}
 		_loop.exit();
 		shutDownServices();
 		Runtime.getRuntime().removeShutdownHook(_shutdownHook);
+		if (_launcher != null) {
+			_launcher.stop(code);
+		}
+	}
 
-		try (IBehaviorConnection<ILauncherService> launcherBC = BEHAVIORS.getBehaviorConnection(ILauncherService.class)
-				.get()) {
-			launcherBC.getBehavior().stop(code);
-		} catch (Exception e) {
-			LOG.error("Can't find launcher service: ", e);
+	@Override
+	public void start(ILauncherService launcher) {
+		LOG.trace("Starting application with launcher.");
+		_launcher = launcher;
+		final String[] args = launcher.getMainArgs();
+		if (args != null) {
+			_mainThread = new Thread() {
+				@Override
+				public void run() {
+					setName("Fisked Main Thread");
+					Application.this.start(args);
+				}
+			};
+			_mainThread.start();
 		}
 	}
 }

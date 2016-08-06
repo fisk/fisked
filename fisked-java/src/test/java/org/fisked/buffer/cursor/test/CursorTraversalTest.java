@@ -31,10 +31,11 @@ import org.fisked.buffer.cursor.CursorCollection;
 import org.fisked.buffer.cursor.traverse.IFilterVisitor;
 import org.fisked.text.TextLayout;
 import org.fisked.util.models.Size;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class CursorTraversalTest {
+
 	private static class Value<T> {
 		private T _value;
 
@@ -52,7 +53,7 @@ public class CursorTraversalTest {
 	}
 
 	@Test
-	void testCursorTraversal() {
+	public void testCursorTraversal() {
 		TextLayout layout = new TextLayout("a", new Size(1, 1));
 		CursorCollection collection = new CursorCollection(layout);
 		collection.init(0);
@@ -65,6 +66,6 @@ public class CursorTraversalTest {
 			}
 		};
 		collection.doFiltered(visitor);
-		Assert.assertTrue(found.get(), "Didn't find cursor");
+		Assert.assertTrue(found.get());
 	}
 }

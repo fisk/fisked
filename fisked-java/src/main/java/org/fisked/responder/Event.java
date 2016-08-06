@@ -36,8 +36,18 @@ public class Event implements Iterable<Event> {
 		_input = input;
 	}
 
+	public Event(Event event) {
+		_input = event._input;
+		_next = event._next;
+	}
+
 	public Event getNext() {
 		return _next;
+	}
+
+	@Override
+	public String toString() {
+		return getString();
 	}
 
 	public String getString() {

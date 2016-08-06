@@ -64,11 +64,6 @@ public class Launcher {
 					Launcher.this.stop(code);
 				}
 
-				@Override
-				public void printBundles() {
-					Launcher.this.printBundles();
-				}
-
 			};
 			_registration = context.registerService(ILauncherService.class, service, null);
 		}
@@ -113,13 +108,6 @@ public class Launcher {
 		}
 	}
 
-	public void printBundles() {
-		System.out.println("Bundle snapshot: ");
-		for (Bundle bundle : _activator.getBundles()) {
-			System.out.println("Bundle " + bundle.getSymbolicName() + ": " + state(bundle.getState()));
-		}
-	}
-
 	private String join(List<String> strs, String delim) {
 		StringBuilder str = new StringBuilder();
 		int i = 0;
@@ -146,13 +134,12 @@ public class Launcher {
 		List<LauncherActivator> list = new ArrayList<>();
 		_activator = new LauncherActivator();
 		list.add(_activator);
-		config.put(FelixConstants.SYSTEMBUNDLE_ACTIVATORS_PROP, list);
 
+		config.put(FelixConstants.SYSTEMBUNDLE_ACTIVATORS_PROP, list);
 		config.put("felix.auto.deploy.action", "install,start");
 		config.put("felix.auto.deploy.dir", System.getProperty("user.home") + "/.fisked/bundle");
 		config.put("org.osgi.framework.storage.clean", "onFirstInit");
 		config.put(Constants.FRAMEWORK_STORAGE, System.getProperty("user.home") + "/.fisked/bundle-cache");
-		// config.put(AutoProcessor.AUTO_DEPLOY_STARTLEVEL_PROPERTY, "1");
 
 		try {
 			_felix = new Felix(config);

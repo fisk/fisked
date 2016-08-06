@@ -223,6 +223,7 @@ public class Buffer implements CharSequence {
 	private void appendStringAtPointLogged(Cursor cursor, String string) {
 		int index = cursor.getCharIndex();
 		insertStringLogged(index, string);
+		cursor.setCharIndex(index + string.length(), true);
 	}
 
 	public void appendStringAtPointLogged(String string) {

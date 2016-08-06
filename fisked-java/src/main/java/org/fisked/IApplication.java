@@ -27,8 +27,11 @@
 package org.fisked;
 
 import org.fisked.buffer.drawing.Window;
+import org.fisked.launcher.service.ILauncherService;
 
 public interface IApplication {
+	void start(ILauncherService launcher);
+
 	void exit(int status);
 
 	void pushPrimaryWindow(Window window);

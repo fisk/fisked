@@ -46,4 +46,5 @@ public class BehaviorConnectionFactory implements IPreparedBehaviorProvider {
 	public <T> Future<IBehaviorConnection<T>> getBehaviorConnection(Class<T> targetClass) {
 		return _provider.getBehaviorConnection(_callerClass, targetClass);
 	}
+
 }

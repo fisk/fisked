@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.behavior.IBehaviorProvider;
+import org.fisked.behavior.RootBehaviorProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -144,6 +145,11 @@ public class OSGiBehaviorProvider implements IBehaviorProvider {
 		} catch (InvalidSyntaxException e) {
 			LOG.error("Invalid syntax: " + e);
 		}
+
+		if (!future.isDone()) {
+			RootBehaviorProvider.getInstance().registerFuture(callerClass, targetClass, future);
+		}
+
 		return future;
 	}
 

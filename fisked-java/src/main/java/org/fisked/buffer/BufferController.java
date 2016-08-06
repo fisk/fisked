@@ -218,6 +218,8 @@ public class BufferController {
 					}
 					int startIndex = selection.getRanges().get(0).getStart();
 					_buffer.insertStringLogged(startIndex, text);
+					traversable.getPrimary().setCharIndex(startIndex + text.length(), true);
+					traversable.clearOther();
 					return true;
 				}
 			};
@@ -292,5 +294,18 @@ public class BufferController {
 			};
 			_buffer.getCursorCollection().doFiltered(visitor);
 		}
+	}
+
+	public void collapseCursors() {
+		IFilterVisitor<TwinCursor> visitor = new IFilterVisitor<TwinCursor>() {
+			@Override
+			public boolean visit(TwinCursor cursor) {
+				Range range = cursor.getSortedOtherRange();
+				cursor.getPrimary().setCharIndex(range.getStart(), true);
+				cursor.clearOther();
+				return true;
+			}
+		};
+		getBuffer().getCursorCollection().doFiltered(visitor);
 	}
 }
