@@ -81,9 +81,10 @@ public class VisualMode extends AbstractMode {
 					RegisterManager.getInstance().setRegister(registerRecognizer.getRegister(), selectionText);
 
 					try (UndoScope us = buffer.createUndoScope()) {
-						_window.getBufferController().getInnerSelections().forEach((Range range, String text) -> {
-							buffer.removeCharsInRangeLogged(range);
-						});
+						_window.getBufferController().getInnerSelections()
+								.forEachReverse((Range range, String text) -> {
+									buffer.removeCharsInRangeLogged(range);
+								});
 						_window.getBufferController().collapseCursors();
 					}
 
@@ -104,9 +105,10 @@ public class VisualMode extends AbstractMode {
 					RegisterManager.getInstance().setRegister(registerRecognizer.getRegister(), selectionText);
 
 					try (UndoScope us = buffer.createUndoScope()) {
-						_window.getBufferController().getInnerSelections().forEach((Range range, String text) -> {
-							buffer.removeCharsInRangeLogged(range);
-						});
+						_window.getBufferController().getInnerSelections()
+								.forEachReverse((Range range, String text) -> {
+									buffer.removeCharsInRangeLogged(range);
+								});
 						_window.getBufferController().collapseCursors();
 					}
 
