@@ -28,7 +28,7 @@ package org.fisked.buffer.cursor.test;
 
 import org.fisked.buffer.cursor.Cursor;
 import org.fisked.buffer.cursor.CursorCollection;
-import org.fisked.buffer.cursor.traverse.IFilterVisitor;
+import org.fisked.buffer.cursor.traverse.IFilterVertexVisitor;
 import org.fisked.text.TextLayout;
 import org.fisked.util.models.Size;
 import org.junit.Assert;
@@ -58,7 +58,7 @@ public class CursorTraversalTest {
 		CursorCollection collection = new CursorCollection(layout);
 		collection.init(0);
 		Value<Boolean> found = new Value<Boolean>(false);
-		IFilterVisitor<Cursor> visitor = new IFilterVisitor<Cursor>() {
+		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
 			@Override
 			public boolean visit(Cursor traversable) {
 				found.set(true);

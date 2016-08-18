@@ -26,13 +26,35 @@
  *******************************************************************************/
 package org.fisked.buffer.cursor.traverse;
 
-import org.fisked.buffer.cursor.HierarchyCursor;
+import org.fisked.buffer.cursor.Cursor;
+import org.fisked.buffer.cursor.CursorCollection;
+import org.fisked.buffer.cursor.NullCursor;
+import org.fisked.buffer.cursor.TwinCursor;
 
-public class CursorPrimaryOrderer extends AbstractCursorOrderer {
-	public boolean traverse(HierarchyCursor traversable, IVisitor visitor) {
+public abstract class AbstractVertexOrderer implements IVertexOrderer {
+	@Override
+	public boolean traverse(TwinCursor traversable, IVertexVisitor visitor) {
 		if (!visitor.visit(traversable)) {
 			return false;
 		}
 		return traversable.getPrimary().traverse(this, visitor);
+	}
+
+	@Override
+	public boolean traverse(CursorCollection traversable, IVertexVisitor visitor) {
+		if (!visitor.visit(traversable)) {
+			return false;
+		}
+		return traversable.getRoot().traverse(this, visitor);
+	}
+
+	@Override
+	public boolean traverse(Cursor traversable, IVertexVisitor visitor) {
+		return visitor.visit(traversable);
+	}
+
+	@Override
+	public boolean traverse(NullCursor traversable, IVertexVisitor visitor) {
+		return true;
 	}
 }

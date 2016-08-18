@@ -29,9 +29,11 @@ package org.fisked.buffer.cursor;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.fisked.buffer.cursor.traverse.IEdgeOrderer;
+import org.fisked.buffer.cursor.traverse.IEdgeVisitor;
 import org.fisked.buffer.cursor.traverse.ITraversable;
 import org.fisked.buffer.cursor.traverse.IVertexOrderer;
-import org.fisked.buffer.cursor.traverse.IVisitor;
+import org.fisked.buffer.cursor.traverse.IVertexVisitor;
 
 public class HierarchyCursor implements ITraversable {
 	private final List<ITraversable> _children = new ArrayList<ITraversable>();
@@ -66,13 +68,22 @@ public class HierarchyCursor implements ITraversable {
 		_children.add(index, traversable);
 	}
 
+	public void removeChild(int index) {
+		_children.remove(index);
+	}
+
 	public void clear() {
 		_children.clear();
 	}
 
 	@Override
-	public boolean traverse(IVertexOrderer orderer, IVisitor visitor) {
+	public boolean traverse(IVertexOrderer orderer, IVertexVisitor visitor) {
 		return orderer.traverse(this, visitor);
+	}
+
+	@Override
+	public boolean traverse(IEdgeOrderer orderer, IEdgeVisitor visitor) {
+		return orderer.traverseEdge(this, visitor);
 	}
 
 	@Override

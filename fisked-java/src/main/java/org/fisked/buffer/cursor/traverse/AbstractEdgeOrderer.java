@@ -32,14 +32,54 @@ import org.fisked.buffer.cursor.HierarchyCursor;
 import org.fisked.buffer.cursor.NullCursor;
 import org.fisked.buffer.cursor.TwinCursor;
 
-public interface IVisitor {
-	boolean visit(Cursor traversable);
+public abstract class AbstractEdgeOrderer implements IEdgeOrderer {
+	@Override
+	public boolean traverseEdge(TwinCursor traversable, IEdgeVisitor visitor) {
+		if (!visitor.visitEdge(new IEdge() {
 
-	boolean visit(CursorCollection traversable);
+			@Override
+			public void set(ITraversable val) {
+				traversable.setPrimary((Cursor) val);
+			}
 
-	boolean visit(HierarchyCursor traversable);
+			@Override
+			public void delete() {
+				set(null);
+			}
 
-	boolean visit(TwinCursor traversable);
+		}, traversable)) {
+			return false;
+		}
+		return traversable.getPrimary().traverse(this, visitor);
+	}
 
-	boolean visit(NullCursor traversable);
+	@Override
+	public boolean traverseEdge(CursorCollection traversable, IEdgeVisitor visitor) {
+		if (!visitor.visitEdge(new IEdge() {
+
+			@Override
+			public void set(ITraversable val) {
+				traversable.setRoot((HierarchyCursor) val);
+			}
+
+			@Override
+			public void delete() {
+				set(null);
+			}
+
+		}, traversable)) {
+			return false;
+		}
+		return traversable.getRoot().traverse(this, visitor);
+	}
+
+	@Override
+	public boolean traverseEdge(Cursor traversable, IEdgeVisitor visitor) {
+		return true;
+	}
+
+	@Override
+	public boolean traverseEdge(NullCursor traversable, IEdgeVisitor visitor) {
+		return true;
+	}
 }

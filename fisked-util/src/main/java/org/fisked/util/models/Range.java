@@ -78,4 +78,13 @@ public class Range implements Comparable<Range> {
 		}
 		return start;
 	}
+
+	public int getEndSorted() {
+		int start = getStart();
+		int end = getEnd();
+		if (start > end) {
+			return start;
+		}
+		return end;
+	}
 }

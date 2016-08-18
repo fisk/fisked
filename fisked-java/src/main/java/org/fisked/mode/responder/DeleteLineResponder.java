@@ -30,7 +30,7 @@ import org.fisked.buffer.Buffer;
 import org.fisked.buffer.Buffer.UndoScope;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.cursor.Cursor;
-import org.fisked.buffer.cursor.traverse.IFilterVisitor;
+import org.fisked.buffer.cursor.traverse.IFilterVertexVisitor;
 import org.fisked.buffer.registers.RegisterManager;
 import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
@@ -93,7 +93,7 @@ public class DeleteLineResponder implements IInputResponder {
 		Buffer buffer = _window.getBuffer();
 
 		try (UndoScope us = buffer.createUndoScope()) {
-			IFilterVisitor<Cursor> visitor = new IFilterVisitor<Cursor>() {
+			IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
 				@Override
 				public boolean visit(Cursor traversable) {
 					int start = getLineStart(traversable);

@@ -26,9 +26,11 @@
  *******************************************************************************/
 package org.fisked.buffer.cursor;
 
+import org.fisked.buffer.cursor.traverse.IEdgeOrderer;
+import org.fisked.buffer.cursor.traverse.IEdgeVisitor;
 import org.fisked.buffer.cursor.traverse.ITraversable;
 import org.fisked.buffer.cursor.traverse.IVertexOrderer;
-import org.fisked.buffer.cursor.traverse.IVisitor;
+import org.fisked.buffer.cursor.traverse.IVertexVisitor;
 import org.fisked.text.TextLayout;
 import org.fisked.text.TextLayout.InvalidLocationException;
 import org.fisked.util.models.Point;
@@ -116,8 +118,13 @@ public class Cursor implements ITraversable {
 	}
 
 	@Override
-	public boolean traverse(IVertexOrderer orderer, IVisitor visitor) {
+	public boolean traverse(IVertexOrderer orderer, IVertexVisitor visitor) {
 		return orderer.traverse(this, visitor);
+	}
+
+	@Override
+	public boolean traverse(IEdgeOrderer orderer, IEdgeVisitor visitor) {
+		return orderer.traverseEdge(this, visitor);
 	}
 
 	@Override

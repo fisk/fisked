@@ -100,6 +100,9 @@ public class VisualMode extends AbstractMode {
 					StringBuilder builder = new StringBuilder();
 					_window.getBufferController().getFatTextSelections().forEach((FatTextSelection selection) -> {
 						builder.append(selection);
+						int charIndex = selection.getRanges().get(0).getStartSorted();
+						selection.getCursor().getPrimary().setCharIndex(charIndex, true);
+						selection.getCursor().clearOther();
 					});
 					TextSelection selectionText = new TextSelection(_mode, builder.toString());
 					RegisterManager.getInstance().setRegister(registerRecognizer.getRegister(), selectionText);
@@ -109,7 +112,6 @@ public class VisualMode extends AbstractMode {
 								.forEachReverse((Range range, String text) -> {
 									buffer.removeCharsInRangeLogged(range);
 								});
-						_window.getBufferController().collapseCursors();
 					}
 
 					_window.switchToInputMode();

@@ -26,10 +26,19 @@
  *******************************************************************************/
 package org.fisked.buffer.cursor;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.fisked.buffer.Buffer;
+import org.fisked.buffer.cursor.traverse.IEdgeOrderer;
+import org.fisked.buffer.cursor.traverse.IEdgeVisitor;
 import org.fisked.buffer.cursor.traverse.ITraversable;
 import org.fisked.buffer.cursor.traverse.IVertexOrderer;
-import org.fisked.buffer.cursor.traverse.IVisitor;
+import org.fisked.buffer.cursor.traverse.IVertexVisitor;
+import org.fisked.text.TextLayout;
+import org.fisked.util.models.Point;
 import org.fisked.util.models.Range;
+import org.fisked.util.models.selection.SelectionMode;
 
 public class TwinCursor implements ITraversable {
 	private Cursor _primaryCursor;
@@ -72,6 +81,10 @@ public class TwinCursor implements ITraversable {
 		return _primaryCursor;
 	}
 
+	public void setPrimary(Cursor primary) {
+		_primaryCursor = primary;
+	}
+
 	public Range getOtherRange() {
 		Cursor primary = _primaryCursor;
 		if (_otherCursor == null) {
@@ -100,6 +113,82 @@ public class TwinCursor implements ITraversable {
 		return new Range(start, end - start);
 	}
 
+	public List<Range> getExpandedRanges(Buffer buffer, SelectionMode mode) {
+		Range range = getSortedOtherRange();
+		TextLayout layout = buffer.getTextLayout();
+		List<Range> ranges = new ArrayList<>();
+		switch (mode) {
+		case LINE_MODE: {
+			// Recalculate contiguous range to next case block
+			Point startPoint = layout.getAbsolutePhysicalPointForCharIndex(range.getStart());
+			Point endPoint = layout.getAbsolutePhysicalPointForCharIndex(range.getEnd());
+
+			int minY = Math.min(startPoint.getY(), endPoint.getY());
+			int maxY = Math.max(startPoint.getY(), endPoint.getY());
+
+			int minIndex;
+			int maxIndex;
+
+			try {
+				minIndex = layout.getCharIndexForAbsolutePhysicalPoint(new Point(0, minY));
+			} catch (Exception e) {
+				minIndex = 0;
+			}
+
+			try {
+				maxIndex = layout.getCharIndexForAbsolutePhysicalPoint(new Point(0, maxY + 1));
+			} catch (Exception e) {
+				maxIndex = buffer.length();
+			}
+
+			range = new Range(minIndex, maxIndex - minIndex);
+		}
+		case NORMAL_MODE: {
+			// Contiguous text
+			ranges.add(range);
+			break;
+		}
+		case BLOCK_MODE: {
+			StringBuilder stringBuilder = new StringBuilder();
+			Point startPoint = layout.getAbsolutePhysicalPointForCharIndex(range.getStart());
+			Point endPoint = layout.getAbsolutePhysicalPointForCharIndex(range.getEnd());
+
+			int minY = Math.min(startPoint.getY(), endPoint.getY());
+			int maxY = Math.max(startPoint.getY(), endPoint.getY());
+			int minX = Math.min(startPoint.getX(), endPoint.getX());
+			int maxX = Math.max(startPoint.getX(), endPoint.getX());
+
+			for (int i = minY; i <= maxY; i++) {
+				int minIndex;
+				int maxIndex;
+				int lineEnd;
+
+				try {
+					lineEnd = layout.getCharIndexForAbsolutePhysicalPoint(new Point(0, i + 1));
+				} catch (Exception e) {
+					lineEnd = buffer.length();
+				}
+				try {
+					minIndex = layout.getCharIndexForAbsolutePhysicalPoint(new Point(minX, i));
+				} catch (Exception e) {
+					minIndex = lineEnd;
+				}
+				try {
+					maxIndex = layout.getCharIndexForAbsolutePhysicalPoint(new Point(maxX, i));
+				} catch (Exception e) {
+					maxIndex = lineEnd;
+				}
+
+				ranges.add(new Range(minIndex, maxIndex - minIndex));
+				stringBuilder.append(buffer.subSequence(minIndex, maxIndex));
+			}
+			break;
+		}
+		default:
+		}
+		return ranges;
+	}
+
 	public void switchOther() {
 		Cursor other = _otherCursor;
 		_otherCursor = _primaryCursor;
@@ -107,7 +196,12 @@ public class TwinCursor implements ITraversable {
 	}
 
 	@Override
-	public boolean traverse(IVertexOrderer orderer, IVisitor visitor) {
+	public boolean traverse(IVertexOrderer orderer, IVertexVisitor visitor) {
 		return orderer.traverse(this, visitor);
+	}
+
+	@Override
+	public boolean traverse(IEdgeOrderer orderer, IEdgeVisitor visitor) {
+		return orderer.traverseEdge(this, visitor);
 	}
 }

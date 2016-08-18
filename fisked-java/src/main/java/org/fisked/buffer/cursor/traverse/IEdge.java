@@ -24,23 +24,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.util;
+package org.fisked.buffer.cursor.traverse;
 
-public class Wrapper<T> {
-	private T _value;
+public interface IEdge {
+	void set(ITraversable val);
 
-	public Wrapper(T value) {
-		_value = value;
-	}
-
-	public Wrapper() {
-	}
-
-	public T getValue() {
-		return _value;
-	}
-
-	public void setValue(T value) {
-		_value = value;
-	}
+	void delete();
 }

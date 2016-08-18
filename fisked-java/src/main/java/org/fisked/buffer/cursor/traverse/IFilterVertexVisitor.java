@@ -24,23 +24,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.util;
+package org.fisked.buffer.cursor.traverse;
 
-public class Wrapper<T> {
-	private T _value;
+import org.fisked.buffer.cursor.Cursor;
+import org.fisked.buffer.cursor.CursorCollection;
+import org.fisked.buffer.cursor.HierarchyCursor;
+import org.fisked.buffer.cursor.NullCursor;
+import org.fisked.buffer.cursor.TwinCursor;
 
-	public Wrapper(T value) {
-		_value = value;
+public interface IFilterVertexVisitor<V extends ITraversable> extends IVertexVisitor {
+	@Override
+	default boolean visit(Cursor traversable) {
+		return true;
 	}
 
-	public Wrapper() {
+	@Override
+	default boolean visit(CursorCollection traversable) {
+		return true;
 	}
 
-	public T getValue() {
-		return _value;
+	@Override
+	default boolean visit(HierarchyCursor traversable) {
+		return true;
 	}
 
-	public void setValue(T value) {
-		_value = value;
+	@Override
+	default boolean visit(NullCursor traversable) {
+		return true;
+	}
+
+	@Override
+	default boolean visit(TwinCursor traversable) {
+		return true;
 	}
 }

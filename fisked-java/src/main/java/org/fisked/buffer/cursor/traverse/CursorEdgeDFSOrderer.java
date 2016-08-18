@@ -24,23 +24,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.util;
+package org.fisked.buffer.cursor.traverse;
 
-public class Wrapper<T> {
-	private T _value;
+import org.fisked.buffer.cursor.HierarchyCursor;
 
-	public Wrapper(T value) {
-		_value = value;
-	}
+public class CursorEdgeDFSOrderer extends AbstractEdgeOrderer {
+	@Override
+	public boolean traverseEdge(HierarchyCursor traversable, IEdgeVisitor visitor) {
+		int i = 0;
+		for (ITraversable child : traversable.getChildren()) {
+			final int childIndex = i++;
+			if (!visitor.visitEdge(new IEdge() {
 
-	public Wrapper() {
-	}
+				@Override
+				public void set(ITraversable val) {
+					traversable.replaceChild(childIndex, val);
+				}
 
-	public T getValue() {
-		return _value;
-	}
+				@Override
+				public void delete() {
+					traversable.removeChild(childIndex);
+				}
 
-	public void setValue(T value) {
-		_value = value;
+			}, traversable)) {
+				return false;
+			}
+
+			if (!child.traverse(this, visitor)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

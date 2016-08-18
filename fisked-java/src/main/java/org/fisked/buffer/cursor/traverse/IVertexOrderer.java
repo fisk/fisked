@@ -33,13 +33,13 @@ import org.fisked.buffer.cursor.NullCursor;
 import org.fisked.buffer.cursor.TwinCursor;
 
 public interface IVertexOrderer {
-	boolean traverse(Cursor traversable, IVisitor visitor);
+	boolean traverse(Cursor traversable, IVertexVisitor visitor);
 
-	boolean traverse(CursorCollection traversable, IVisitor visitor);
+	boolean traverse(CursorCollection traversable, IVertexVisitor visitor);
 
-	boolean traverse(HierarchyCursor traversable, IVisitor visitor);
+	boolean traverse(HierarchyCursor traversable, IVertexVisitor visitor);
 
-	boolean traverse(TwinCursor traversable, IVisitor visitor);
+	boolean traverse(TwinCursor traversable, IVertexVisitor visitor);
 
-	boolean traverse(NullCursor traversable, IVisitor visitor);
+	boolean traverse(NullCursor traversable, IVertexVisitor visitor);
 }

@@ -26,6 +26,20 @@
  *******************************************************************************/
 package org.fisked.buffer.cursor.traverse;
 
-public interface IEdgeOrderer extends IVertexOrderer {
-	ITraversableEdge getEdge();
+import org.fisked.buffer.cursor.Cursor;
+import org.fisked.buffer.cursor.CursorCollection;
+import org.fisked.buffer.cursor.HierarchyCursor;
+import org.fisked.buffer.cursor.NullCursor;
+import org.fisked.buffer.cursor.TwinCursor;
+
+public interface IEdgeOrderer {
+	boolean traverseEdge(Cursor traversable, IEdgeVisitor visitor);
+
+	boolean traverseEdge(CursorCollection traversable, IEdgeVisitor visitor);
+
+	boolean traverseEdge(HierarchyCursor traversable, IEdgeVisitor visitor);
+
+	boolean traverseEdge(TwinCursor traversable, IEdgeVisitor visitor);
+
+	boolean traverseEdge(NullCursor traversable, IEdgeVisitor visitor);
 }

@@ -27,7 +27,9 @@
 package org.fisked.buffer.cursor.traverse;
 
 public interface ITraversable {
-	public boolean traverse(IVertexOrderer orderer, IVisitor visitor);
+	public boolean traverse(IVertexOrderer orderer, IVertexVisitor visitor);
+
+	public boolean traverse(IEdgeOrderer orderer, IEdgeVisitor visitor);
 
 	ITraversable clone();
 }

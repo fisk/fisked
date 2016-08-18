@@ -26,18 +26,15 @@
  *******************************************************************************/
 package org.fisked.buffer.cursor.traverse;
 
-import java.util.List;
-
 import org.fisked.buffer.cursor.HierarchyCursor;
 
-public class CursorReverseDFSOrderer extends AbstractCursorOrderer {
-	public boolean traverse(HierarchyCursor traversable, IVisitor visitor) {
+public class CursorVertexDFSOrderer extends AbstractVertexOrderer {
+	@Override
+	public boolean traverse(HierarchyCursor traversable, IVertexVisitor visitor) {
 		if (!visitor.visit(traversable)) {
 			return false;
 		}
-		List<ITraversable> children = traversable.getChildren();
-		for (int i = children.size() - 1; i >= 0; i--) {
-			ITraversable child = children.get(i);
+		for (ITraversable child : traversable.getChildren()) {
 			if (!child.traverse(this, visitor)) {
 				return false;
 			}

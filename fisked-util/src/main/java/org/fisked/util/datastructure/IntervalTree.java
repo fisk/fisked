@@ -28,6 +28,7 @@ package org.fisked.util.datastructure;
 
 import java.util.TreeMap;
 
+import org.fisked.util.Wrapper;
 import org.fisked.util.models.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,6 +122,14 @@ public class IntervalTree<T> {
 			}
 			first = false;
 		}
+	}
+
+	public boolean isIntersecting(Range range) {
+		Wrapper<Boolean> result = new Wrapper<>(false);
+		forEachIntersect(range, (Range intersectRange, T value) -> {
+			result.setValue(true);
+		});
+		return result.getValue();
 	}
 
 	public int size() {

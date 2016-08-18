@@ -26,35 +26,18 @@
  *******************************************************************************/
 package org.fisked.buffer.cursor.traverse;
 
-import org.fisked.buffer.cursor.Cursor;
-import org.fisked.buffer.cursor.CursorCollection;
-import org.fisked.buffer.cursor.HierarchyCursor;
-import org.fisked.buffer.cursor.NullCursor;
-import org.fisked.buffer.cursor.TwinCursor;
+public class EdgeTraverser<T extends ITraversable, O extends IEdgeOrderer> {
+	protected final ITraversable _root;
+	protected final O _orderer;
+	protected final IEdgeVisitor _visitor;
 
-public interface IFilterVisitor<V extends ITraversable> extends IVisitor {
-	@Override
-	default boolean visit(Cursor traversable) {
-		return true;
+	public EdgeTraverser(IEdgeVisitor visitor, ITraversable root, O orderer) {
+		_root = root;
+		_orderer = orderer;
+		_visitor = visitor;
 	}
 
-	@Override
-	default boolean visit(CursorCollection traversable) {
-		return true;
-	}
-
-	@Override
-	default boolean visit(HierarchyCursor traversable) {
-		return true;
-	}
-
-	@Override
-	default boolean visit(NullCursor traversable) {
-		return true;
-	}
-
-	@Override
-	default boolean visit(TwinCursor traversable) {
-		return true;
+	public void traverse() {
+		_root.traverse(_orderer, _visitor);
 	}
 }

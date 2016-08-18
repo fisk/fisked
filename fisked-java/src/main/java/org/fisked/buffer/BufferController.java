@@ -33,7 +33,7 @@ import org.fisked.buffer.Buffer.UndoScope;
 import org.fisked.buffer.cursor.Cursor;
 import org.fisked.buffer.cursor.FatTextSelection;
 import org.fisked.buffer.cursor.TwinCursor;
-import org.fisked.buffer.cursor.traverse.IFilterVisitor;
+import org.fisked.buffer.cursor.traverse.IFilterVertexVisitor;
 import org.fisked.text.TextLayout;
 import org.fisked.util.datastructure.IntervalTree;
 import org.fisked.util.models.Point;
@@ -58,7 +58,7 @@ public class BufferController {
 
 	public void setSelectionMode(SelectionMode mode) {
 		_mode = mode;
-		IFilterVisitor<TwinCursor> visitor = new IFilterVisitor<TwinCursor>() {
+		IFilterVertexVisitor<TwinCursor> visitor = new IFilterVertexVisitor<TwinCursor>() {
 			@Override
 			public boolean visit(TwinCursor traversable) {
 				if (mode == SelectionMode.INVALID_MODE) {
@@ -193,7 +193,7 @@ public class BufferController {
 
 	public String getMergedSelectedText() {
 		StringBuilder builder = new StringBuilder();
-		IFilterVisitor<TwinCursor> visitor = new IFilterVisitor<TwinCursor>() {
+		IFilterVertexVisitor<TwinCursor> visitor = new IFilterVertexVisitor<TwinCursor>() {
 			@Override
 			public boolean visit(TwinCursor traversable) {
 				Range range = traversable.getOtherRange();
@@ -208,7 +208,7 @@ public class BufferController {
 
 	public void setMergedSelectionText(String text) {
 		try (UndoScope us = _buffer.createUndoScope()) {
-			IFilterVisitor<TwinCursor> visitor = new IFilterVisitor<TwinCursor>() {
+			IFilterVertexVisitor<TwinCursor> visitor = new IFilterVertexVisitor<TwinCursor>() {
 				@Override
 				public boolean visit(TwinCursor traversable) {
 					Range range = traversable.getOtherRange();
@@ -231,7 +231,7 @@ public class BufferController {
 		if (_mode == SelectionMode.INVALID_MODE)
 			return new ArrayList<FatTextSelection>();
 		List<FatTextSelection> result = new ArrayList<>();
-		IFilterVisitor<TwinCursor> visitor = new IFilterVisitor<TwinCursor>() {
+		IFilterVertexVisitor<TwinCursor> visitor = new IFilterVertexVisitor<TwinCursor>() {
 			@Override
 			public boolean visit(TwinCursor traversable) {
 				Range range = traversable.getSortedOtherRange();
@@ -248,7 +248,7 @@ public class BufferController {
 		if (_mode == SelectionMode.INVALID_MODE)
 			return new IntervalTree<String>();
 		IntervalTree<String> result = new IntervalTree<>();
-		IFilterVisitor<TwinCursor> visitor = new IFilterVisitor<TwinCursor>() {
+		IFilterVertexVisitor<TwinCursor> visitor = new IFilterVertexVisitor<TwinCursor>() {
 			@Override
 			public boolean visit(TwinCursor traversable) {
 				Range range = traversable.getSortedOtherRange();
@@ -269,7 +269,7 @@ public class BufferController {
 	}
 
 	public void switchToOther() {
-		IFilterVisitor<TwinCursor> visitor = new IFilterVisitor<TwinCursor>() {
+		IFilterVertexVisitor<TwinCursor> visitor = new IFilterVertexVisitor<TwinCursor>() {
 			@Override
 			public boolean visit(TwinCursor traversable) {
 				traversable.switchOther();
@@ -285,7 +285,7 @@ public class BufferController {
 
 	public void doCursorsLogged(DoCursorClosure closure) {
 		try (UndoScope us = _buffer.createUndoScope()) {
-			IFilterVisitor<Cursor> visitor = new IFilterVisitor<Cursor>() {
+			IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
 				@Override
 				public boolean visit(Cursor traversable) {
 					closure.doit(traversable);
@@ -297,7 +297,7 @@ public class BufferController {
 	}
 
 	public void collapseCursors() {
-		IFilterVisitor<TwinCursor> visitor = new IFilterVisitor<TwinCursor>() {
+		IFilterVertexVisitor<TwinCursor> visitor = new IFilterVertexVisitor<TwinCursor>() {
 			@Override
 			public boolean visit(TwinCursor cursor) {
 				Range range = cursor.getSortedOtherRange();

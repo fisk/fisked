@@ -38,8 +38,8 @@ import java.util.Stack;
 import org.apache.commons.io.IOUtils;
 import org.fisked.buffer.cursor.Cursor;
 import org.fisked.buffer.cursor.CursorCollection;
-import org.fisked.buffer.cursor.traverse.CursorReverseDFSOrderer;
-import org.fisked.buffer.cursor.traverse.IFilterVisitor;
+import org.fisked.buffer.cursor.traverse.CursorVertexReverseDFSOrderer;
+import org.fisked.buffer.cursor.traverse.IFilterVertexVisitor;
 import org.fisked.text.IBufferDecorator;
 import org.fisked.text.TextLayout;
 import org.fisked.util.models.AttributedString;
@@ -173,14 +173,14 @@ public class Buffer implements CharSequence {
 	}
 
 	public void removeCharAtPointLogged() {
-		IFilterVisitor<Cursor> visitor = new IFilterVisitor<Cursor>() {
+		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
 			@Override
 			public boolean visit(Cursor cursor) {
 				removeCharAtPointLogged(cursor);
 				return true;
 			}
 		};
-		_cursorCollection.doFiltered(visitor, new CursorReverseDFSOrderer());
+		_cursorCollection.doFiltered(visitor, new CursorVertexReverseDFSOrderer());
 	}
 
 	public void removeCharsInRange(Range selection) {
@@ -227,14 +227,14 @@ public class Buffer implements CharSequence {
 	}
 
 	public void appendStringAtPointLogged(String string) {
-		IFilterVisitor<Cursor> visitor = new IFilterVisitor<Cursor>() {
+		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
 			@Override
 			public boolean visit(Cursor cursor) {
 				appendStringAtPointLogged(cursor, string);
 				return true;
 			}
 		};
-		_cursorCollection.doFiltered(visitor, new CursorReverseDFSOrderer());
+		_cursorCollection.doFiltered(visitor, new CursorVertexReverseDFSOrderer());
 	}
 
 	public String getFileName() {
