@@ -32,6 +32,8 @@ import java.util.regex.Pattern;
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.cursor.Cursor;
+import org.fisked.buffer.cursor.traverse.CursorStatus;
+import org.fisked.buffer.cursor.traverse.IFilterVertexVisitor;
 import org.fisked.text.TextLayout.InvalidLocationException;
 import org.fisked.util.models.Point;
 import org.fisked.util.models.Rectangle;
@@ -121,120 +123,165 @@ public class TextNavigator {
 	}
 
 	public void moveLeft() {
-		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-			int newIndex = getIndex(cursor) - 1;
-			if (newIndex >= 0) {
-				setIndex(cursor, newIndex, true);
+		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
+			@Override
+			public boolean visit(Cursor cursor) {
+				int newIndex = getIndex(cursor) - 1;
+				if (newIndex >= 0) {
+					setIndex(cursor, newIndex, true);
+				}
+				return true;
 			}
-		});
+		};
+		_window.getBuffer().getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 	}
 
 	public void moveRight() {
-		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-			int newIndex = getIndex(cursor) + 1;
-			if (newIndex <= _buffer.getCharSequence().length()) {
-				setIndex(cursor, newIndex, true);
+		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
+			@Override
+			public boolean visit(Cursor cursor) {
+				int newIndex = getIndex(cursor) + 1;
+				if (newIndex <= _buffer.getCharSequence().length()) {
+					setIndex(cursor, newIndex, true);
+				}
+				return true;
 			}
-		});
+		};
+		_window.getBuffer().getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 	}
 
 	public void moveDown() {
-		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-			Point point = getAbsolutePoint(cursor);
-			Point newPoint = new Point(getLastColumn(cursor), point.getY() + 1);
-			setAbsolutePoint(cursor, newPoint, false);
-		});
+		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
+			@Override
+			public boolean visit(Cursor cursor) {
+				Point point = getAbsolutePoint(cursor);
+				Point newPoint = new Point(getLastColumn(cursor), point.getY() + 1);
+				setAbsolutePoint(cursor, newPoint, false);
+				return true;
+			}
+		};
+		_window.getBuffer().getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 	}
 
 	public void moveUp() {
-		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-			Point point = getAbsolutePoint(cursor);
-			Point newPoint = new Point(getLastColumn(cursor), point.getY() - 1);
-			setAbsolutePoint(cursor, newPoint, false);
-		});
+		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
+			@Override
+			public boolean visit(Cursor cursor) {
+				Point point = getAbsolutePoint(cursor);
+				Point newPoint = new Point(getLastColumn(cursor), point.getY() - 1);
+				setAbsolutePoint(cursor, newPoint, false);
+				return true;
+			}
+		};
+		_window.getBuffer().getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 	}
 
 	public void moveToTheBeginningOfLine() {
-		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-			int newIndex = getIndex(cursor);
-			if (newIndex == 0) {
-				return;
-			}
-			if (!String.valueOf(_buffer.getCharSequence().charAt(newIndex - 1)).matches(".")) {
-				return;
-			}
-			newIndex--;
-			while (newIndex >= 0 && String.valueOf(_buffer.getCharSequence().charAt(newIndex)).matches(".")) {
+		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
+			@Override
+			public boolean visit(Cursor cursor) {
+				int newIndex = getIndex(cursor);
+				if (newIndex == 0) {
+					return true;
+				}
+				if (!String.valueOf(_buffer.getCharSequence().charAt(newIndex - 1)).matches(".")) {
+					return true;
+				}
 				newIndex--;
+				while (newIndex >= 0 && String.valueOf(_buffer.getCharSequence().charAt(newIndex)).matches(".")) {
+					newIndex--;
+				}
+				setIndex(cursor, ++newIndex, true);
+				return true;
 			}
-			setIndex(cursor, ++newIndex, true);
-		});
+		};
+		_window.getBuffer().getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 	}
 
 	public void moveToTheEndOfLine() {
-		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-			int newIndex = getIndex(cursor);
-			if (newIndex == _buffer.getCharSequence().length()) {
-				return;
-			}
-			if (!String.valueOf(_buffer.getCharSequence().charAt(newIndex)).matches(".")) {
-				return;
-			}
-			newIndex++;
-			while (newIndex < _buffer.getCharSequence().length()
-					&& String.valueOf(_buffer.getCharSequence().charAt(newIndex)).matches(".")) {
+		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
+			@Override
+			public boolean visit(Cursor cursor) {
+				int newIndex = getIndex(cursor);
+				if (newIndex == _buffer.getCharSequence().length()) {
+					return true;
+				}
+				if (!String.valueOf(_buffer.getCharSequence().charAt(newIndex)).matches(".")) {
+					return true;
+				}
 				newIndex++;
+				while (newIndex < _buffer.getCharSequence().length()
+						&& String.valueOf(_buffer.getCharSequence().charAt(newIndex)).matches(".")) {
+					newIndex++;
+				}
+				setIndex(cursor, newIndex, true);
+				return true;
 			}
-			setIndex(cursor, newIndex, true);
-		});
+		};
+		_window.getBuffer().getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 	}
 
 	Pattern _nextWordPattern = Pattern.compile("\\s([^\\s]+)");
 
 	public void moveToNextWord() {
-		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-			int index = getIndex(cursor);
-			CharSequence string = _buffer.getCharSequence();
-			Matcher matcher = _nextWordPattern.matcher(string);
-			if (matcher.find(index)) {
-				int newIndex = matcher.start(1);
-				setIndex(cursor, newIndex, true);
+		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
+			@Override
+			public boolean visit(Cursor cursor) {
+				int index = getIndex(cursor);
+				CharSequence string = _buffer.getCharSequence();
+				Matcher matcher = _nextWordPattern.matcher(string);
+				if (matcher.find(index)) {
+					int newIndex = matcher.start(1);
+					setIndex(cursor, newIndex, true);
+				}
+				return true;
 			}
-		});
+		};
+		_window.getBuffer().getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 	}
 
 	Pattern _endOfWordPattern = Pattern.compile("([^\\s]+)(\\s|$)");
 
 	public void moveToEndOfWord() {
-		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-			int index = getIndex(cursor) + 1;
-			CharSequence string = _buffer.getCharSequence();
-			if (index >= string.length())
-				return;
-			Matcher matcher = _endOfWordPattern.matcher(string);
-			if (matcher.find(index)) {
-				int newIndex = matcher.end(1) - 1;
-				if (newIndex > 0) {
-					setIndex(cursor, newIndex, true);
+		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
+			@Override
+			public boolean visit(Cursor cursor) {
+				int index = getIndex(cursor) + 1;
+				CharSequence string = _buffer.getCharSequence();
+				if (index >= string.length())
+					return true;
+				Matcher matcher = _endOfWordPattern.matcher(string);
+				if (matcher.find(index)) {
+					int newIndex = matcher.end(1) - 1;
+					if (newIndex > 0) {
+						setIndex(cursor, newIndex, true);
+					}
 				}
+				return true;
 			}
-		});
+		};
+		_window.getBuffer().getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 	}
 
 	Pattern _previousWordPattern = Pattern.compile("([^\\s]+)(\\s|$)");
 
 	public void moveToPreviousWord() {
-		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-			int index = getIndex(cursor);
-			CharSequence string = _buffer.getCharSequence();
-			StringBuilder reverse = new StringBuilder(_buffer.getCharSequence()).reverse();
-			int length = string.length();
-			Matcher matcher = _previousWordPattern.matcher(reverse);
-			if (matcher.find(length - index)) {
-				int newIndex = matcher.end(1);
-				setIndex(cursor, length - newIndex, true);
+		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
+			@Override
+			public boolean visit(Cursor cursor) {
+				int index = getIndex(cursor);
+				CharSequence string = _buffer.getCharSequence();
+				StringBuilder reverse = new StringBuilder(_buffer.getCharSequence()).reverse();
+				int length = string.length();
+				Matcher matcher = _previousWordPattern.matcher(reverse);
+				if (matcher.find(length - index)) {
+					int newIndex = matcher.end(1);
+					setIndex(cursor, length - newIndex, true);
+				}
+				return true;
 			}
-		});
+		};
+		_window.getBuffer().getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 	}
 
 	public void moveCursorDownIfNeeded() {
@@ -276,14 +323,24 @@ public class TextNavigator {
 	}
 
 	public void moveToStart() {
-		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-			setIndex(cursor, 0, true);
-		});
+		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
+			@Override
+			public boolean visit(Cursor cursor) {
+				setIndex(cursor, 0, true);
+				return true;
+			}
+		};
+		_window.getBuffer().getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 	}
 
 	public void moveToEnd() {
-		_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-			setIndex(cursor, getBuffer().getCharSequence().length(), true);
-		});
+		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
+			@Override
+			public boolean visit(Cursor cursor) {
+				setIndex(cursor, getBuffer().getCharSequence().length(), true);
+				return true;
+			}
+		};
+		_window.getBuffer().getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 	}
 }

@@ -28,6 +28,8 @@ package org.fisked.mode.responder;
 
 import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.cursor.Cursor;
+import org.fisked.buffer.cursor.traverse.CursorStatus;
+import org.fisked.buffer.cursor.traverse.IFilterVertexVisitor;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.InputResponderChain;
@@ -49,10 +51,15 @@ public class BasicNavigationResponder implements IInputResponder {
 
 		final MotionRecognizer motionRecognizer = new MotionRecognizer(window);
 		_responders.addResponder(motionRecognizer, () -> {
-			_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-				MotionRange range = motionRecognizer.getMotionRange(cursor);
-				_navigator.moveToIndexAndScroll(cursor, range.getEnd());
-			});
+			IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
+				@Override
+				public boolean visit(Cursor cursor) {
+					MotionRange range = motionRecognizer.getMotionRange(cursor);
+					_navigator.moveToIndexAndScroll(cursor, range.getEnd());
+					return true;
+				}
+			};
+			_window.getBuffer().getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 		});
 		_responders.addResponder((Event nextEvent) -> {
 			if (nextEvent.isControlChar('e')) {

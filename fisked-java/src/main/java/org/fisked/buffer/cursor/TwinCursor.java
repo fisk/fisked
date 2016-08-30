@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.fisked.buffer.Buffer;
+import org.fisked.buffer.cursor.traverse.CursorStatus;
 import org.fisked.buffer.cursor.traverse.IEdgeOrderer;
 import org.fisked.buffer.cursor.traverse.IEdgeVisitor;
 import org.fisked.buffer.cursor.traverse.ITraversable;
@@ -43,6 +44,18 @@ import org.fisked.util.models.selection.SelectionMode;
 public class TwinCursor implements ITraversable {
 	private Cursor _primaryCursor;
 	private Cursor _otherCursor;
+
+	private CursorStatus _cursorStatus = CursorStatus.ACTIVE;
+
+	@Override
+	public CursorStatus getCursorStatus() {
+		return _cursorStatus;
+	}
+
+	@Override
+	public void setCursorStatus(CursorStatus cursorStatus) {
+		_cursorStatus = cursorStatus;
+	}
 
 	public TwinCursor(Cursor primaryCursor, Cursor otherCursor) {
 		_primaryCursor = primaryCursor;

@@ -24,33 +24,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.buffer;
+package org.fisked.buffer.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.NavigableMap;
 import java.util.TreeMap;
 
+import org.fisked.buffer.Buffer;
 import org.fisked.buffer.Buffer.UndoScope;
+import org.fisked.buffer.cursor.Cursor;
 import org.fisked.buffer.cursor.TwinCursor;
+import org.fisked.buffer.cursor.traverse.CursorStatus;
 import org.fisked.buffer.cursor.traverse.IEdge;
 import org.fisked.buffer.cursor.traverse.IFilterEdgeVisitor;
 import org.fisked.buffer.cursor.traverse.IFilterVertexVisitor;
+import org.fisked.buffer.registers.RegisterManager;
 import org.fisked.util.datastructure.IntervalTree;
 import org.fisked.util.models.Range;
 import org.fisked.util.models.selection.SelectionMode;
+import org.fisked.util.models.selection.TextSelection;
 
 public class TextTransaction {
 	private final Buffer _buffer;
-	private List<TwinCursor> _cursors;
+	private final List<TwinCursor> _cursors = new ArrayList<>();
 	private final boolean _logged;
-	private final SelectionMode _mode;
 
-	public TextTransaction(Buffer buffer, boolean logged, SelectionMode mode) {
+	public TextTransaction(Buffer buffer, boolean logged) {
 		_logged = logged;
 		_buffer = buffer;
-		_mode = mode;
 		addBufferCursorCollection();
 	}
 
@@ -66,25 +69,146 @@ public class TextTransaction {
 				return true;
 			}
 		};
-		_buffer.getCursorCollection().doFiltered(visitor);
+		_buffer.getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 	}
 
-	public void executeDelete() {
+	private TreeMap<Integer, TwinCursor> getReverseCursorTree() {
+		TreeMap<Integer, TwinCursor> cursorStarts = new TreeMap<>(Collections.reverseOrder());
+
+		for (TwinCursor cursor : _cursors) {
+			cursorStarts.put(cursor.getSortedOtherRange().getStart(), cursor);
+		}
+
+		return cursorStarts;
+	}
+
+	public void executeWrite(String string) {
+		TreeMap<Integer, TwinCursor> cursorStarts = getReverseCursorTree();
+		Runnable internal = () -> {
+			cursorStarts.forEach((start, cursor) -> {
+				if (_logged) {
+					_buffer.appendStringAtPointLogged(cursor.getPrimary(), string);
+				} else {
+					_buffer.appendStringAtPoint(cursor.getPrimary(), string);
+				}
+			});
+		};
 		if (_logged) {
 			try (UndoScope us = _buffer.createUndoScope()) {
-				executeInternal();
+				internal.run();
 			}
 		} else {
-			executeInternal();
+			internal.run();
 		}
 	}
 
-	private void executeInternal() {
-		IntervalTree<TwinCursor> removeIntervals = new IntervalTree<TwinCursor>();
+	public void executeDelete(RangeExpander expander) {
+		if (_logged) {
+			try (UndoScope us = _buffer.createUndoScope()) {
+				executeDeleteInternal(expander);
+			}
+		} else {
+			executeDeleteInternal(expander);
+		}
+	}
+
+	public void executeDeleteSelection(SelectionMode mode) {
+		RangeExpander expander = (TwinCursor cursor) -> {
+			List<Range> ranges = cursor.getExpandedRanges(_buffer, mode);
+			StringBuilder str = new StringBuilder();
+			for (int i = 0; i < ranges.size(); i++) {
+				Range range = ranges.get(i);
+				str.append(_buffer.getCharSequence().subSequence(range.getStart(), range.getEnd()));
+				if (i + 1 < ranges.size()) {
+					str.append("\n");
+				}
+			}
+			RegisterManager.getInstance().setRegister(RegisterManager.UNNAMED_REGISTER,
+					new TextSelection(mode, str.toString()));
+			return ranges;
+		};
+		executeDelete(expander);
+	}
+
+	public void executeDeleteAtPoint(int forward, int backward) {
+		RangeExpander expander = (TwinCursor cursor) -> {
+			int charIndex = cursor.getPrimary().getCharIndex();
+			Range range = new Range(charIndex - backward, forward + backward);
+			List<Range> list = new ArrayList<>();
+			list.add(range);
+			return list;
+		};
+		executeDelete(expander);
+	}
+
+	private int getLineStart(Cursor cursor) {
+		Buffer buffer = _buffer;
+		String string = buffer.getCharSequence().toString();
+
+		int newIndex = cursor.getCharIndex();
+		if (newIndex != 0) {
+			if (String.valueOf(string.charAt(newIndex - 1)).matches(".")) {
+				newIndex--;
+				while (newIndex >= 0 && String.valueOf(string.charAt(newIndex)).matches(".")) {
+					newIndex--;
+				}
+				newIndex++;
+			}
+		}
+
+		return newIndex;
+	}
+
+	private int getLineEnd(Cursor cursor) {
+		Buffer buffer = _buffer;
+		String string = buffer.getCharSequence().toString();
+
+		int newIndex = cursor.getCharIndex();
+		if (newIndex != string.length()) {
+			if (String.valueOf(string.charAt(newIndex)).matches(".")) {
+				newIndex++;
+				while (newIndex < string.length() && String.valueOf(string.charAt(newIndex)).matches(".")) {
+					newIndex++;
+				}
+			}
+		}
+
+		return newIndex;
+	}
+
+	public void executeDeleteLines() {
+		RangeExpander expander = (TwinCursor twinCursor) -> {
+			Cursor cursor = twinCursor.getPrimary();
+
+			int start = getLineStart(cursor);
+			int lineEnd = getLineEnd(cursor) + 1;
+			int end = Math.min(lineEnd, _buffer.length());
+			start -= lineEnd - end;
+			start = Math.max(start, 0);
+			Range lineRange = new Range(start, end - start);
+
+			String string = _buffer.toString().substring(lineRange.getStart(), lineRange.getEnd());
+			// TODO: Should have per-cursor registers really.
+			RegisterManager.getInstance().setRegister(RegisterManager.UNNAMED_REGISTER,
+					new TextSelection(SelectionMode.LINE_MODE, string));
+
+			List<Range> list = new ArrayList<>();
+			list.add(lineRange);
+			return list;
+		};
+		executeDelete(expander);
+	}
+
+	public interface RangeExpander {
+		List<Range> getRanges(TwinCursor cursor);
+	}
+
+	private void executeDeleteInternal(RangeExpander expander) {
+		IntervalTree<TwinCursor> removeIntervals = new IntervalTree<>();
 		List<TwinCursor> deleteCursors = new ArrayList<>();
-		NavigableMap<Integer, TwinCursor> cursorStarts = new TreeMap<>();
+		TreeMap<Integer, TwinCursor> cursorStarts = new TreeMap<>();
 		for (TwinCursor cursor : _cursors) {
-			List<Range> expandedRanges = cursor.getExpandedRanges(_buffer, _mode);
+			List<Range> expandedRanges = expander.getRanges(cursor);
 			for (Range expandedRange : expandedRanges) {
 				if (removeIntervals.isIntersecting(expandedRange)) {
 					removeIntervals.forEachIntersect(expandedRange,
@@ -120,7 +244,12 @@ public class TextTransaction {
 				int cursorStart = entry.getKey();
 				TwinCursor currentCursor = entry.getValue();
 				cursorStarts.remove(cursorStart, currentCursor);
-				cursorStarts.put(cursorStart - range.getLength(), currentCursor);
+				int newPosition = cursorStart - range.getLength();
+				if (cursorStarts.containsKey(newPosition)) {
+					deleteCursors.add(currentCursor);
+				} else {
+					cursorStarts.put(newPosition, currentCursor);
+				}
 				entry = cursorStarts.higherEntry(range.getEnd());
 			}
 		});
@@ -143,7 +272,7 @@ public class TextTransaction {
 					return true;
 				}
 			};
-			_buffer.getCursorCollection().doFiltered(visitor);
+			_buffer.getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 		}
 	}
 }

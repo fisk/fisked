@@ -28,6 +28,7 @@ package org.fisked.buffer;
 
 import java.util.List;
 
+import org.fisked.buffer.controller.ModeLineController;
 import org.fisked.buffer.drawing.View;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.util.models.AttributedString;

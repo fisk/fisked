@@ -26,26 +26,6 @@
  *******************************************************************************/
 package org.fisked.buffer.cursor.traverse;
 
-import org.fisked.buffer.cursor.HierarchyCursor;
-
-public class CursorVertexDFSOrderer extends AbstractVertexOrderer {
-	public CursorVertexDFSOrderer(CursorStatus status) {
-		super(status);
-	}
-
-	@Override
-	public boolean traverse(HierarchyCursor traversable, IVertexVisitor visitor) {
-		if (!shouldVisit(traversable)) {
-			return true;
-		}
-		if (!visitor.visit(traversable)) {
-			return false;
-		}
-		for (ITraversable child : traversable.getChildren()) {
-			if (!child.traverse(this, visitor)) {
-				return false;
-			}
-		}
-		return true;
-	}
+public enum CursorStatus {
+	ACTIVE, INACTIVE, ALL
 }

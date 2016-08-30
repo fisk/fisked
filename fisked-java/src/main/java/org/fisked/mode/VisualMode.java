@@ -28,8 +28,8 @@ package org.fisked.mode;
 
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.Buffer.UndoScope;
+import org.fisked.buffer.controller.FatTextSelection;
 import org.fisked.buffer.BufferWindow;
-import org.fisked.buffer.cursor.FatTextSelection;
 import org.fisked.buffer.registers.RegisterManager;
 import org.fisked.mode.responder.BasicNavigationResponder;
 import org.fisked.mode.responder.CommandInputResponder;

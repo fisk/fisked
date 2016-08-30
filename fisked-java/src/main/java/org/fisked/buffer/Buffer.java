@@ -36,10 +36,9 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.apache.commons.io.IOUtils;
+import org.fisked.buffer.controller.TextTransaction;
 import org.fisked.buffer.cursor.Cursor;
 import org.fisked.buffer.cursor.CursorCollection;
-import org.fisked.buffer.cursor.traverse.CursorVertexReverseDFSOrderer;
-import org.fisked.buffer.cursor.traverse.IFilterVertexVisitor;
 import org.fisked.text.IBufferDecorator;
 import org.fisked.text.TextLayout;
 import org.fisked.util.models.AttributedString;
@@ -54,9 +53,13 @@ public class Buffer implements CharSequence {
 	private FileContext _fileContext = null;
 	private TextLayout _layout;
 	private CursorCollection _cursorCollection;
-	private final Map<String, Object> _map = new HashMap<String, Object>();
+	private final Map<String, Object> _map = new HashMap<>();
 
 	private final Stack<Integer> _undoMergeScope = new Stack<>();
+
+	public TextTransaction makeTextTransaction(boolean logged) {
+		return new TextTransaction(this, logged);
+	}
 
 	public class UndoScope implements AutoCloseable {
 		public UndoScope() {
@@ -165,22 +168,14 @@ public class Buffer implements CharSequence {
 		}
 	}
 
-	private void removeCharAtPointLogged(Cursor cursor) {
-		if (cursor.getCharIndex() == 0 || _stringBuilder.length() == 0)
-			return;
-		int index = cursor.getCharIndex() - 1;
-		removeCharsInRangeLogged(new Range(index, 1));
+	public void removeCharAtPointLogged() {
+		TextTransaction transaction = makeTextTransaction(true);
+		transaction.executeDeleteAtPoint(0, 1);
 	}
 
-	public void removeCharAtPointLogged() {
-		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
-			@Override
-			public boolean visit(Cursor cursor) {
-				removeCharAtPointLogged(cursor);
-				return true;
-			}
-		};
-		_cursorCollection.doFiltered(visitor, new CursorVertexReverseDFSOrderer());
+	public void deleteCharAtPointLogged() {
+		TextTransaction transaction = makeTextTransaction(true);
+		transaction.executeDeleteAtPoint(1, 0);
 	}
 
 	public void removeCharsInRange(Range selection) {
@@ -220,21 +215,21 @@ public class Buffer implements CharSequence {
 		insertString(position, string);
 	}
 
-	private void appendStringAtPointLogged(Cursor cursor, String string) {
+	public void appendStringAtPointLogged(Cursor cursor, String string) {
 		int index = cursor.getCharIndex();
 		insertStringLogged(index, string);
 		cursor.setCharIndex(index + string.length(), true);
 	}
 
+	public void appendStringAtPoint(Cursor cursor, String string) {
+		int index = cursor.getCharIndex();
+		insertString(index, string);
+		cursor.setCharIndex(index + string.length(), true);
+	}
+
 	public void appendStringAtPointLogged(String string) {
-		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
-			@Override
-			public boolean visit(Cursor cursor) {
-				appendStringAtPointLogged(cursor, string);
-				return true;
-			}
-		};
-		_cursorCollection.doFiltered(visitor, new CursorVertexReverseDFSOrderer());
+		TextTransaction transaction = makeTextTransaction(true);
+		transaction.executeWrite(string);
 	}
 
 	public String getFileName() {

@@ -26,9 +26,12 @@
  *******************************************************************************/
 package org.fisked.mode.responder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.fisked.buffer.BufferWindow;
-import org.fisked.buffer.cursor.Cursor;
-import org.fisked.buffer.registers.RegisterManager;
+import org.fisked.buffer.controller.TextTransaction;
+import org.fisked.buffer.cursor.TwinCursor;
 import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.IInputResponder;
@@ -37,8 +40,7 @@ import org.fisked.responder.LoopResponder;
 import org.fisked.responder.RecognitionState;
 import org.fisked.responder.motion.IMotion.MotionRange;
 import org.fisked.responder.motion.MotionRecognizer;
-import org.fisked.util.models.selection.SelectionMode;
-import org.fisked.util.models.selection.TextSelection;
+import org.fisked.util.models.Range;
 
 public class MotionActionResponder implements IInputResponder {
 
@@ -53,22 +55,24 @@ public class MotionActionResponder implements IInputResponder {
 		_responders.addResponder((Event event) -> {
 			return EventRecognition.matchesJoined(event, "d", motionRecognizer);
 		}, () -> {
-			_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-				MotionRange range = motionRecognizer.getMotionRange(cursor);
-				String str = _window.getBuffer().toString().substring(range.getStart(), range.getEnd());
-				RegisterManager.getInstance().setRegister(RegisterManager.UNNAMED_REGISTER,
-						new TextSelection(SelectionMode.NORMAL_MODE, str));
-				_window.getBuffer().removeCharsInRangeLogged(range.getRange());
-				cursor.setCharIndex(range.getRange().getStartSorted(), true);
+			TextTransaction transaction = _window.getBuffer().makeTextTransaction(true);
+			transaction.executeDelete((TwinCursor twinCursor) -> {
+				MotionRange motionRange = motionRecognizer.getMotionRange(twinCursor.getPrimary());
+				List<Range> ranges = new ArrayList<>();
+				ranges.add(motionRange.getRange());
+				return ranges;
 			});
 			_window.setNeedsFullRedraw();
 		});
 		_responders.addResponder((Event event) -> {
 			return EventRecognition.matchesJoined(event, "c", motionRecognizer);
 		}, () -> {
-			_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-				MotionRange range = motionRecognizer.getMotionRange(cursor);
-				_window.getBuffer().removeCharsInRangeLogged(range.getRange());
+			TextTransaction transaction = _window.getBuffer().makeTextTransaction(true);
+			transaction.executeDelete((TwinCursor twinCursor) -> {
+				MotionRange motionRange = motionRecognizer.getMotionRange(twinCursor.getPrimary());
+				List<Range> ranges = new ArrayList<>();
+				ranges.add(motionRange.getRange());
+				return ranges;
 			});
 			_window.switchToInputMode();
 		});

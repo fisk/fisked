@@ -26,9 +26,8 @@
  *******************************************************************************/
 package org.fisked.buffer.cursor;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.fisked.buffer.cursor.traverse.CursorEdgeDFSOrderer;
+import org.fisked.buffer.cursor.traverse.CursorStatus;
 import org.fisked.buffer.cursor.traverse.CursorVertexDFSOrderer;
 import org.fisked.buffer.cursor.traverse.CursorVertexPrimaryOrderer;
 import org.fisked.buffer.cursor.traverse.CursorVertexReverseDFSOrderer;
@@ -42,10 +41,23 @@ import org.fisked.buffer.cursor.traverse.IVertexOrderer;
 import org.fisked.buffer.cursor.traverse.IVertexVisitor;
 import org.fisked.buffer.cursor.traverse.VertexTraverser;
 import org.fisked.text.TextLayout;
+import org.fisked.util.Wrapper;
 
 public class CursorCollection implements ITraversable {
 	private final TextLayout _layout;
 	private HierarchyCursor _root;
+
+	private CursorStatus _cursorStatus = CursorStatus.ACTIVE;
+
+	@Override
+	public CursorStatus getCursorStatus() {
+		return _cursorStatus;
+	}
+
+	@Override
+	public void setCursorStatus(CursorStatus cursorStatus) {
+		_cursorStatus = cursorStatus;
+	}
 
 	public CursorCollection(TextLayout layout) {
 		_layout = layout;
@@ -76,38 +88,38 @@ public class CursorCollection implements ITraversable {
 
 	public <T extends ITraversable, O extends IVertexOrderer> void doFiltered(IFilterVertexVisitor<T> visitor,
 			O orderer) {
-		VertexTraverser<T, O> traverser = new VertexTraverser<T, O>(visitor, this, orderer);
+		VertexTraverser<T, O> traverser = new VertexTraverser<>(visitor, this, orderer);
 		traverser.traverse();
 	}
 
 	public <T extends ITraversable, O extends IEdgeOrderer> void doFiltered(IFilterEdgeVisitor<T> visitor, O orderer) {
-		EdgeTraverser<T, O> traverser = new EdgeTraverser<T, O>(visitor, this, orderer);
+		EdgeTraverser<T, O> traverser = new EdgeTraverser<>(visitor, this, orderer);
 		traverser.traverse();
 	}
 
-	public <T extends ITraversable> void doFiltered(IFilterVertexVisitor<T> visitor) {
-		doFiltered(visitor, new CursorVertexDFSOrderer());
+	public <T extends ITraversable> void doFiltered(IFilterVertexVisitor<T> visitor, CursorStatus status) {
+		doFiltered(visitor, new CursorVertexDFSOrderer(status));
 	}
 
-	public <T extends ITraversable> void doFiltered(IFilterEdgeVisitor<T> visitor) {
-		doFiltered(visitor, new CursorEdgeDFSOrderer());
+	public <T extends ITraversable> void doFiltered(IFilterEdgeVisitor<T> visitor, CursorStatus status) {
+		doFiltered(visitor, new CursorEdgeDFSOrderer(status));
 	}
 
-	public <T extends ITraversable> void doFilteredReverse(IFilterVertexVisitor<T> visitor) {
-		doFiltered(visitor, new CursorVertexReverseDFSOrderer());
+	public <T extends ITraversable> void doFilteredReverse(IFilterVertexVisitor<T> visitor, CursorStatus status) {
+		doFiltered(visitor, new CursorVertexReverseDFSOrderer(status));
 	}
 
 	public Cursor getPrimaryCursor() {
-		AtomicReference<Cursor> cursorRef = new AtomicReference<>();
+		Wrapper<Cursor> cursorRef = new Wrapper<>();
 		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
 			@Override
 			public boolean visit(Cursor cursor) {
-				cursorRef.set(cursor);
+				cursorRef.setValue(cursor);
 				return false;
 			}
 		};
-		doFiltered(visitor, new CursorVertexPrimaryOrderer());
-		return cursorRef.get();
+		doFiltered(visitor, new CursorVertexPrimaryOrderer(CursorStatus.ACTIVE));
+		return cursorRef.getValue();
 	}
 
 	public interface DoTwinTransplantClosure {
@@ -133,5 +145,10 @@ public class CursorCollection implements ITraversable {
 		CursorCollection collection = new CursorCollection(_layout);
 		collection._root = (HierarchyCursor) _root.clone();
 		return collection;
+	}
+
+	public void addCursorAt(int charIndex) {
+		TwinCursor cursor = new TwinCursor(Cursor.makeCursorFromCharIndex(charIndex, _layout));
+		_root.addChild(cursor);
 	}
 }

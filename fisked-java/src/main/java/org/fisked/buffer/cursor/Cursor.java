@@ -26,6 +26,7 @@
  *******************************************************************************/
 package org.fisked.buffer.cursor;
 
+import org.fisked.buffer.cursor.traverse.CursorStatus;
 import org.fisked.buffer.cursor.traverse.IEdgeOrderer;
 import org.fisked.buffer.cursor.traverse.IEdgeVisitor;
 import org.fisked.buffer.cursor.traverse.ITraversable;
@@ -44,6 +45,18 @@ public class Cursor implements ITraversable {
 	private int _lastColumn; // last column of any command that changes cursor
 								// position side-ways
 	private final TextLayout _layout;
+
+	private CursorStatus _cursorStatus = CursorStatus.ACTIVE;
+
+	@Override
+	public CursorStatus getCursorStatus() {
+		return _cursorStatus;
+	}
+
+	@Override
+	public void setCursorStatus(CursorStatus cursorStatus) {
+		_cursorStatus = cursorStatus;
+	}
 
 	protected Cursor(int charIndex, Point relativePoint, Point absolutePoint, int lastColumn, TextLayout layout) {
 		_charIndex = charIndex;

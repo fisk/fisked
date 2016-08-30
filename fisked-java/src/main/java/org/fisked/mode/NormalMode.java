@@ -31,6 +31,7 @@ import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.mode.responder.BasicNavigationResponder;
 import org.fisked.mode.responder.CommandInputResponder;
+import org.fisked.mode.responder.CursorManagerResponder;
 import org.fisked.mode.responder.DeleteLineResponder;
 import org.fisked.mode.responder.InputModeSwitchResponder;
 import org.fisked.mode.responder.MotionActionResponder;
@@ -57,6 +58,7 @@ public class NormalMode extends AbstractMode {
 		addResponder(new InputModeSwitchResponder(_window));
 		addResponder(new VisualModeSwitchResponder(_window));
 		addResponder(new BasicNavigationResponder(_window));
+		addResponder(new CursorManagerResponder(_window));
 		addResponder(new MotionActionResponder(_window));
 		addResponder(nextEvent -> {
 			if (nextEvent.isCharacter('p')) {

@@ -29,11 +29,18 @@ package org.fisked.buffer.cursor.traverse;
 import org.fisked.buffer.cursor.HierarchyCursor;
 
 public class CursorEdgeDFSOrderer extends AbstractEdgeOrderer {
+	public CursorEdgeDFSOrderer(CursorStatus status) {
+		super(status);
+	}
+
 	@Override
 	public boolean traverseEdge(HierarchyCursor traversable, IEdgeVisitor visitor) {
 		int i = 0;
 		for (ITraversable child : traversable.getChildren()) {
 			final int childIndex = i++;
+			if (!shouldVisit(child)) {
+				continue;
+			}
 			if (!visitor.visitEdge(new IEdge() {
 
 				@Override

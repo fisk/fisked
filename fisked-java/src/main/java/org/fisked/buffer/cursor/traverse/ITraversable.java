@@ -31,5 +31,9 @@ public interface ITraversable {
 
 	public boolean traverse(IEdgeOrderer orderer, IEdgeVisitor visitor);
 
+	public CursorStatus getCursorStatus();
+
+	public void setCursorStatus(CursorStatus cursorStatus);
+
 	ITraversable clone();
 }

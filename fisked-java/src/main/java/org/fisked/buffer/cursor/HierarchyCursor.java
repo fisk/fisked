@@ -29,6 +29,7 @@ package org.fisked.buffer.cursor;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.fisked.buffer.cursor.traverse.CursorStatus;
 import org.fisked.buffer.cursor.traverse.IEdgeOrderer;
 import org.fisked.buffer.cursor.traverse.IEdgeVisitor;
 import org.fisked.buffer.cursor.traverse.ITraversable;
@@ -36,8 +37,20 @@ import org.fisked.buffer.cursor.traverse.IVertexOrderer;
 import org.fisked.buffer.cursor.traverse.IVertexVisitor;
 
 public class HierarchyCursor implements ITraversable {
-	private final List<ITraversable> _children = new ArrayList<ITraversable>();
+	private final List<ITraversable> _children = new ArrayList<>();
 	private ITraversable _primary;
+
+	private CursorStatus _cursorStatus = CursorStatus.ACTIVE;
+
+	@Override
+	public CursorStatus getCursorStatus() {
+		return _cursorStatus;
+	}
+
+	@Override
+	public void setCursorStatus(CursorStatus cursorStatus) {
+		_cursorStatus = cursorStatus;
+	}
 
 	public HierarchyCursor() {
 	}

@@ -24,29 +24,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.buffer.cursor;
+package org.fisked.buffer.cursor.traverse;
 
-import java.util.List;
+import org.fisked.buffer.cursor.HierarchyCursor;
 
-import org.fisked.util.models.Range;
-import org.fisked.util.models.selection.SelectionMode;
-import org.fisked.util.models.selection.TextSelection;
-
-public class FatTextSelection extends TextSelection {
-	private final TwinCursor _cursor;
-	private final List<Range> _ranges;
-
-	public FatTextSelection(SelectionMode mode, String text, List<Range> ranges, TwinCursor cursor) {
-		super(mode, text);
-		_ranges = ranges;
-		_cursor = cursor;
+public class CursorVertexNonPrimaryOrderer extends AbstractVertexOrderer {
+	public CursorVertexNonPrimaryOrderer(CursorStatus status) {
+		super(status);
 	}
 
-	public List<Range> getRanges() {
-		return _ranges;
-	}
-
-	public TwinCursor getCursor() {
-		return _cursor;
+	@Override
+	public boolean traverse(HierarchyCursor traversable, IVertexVisitor visitor) {
+		if (!shouldVisit(traversable)) {
+			return true;
+		}
+		if (!visitor.visit(traversable)) {
+			return false;
+		}
+		for (ITraversable cursor : traversable.getChildren()) {
+			if (!cursor.equals(traversable.getPrimary())) {
+				if (!traversable.getPrimary().traverse(this, visitor)) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 }

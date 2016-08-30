@@ -24,28 +24,45 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.buffer.cursor.traverse;
+package org.fisked.mode.responder;
 
-import org.fisked.buffer.cursor.HierarchyCursor;
+import org.fisked.buffer.BufferWindow;
+import org.fisked.responder.Event;
+import org.fisked.responder.IInputResponder;
+import org.fisked.responder.InputResponderChain;
+import org.fisked.responder.RecognitionState;
 
-public class CursorVertexDFSOrderer extends AbstractVertexOrderer {
-	public CursorVertexDFSOrderer(CursorStatus status) {
-		super(status);
+public class CursorManagerResponder implements IInputResponder {
+	private final BufferWindow _window;
+	private final InputResponderChain _responders = new InputResponderChain();
+
+	public CursorManagerResponder(BufferWindow window) {
+		_window = window;
+
+		_responders.addResponder("cc", () -> {
+			_window.getBufferController().addCursorAtPoint();
+			_window.setNeedsFullRedraw();
+		});
+
+		_responders.addResponder("cd", () -> {
+			_window.getBufferController().addCursorAtPoint();
+			_window.setNeedsFullRedraw();
+		});
+
+		_responders.addResponder("ca", () -> {
+			_window.getBufferController().addCursorAtPoint();
+			_window.setNeedsFullRedraw();
+		});
 	}
 
 	@Override
-	public boolean traverse(HierarchyCursor traversable, IVertexVisitor visitor) {
-		if (!shouldVisit(traversable)) {
-			return true;
-		}
-		if (!visitor.visit(traversable)) {
-			return false;
-		}
-		for (ITraversable child : traversable.getChildren()) {
-			if (!child.traverse(this, visitor)) {
-				return false;
-			}
-		}
-		return true;
+	public RecognitionState recognizesInput(Event input) {
+		return _responders.recognizesInput(input);
 	}
+
+	@Override
+	public void onRecognize() {
+		_responders.onRecognize();
+	}
+
 }

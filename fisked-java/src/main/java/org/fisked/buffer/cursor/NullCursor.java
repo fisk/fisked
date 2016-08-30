@@ -26,6 +26,7 @@
  *******************************************************************************/
 package org.fisked.buffer.cursor;
 
+import org.fisked.buffer.cursor.traverse.CursorStatus;
 import org.fisked.buffer.cursor.traverse.IEdgeOrderer;
 import org.fisked.buffer.cursor.traverse.IEdgeVisitor;
 import org.fisked.buffer.cursor.traverse.ITraversable;
@@ -33,6 +34,18 @@ import org.fisked.buffer.cursor.traverse.IVertexOrderer;
 import org.fisked.buffer.cursor.traverse.IVertexVisitor;
 
 public class NullCursor implements ITraversable {
+	private CursorStatus _cursorStatus = CursorStatus.ACTIVE;
+
+	@Override
+	public CursorStatus getCursorStatus() {
+		return _cursorStatus;
+	}
+
+	@Override
+	public void setCursorStatus(CursorStatus cursorStatus) {
+		_cursorStatus = cursorStatus;
+	}
+
 	@Override
 	public boolean traverse(IVertexOrderer orderer, IVertexVisitor visitor) {
 		return orderer.traverse(this, visitor);

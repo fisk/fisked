@@ -32,8 +32,28 @@ import org.fisked.buffer.cursor.NullCursor;
 import org.fisked.buffer.cursor.TwinCursor;
 
 public abstract class AbstractVertexOrderer implements IVertexOrderer {
+	private final CursorStatus _cursorStatus;
+
+	public AbstractVertexOrderer(CursorStatus status) {
+		_cursorStatus = status;
+	}
+
+	protected boolean shouldVisit(ITraversable traversable) {
+		switch (_cursorStatus) {
+		case ALL:
+			return true;
+		case ACTIVE:
+		case INACTIVE:
+			return traversable.getCursorStatus() == _cursorStatus;
+		}
+		return false;
+	}
+
 	@Override
 	public boolean traverse(TwinCursor traversable, IVertexVisitor visitor) {
+		if (!shouldVisit(traversable)) {
+			return true;
+		}
 		if (!visitor.visit(traversable)) {
 			return false;
 		}
@@ -42,6 +62,9 @@ public abstract class AbstractVertexOrderer implements IVertexOrderer {
 
 	@Override
 	public boolean traverse(CursorCollection traversable, IVertexVisitor visitor) {
+		if (!shouldVisit(traversable)) {
+			return true;
+		}
 		if (!visitor.visit(traversable)) {
 			return false;
 		}
@@ -50,6 +73,9 @@ public abstract class AbstractVertexOrderer implements IVertexOrderer {
 
 	@Override
 	public boolean traverse(Cursor traversable, IVertexVisitor visitor) {
+		if (!shouldVisit(traversable)) {
+			return true;
+		}
 		return visitor.visit(traversable);
 	}
 

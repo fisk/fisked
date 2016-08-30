@@ -31,7 +31,15 @@ import java.util.List;
 import org.fisked.buffer.cursor.HierarchyCursor;
 
 public class CursorVertexReverseDFSOrderer extends AbstractVertexOrderer {
+	public CursorVertexReverseDFSOrderer(CursorStatus status) {
+		super(status);
+	}
+
+	@Override
 	public boolean traverse(HierarchyCursor traversable, IVertexVisitor visitor) {
+		if (!shouldVisit(traversable)) {
+			return true;
+		}
 		if (!visitor.visit(traversable)) {
 			return false;
 		}

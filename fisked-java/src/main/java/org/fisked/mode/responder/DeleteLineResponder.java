@@ -27,18 +27,12 @@
 package org.fisked.mode.responder;
 
 import org.fisked.buffer.Buffer;
-import org.fisked.buffer.Buffer.UndoScope;
 import org.fisked.buffer.BufferWindow;
-import org.fisked.buffer.cursor.Cursor;
-import org.fisked.buffer.cursor.traverse.IFilterVertexVisitor;
-import org.fisked.buffer.registers.RegisterManager;
+import org.fisked.buffer.controller.TextTransaction;
 import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.RecognitionState;
-import org.fisked.util.models.Range;
-import org.fisked.util.models.selection.SelectionMode;
-import org.fisked.util.models.selection.TextSelection;
 
 public class DeleteLineResponder implements IInputResponder {
 
@@ -53,70 +47,11 @@ public class DeleteLineResponder implements IInputResponder {
 		return EventRecognition.matchesExact(nextEvent, "dd");
 	}
 
-	private int getLineStart(Cursor cursor) {
-		Buffer buffer = _window.getBuffer();
-		String string = buffer.getCharSequence().toString();
-
-		int newIndex = cursor.getCharIndex();
-		if (newIndex != 0) {
-			if (String.valueOf(string.charAt(newIndex - 1)).matches(".")) {
-				newIndex--;
-				while (newIndex >= 0 && String.valueOf(string.charAt(newIndex)).matches(".")) {
-					newIndex--;
-				}
-				newIndex++;
-			}
-		}
-
-		return newIndex;
-	}
-
-	private int getLineEnd(Cursor cursor) {
-		Buffer buffer = _window.getBuffer();
-		String string = buffer.getCharSequence().toString();
-
-		int newIndex = cursor.getCharIndex();
-		if (newIndex != string.length()) {
-			if (String.valueOf(string.charAt(newIndex)).matches(".")) {
-				newIndex++;
-				while (newIndex < string.length() && String.valueOf(string.charAt(newIndex)).matches(".")) {
-					newIndex++;
-				}
-			}
-		}
-
-		return newIndex;
-	}
-
 	@Override
 	public void onRecognize() {
 		Buffer buffer = _window.getBuffer();
-
-		try (UndoScope us = buffer.createUndoScope()) {
-			IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
-				@Override
-				public boolean visit(Cursor traversable) {
-					int start = getLineStart(traversable);
-					int lineEnd = getLineEnd(traversable) + 1;
-					int end = Math.min(lineEnd, buffer.length());
-					start -= lineEnd - end;
-					start = Math.max(start, 0);
-					Range lineRange = new Range(start, end - start);
-
-					String string = buffer.toString().substring(lineRange.getStart(), lineRange.getEnd());
-					RegisterManager.getInstance().setRegister(RegisterManager.UNNAMED_REGISTER,
-							new TextSelection(SelectionMode.LINE_MODE, string));
-
-					if (lineRange.getLength() != 0) {
-						buffer.removeCharsInRangeLogged(lineRange);
-						traversable.setCharIndex(start, true);
-					}
-
-					return true;
-				}
-			};
-			buffer.getCursorCollection().doFilteredReverse(visitor);
-		}
+		TextTransaction transaction = buffer.makeTextTransaction(true);
+		transaction.executeDeleteLines();
 		_window.setNeedsFullRedraw();
 	}
 

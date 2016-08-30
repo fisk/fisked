@@ -24,11 +24,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.buffer;
+package org.fisked.buffer.controller;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.fisked.buffer.BufferWindow;
 import org.fisked.settings.Settings;
 import org.fisked.text.TextLayout;
 import org.fisked.text.TextLayout.InvalidLocationException;

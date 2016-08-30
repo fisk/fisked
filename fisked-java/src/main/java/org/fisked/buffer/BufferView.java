@@ -26,6 +26,9 @@
  *******************************************************************************/
 package org.fisked.buffer;
 
+import org.fisked.buffer.controller.BufferController;
+import org.fisked.buffer.cursor.TwinCursor;
+import org.fisked.buffer.cursor.traverse.CursorStatus;
 import org.fisked.buffer.drawing.View;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.text.IBufferDecorator;
@@ -96,5 +99,19 @@ public class BufferView extends View {
 				context.printString(attributedSubstring);
 			});
 		}
+
+		_controller.doNonPrimaryCursors((TwinCursor cursor) -> {
+			Point relativePoint = cursor.getPrimary().getRelativePoint();
+			if (relativePoint.getY() < drawingRect.getOrigin().getY()
+					|| relativePoint.getY() > drawingRect.getOrigin().getY() + drawingRect.getSize().getHeight()) {
+				return;
+			}
+			AttributedString str = new AttributedString(" ");
+			str.setBackgroundColor(Color.WHITE);
+			str.setForegroundColor(Color.WHITE);
+
+			context.moveTo(relativePoint.getX() + drawingRect.getOrigin().getX(), relativePoint.getY());
+			context.printString(str);
+		}, CursorStatus.ALL);
 	}
 }

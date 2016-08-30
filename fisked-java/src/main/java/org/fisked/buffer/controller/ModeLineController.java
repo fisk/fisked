@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.buffer;
+package org.fisked.buffer.controller;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.fisked.buffer.BufferWindow;
 import org.fisked.scm.ISCMRepository;
 import org.fisked.scm.SCMRepositoryResolver;
 import org.fisked.settings.Settings;

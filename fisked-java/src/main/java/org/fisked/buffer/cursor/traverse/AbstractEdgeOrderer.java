@@ -33,8 +33,28 @@ import org.fisked.buffer.cursor.NullCursor;
 import org.fisked.buffer.cursor.TwinCursor;
 
 public abstract class AbstractEdgeOrderer implements IEdgeOrderer {
+	private final CursorStatus _cursorStatus;
+
+	public AbstractEdgeOrderer(CursorStatus status) {
+		_cursorStatus = status;
+	}
+
+	protected boolean shouldVisit(ITraversable traversable) {
+		switch (_cursorStatus) {
+		case ALL:
+			return true;
+		case ACTIVE:
+		case INACTIVE:
+			return traversable.getCursorStatus() == _cursorStatus;
+		}
+		return false;
+	}
+
 	@Override
 	public boolean traverseEdge(TwinCursor traversable, IEdgeVisitor visitor) {
+		if (!shouldVisit(traversable)) {
+			return true;
+		}
 		if (!visitor.visitEdge(new IEdge() {
 
 			@Override
@@ -50,11 +70,15 @@ public abstract class AbstractEdgeOrderer implements IEdgeOrderer {
 		}, traversable)) {
 			return false;
 		}
+
 		return traversable.getPrimary().traverse(this, visitor);
 	}
 
 	@Override
 	public boolean traverseEdge(CursorCollection traversable, IEdgeVisitor visitor) {
+		if (!shouldVisit(traversable)) {
+			return true;
+		}
 		if (!visitor.visitEdge(new IEdge() {
 
 			@Override

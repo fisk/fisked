@@ -32,6 +32,8 @@ import java.util.List;
 import org.fisked.buffer.Buffer.UndoScope;
 import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.cursor.Cursor;
+import org.fisked.buffer.cursor.traverse.CursorStatus;
+import org.fisked.buffer.cursor.traverse.IFilterVertexVisitor;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.IRecognitionAction;
@@ -124,8 +126,6 @@ public class SearchTextResponder implements IInputResponder {
 				}
 				_window.getCommandController().setCommandFeedback(prefix + _searchString.toString());
 			} else if (nextEvent.isEscape()) {
-				_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-				});
 				_searchString = new StringBuilder();
 				_isSearching = false;
 				try (UndoScope us = _window.getBuffer().createUndoScope()) {
@@ -173,11 +173,17 @@ public class SearchTextResponder implements IInputResponder {
 					_isSearchingForward = true;
 					_isSearching = true;
 					_beforeInfo = new ArrayList<>();
-					_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-						BeforeInfo info = new BeforeInfo(cursor);
-						info._charIndex = cursor.getCharIndex();
-						_beforeInfo.add(info);
-					});
+
+					IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
+						@Override
+						public boolean visit(Cursor cursor) {
+							BeforeInfo info = new BeforeInfo(cursor);
+							info._charIndex = cursor.getCharIndex();
+							_beforeInfo.add(info);
+							return true;
+						}
+					};
+					_window.getBuffer().getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 					_searchString = new StringBuilder();
 					_window.getCommandController().setCommandFeedback("/");
 					_window.setNeedsFullRedraw();
@@ -188,11 +194,17 @@ public class SearchTextResponder implements IInputResponder {
 					_isSearchingForward = false;
 					_isSearching = true;
 					_beforeInfo = new ArrayList<>();
-					_window.getBufferController().doCursorsLogged((Cursor cursor) -> {
-						BeforeInfo info = new BeforeInfo(cursor);
-						info._charIndex = cursor.getCharIndex();
-						_beforeInfo.add(info);
-					});
+
+					IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
+						@Override
+						public boolean visit(Cursor cursor) {
+							BeforeInfo info = new BeforeInfo(cursor);
+							info._charIndex = cursor.getCharIndex();
+							_beforeInfo.add(info);
+							return true;
+						}
+					};
+					_window.getBuffer().getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 					_searchString = new StringBuilder();
 					_window.getCommandController().setCommandFeedback("?");
 					_window.setNeedsFullRedraw();

@@ -29,7 +29,15 @@ package org.fisked.buffer.cursor.traverse;
 import org.fisked.buffer.cursor.HierarchyCursor;
 
 public class CursorVertexPrimaryOrderer extends AbstractVertexOrderer {
+	public CursorVertexPrimaryOrderer(CursorStatus status) {
+		super(status);
+	}
+
+	@Override
 	public boolean traverse(HierarchyCursor traversable, IVertexVisitor visitor) {
+		if (!shouldVisit(traversable)) {
+			return true;
+		}
 		if (!visitor.visit(traversable)) {
 			return false;
 		}

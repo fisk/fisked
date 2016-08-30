@@ -30,6 +30,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.fisked.buffer.controller.BufferController;
+import org.fisked.buffer.controller.LineNumberController;
+import org.fisked.buffer.controller.ModeLineController;
 import org.fisked.buffer.drawing.View;
 import org.fisked.buffer.drawing.Window;
 import org.fisked.command.CommandController;
