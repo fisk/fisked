@@ -30,6 +30,8 @@ import org.fisked.buffer.cursor.Cursor;
 import org.fisked.buffer.cursor.CursorCollection;
 import org.fisked.buffer.cursor.NullCursor;
 import org.fisked.buffer.cursor.TwinCursor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractVertexOrderer implements IVertexOrderer {
 	private final CursorStatus _cursorStatus;
@@ -49,9 +51,12 @@ public abstract class AbstractVertexOrderer implements IVertexOrderer {
 		return false;
 	}
 
+	private final static Logger LOG = LoggerFactory.getLogger(AbstractVertexOrderer.class);
+
 	@Override
 	public boolean traverse(TwinCursor traversable, IVertexVisitor visitor) {
 		if (!shouldVisit(traversable)) {
+			LOG.debug("Cursor " + traversable + " blocked: " + traversable.getCursorStatus());
 			return true;
 		}
 		if (!visitor.visit(traversable)) {

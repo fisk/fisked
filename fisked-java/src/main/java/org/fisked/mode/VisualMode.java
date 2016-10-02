@@ -28,8 +28,9 @@ package org.fisked.mode;
 
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.Buffer.UndoScope;
-import org.fisked.buffer.controller.FatTextSelection;
 import org.fisked.buffer.BufferWindow;
+import org.fisked.buffer.controller.FatTextSelection;
+import org.fisked.buffer.controller.TextTransaction;
 import org.fisked.buffer.registers.RegisterManager;
 import org.fisked.mode.responder.BasicNavigationResponder;
 import org.fisked.mode.responder.CommandInputResponder;
@@ -81,11 +82,8 @@ public class VisualMode extends AbstractMode {
 					RegisterManager.getInstance().setRegister(registerRecognizer.getRegister(), selectionText);
 
 					try (UndoScope us = buffer.createUndoScope()) {
-						_window.getBufferController().getInnerSelections()
-								.forEachReverse((Range range, String text) -> {
-									buffer.removeCharsInRangeLogged(range);
-								});
-						_window.getBufferController().collapseCursors();
+						TextTransaction transaction = buffer.makeTextTransaction(true);
+						transaction.executeDeleteSelection(_mode);
 					}
 
 					_window.switchToNormalMode();

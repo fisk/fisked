@@ -43,7 +43,7 @@ public class CursorVertexNonPrimaryOrderer extends AbstractVertexOrderer {
 		}
 		for (ITraversable cursor : traversable.getChildren()) {
 			if (!cursor.equals(traversable.getPrimary())) {
-				if (!traversable.getPrimary().traverse(this, visitor)) {
+				if (!cursor.traverse(this, visitor)) {
 					return false;
 				}
 			}

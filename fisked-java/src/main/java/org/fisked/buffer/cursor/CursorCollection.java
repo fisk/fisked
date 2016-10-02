@@ -42,6 +42,8 @@ import org.fisked.buffer.cursor.traverse.IVertexVisitor;
 import org.fisked.buffer.cursor.traverse.VertexTraverser;
 import org.fisked.text.TextLayout;
 import org.fisked.util.Wrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CursorCollection implements ITraversable {
 	private final TextLayout _layout;
@@ -147,8 +149,16 @@ public class CursorCollection implements ITraversable {
 		return collection;
 	}
 
-	public void addCursorAt(int charIndex) {
+	private final static Logger LOG = LoggerFactory.getLogger(CursorCollection.class);
+
+	public void addCursorAt(int charIndex, boolean activated) {
 		TwinCursor cursor = new TwinCursor(Cursor.makeCursorFromCharIndex(charIndex, _layout));
 		_root.addChild(cursor);
+		if (activated) {
+			cursor.setCursorStatus(CursorStatus.ACTIVE);
+		} else {
+			cursor.setCursorStatus(CursorStatus.INACTIVE);
+		}
+		LOG.debug("Cursor " + cursor + " added: " + cursor.getCursorStatus());
 	}
 }

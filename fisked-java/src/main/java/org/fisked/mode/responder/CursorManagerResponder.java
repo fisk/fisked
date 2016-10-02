@@ -39,18 +39,18 @@ public class CursorManagerResponder implements IInputResponder {
 	public CursorManagerResponder(BufferWindow window) {
 		_window = window;
 
-		_responders.addResponder("cc", () -> {
-			_window.getBufferController().addCursorAtPoint();
+		_responders.addResponder("ch", () -> {
+			_window.getBufferController().addCursorAtPoint(false);
 			_window.setNeedsFullRedraw();
 		});
 
 		_responders.addResponder("cd", () -> {
-			_window.getBufferController().addCursorAtPoint();
+			_window.getBufferController().deactivateExtraCursors();
 			_window.setNeedsFullRedraw();
 		});
 
 		_responders.addResponder("ca", () -> {
-			_window.getBufferController().addCursorAtPoint();
+			_window.getBufferController().activateExtraCursors();
 			_window.setNeedsFullRedraw();
 		});
 	}

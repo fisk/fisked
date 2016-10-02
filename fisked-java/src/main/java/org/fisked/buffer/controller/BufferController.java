@@ -294,14 +294,6 @@ public class BufferController {
 		getBuffer().getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
 	}
 
-	public void activateNonPrimaryCursors() {
-
-	}
-
-	public void deactivateNonPrimaryCursors() {
-
-	}
-
 	public void doNonPrimaryCursors(DoClosure<TwinCursor> closure, CursorStatus status) {
 		IFilterVertexVisitor<TwinCursor> visitor = new IFilterVertexVisitor<TwinCursor>() {
 			@Override
@@ -324,15 +316,29 @@ public class BufferController {
 		getBuffer().getCursorCollection().doFiltered(visitor, new CursorVertexPrimaryOrderer(CursorStatus.ACTIVE));
 	}
 
-	public void addCursorAtPoint() {
-		getBuffer().getCursorCollection().addCursorAt(getPrimaryCharIndex());
+	public void addCursorAtPoint(boolean activated) {
+		getBuffer().getCursorCollection().addCursorAt(getPrimaryCharIndex(), activated);
 	}
 
 	public void activateExtraCursors() {
-
+		IFilterVertexVisitor<TwinCursor> visitor = new IFilterVertexVisitor<TwinCursor>() {
+			@Override
+			public boolean visit(TwinCursor cursor) {
+				cursor.setCursorStatus(CursorStatus.ACTIVE);
+				return true;
+			}
+		};
+		getBuffer().getCursorCollection().doFiltered(visitor, new CursorVertexNonPrimaryOrderer(CursorStatus.ALL));
 	}
 
 	public void deactivateExtraCursors() {
-
+		IFilterVertexVisitor<TwinCursor> visitor = new IFilterVertexVisitor<TwinCursor>() {
+			@Override
+			public boolean visit(TwinCursor cursor) {
+				cursor.setCursorStatus(CursorStatus.INACTIVE);
+				return true;
+			}
+		};
+		getBuffer().getCursorCollection().doFiltered(visitor, new CursorVertexNonPrimaryOrderer(CursorStatus.ALL));
 	}
 }

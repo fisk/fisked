@@ -1,4 +1,4 @@
-/*******************************************************************************
+/***********ctiveeivtiv********************************************************************
  * Copyright (c) 2016, Erik Österlund
  * All rights reserved.
  *
@@ -45,53 +45,182 @@ import org.fisked.util.datastructure.IntervalTree;
 import org.fisked.util.models.Range;
 import org.fisked.util.models.selection.SelectionMode;
 import org.fisked.util.models.selection.TextSelection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TextTransaction {
 	private final Buffer _buffer;
-	private final List<TwinCursor> _cursors = new ArrayList<>();
+	private List<TwinCursor> _allCursors;
+	private List<TwinCursor> _activeCursors;
+	private List<TwinCursor> _inactiveCursors;
 	private final boolean _logged;
 
 	public TextTransaction(Buffer buffer, boolean logged) {
 		_logged = logged;
 		_buffer = buffer;
-		addBufferCursorCollection();
 	}
 
-	private void addCursor(TwinCursor cursor) {
-		_cursors.add(cursor);
-	}
-
-	private void addBufferCursorCollection() {
+	private void populateBufferCursorCollection(List<TwinCursor> list, CursorStatus status) {
 		IFilterVertexVisitor<TwinCursor> visitor = new IFilterVertexVisitor<TwinCursor>() {
 			@Override
 			public boolean visit(TwinCursor traversable) {
-				addCursor(traversable);
+				list.add(traversable);
 				return true;
 			}
 		};
-		_buffer.getCursorCollection().doFiltered(visitor, CursorStatus.ACTIVE);
+		_buffer.getCursorCollection().doFiltered(visitor, status);
 	}
 
-	private TreeMap<Integer, TwinCursor> getReverseCursorTree() {
+	private List<TwinCursor> getActiveCursors() {
+		if (_activeCursors != null) {
+			return _activeCursors;
+		}
+		_activeCursors = new ArrayList<>();
+		populateBufferCursorCollection(_activeCursors, CursorStatus.ACTIVE);
+		return _activeCursors;
+	}
+
+	private List<TwinCursor> getInactiveCursors() {
+		if (_inactiveCursors != null) {
+			return _inactiveCursors;
+		}
+		_inactiveCursors = new ArrayList<>();
+		populateBufferCursorCollection(_inactiveCursors, CursorStatus.INACTIVE);
+		return _inactiveCursors;
+	}
+
+	private List<TwinCursor> getAllCursors() {
+		if (_allCursors != null) {
+			return _allCursors;
+		}
+		_allCursors = new ArrayList<>();
+		populateBufferCursorCollection(_allCursors, CursorStatus.ALL);
+		return _allCursors;
+	}
+
+	private TreeMap<Integer, TwinCursor> getReverseActiveCursorTree() {
 		TreeMap<Integer, TwinCursor> cursorStarts = new TreeMap<>(Collections.reverseOrder());
 
-		for (TwinCursor cursor : _cursors) {
+		for (TwinCursor cursor : getActiveCursors()) {
 			cursorStarts.put(cursor.getSortedOtherRange().getStart(), cursor);
 		}
 
 		return cursorStarts;
 	}
 
+	private TreeMap<Integer, TwinCursor> getActiveCursorTree() {
+		TreeMap<Integer, TwinCursor> cursorStarts = new TreeMap<>();
+
+		for (TwinCursor cursor : getActiveCursors()) {
+			cursorStarts.put(cursor.getSortedOtherRange().getStart(), cursor);
+		}
+
+		return cursorStarts;
+	}
+
+	private TreeMap<Integer, TwinCursor> getInactiveCursorTree() {
+		TreeMap<Integer, TwinCursor> cursorStarts = new TreeMap<>();
+
+		for (TwinCursor cursor : getInactiveCursors()) {
+			cursorStarts.put(cursor.getSortedOtherRange().getStart(), cursor);
+		}
+
+		return cursorStarts;
+	}
+
+	private TreeMap<Integer, TwinCursor> getAllCursorTree() {
+		TreeMap<Integer, TwinCursor> cursorStarts = new TreeMap<>();
+
+		for (TwinCursor cursor : getAllCursors()) {
+			cursorStarts.put(cursor.getSortedOtherRange().getStart(), cursor);
+		}
+
+		return cursorStarts;
+	}
+
+	private class CursorAdjuster {
+		private final TreeMap<Integer, TwinCursor> _tree;
+		private final int _strlen;
+		private int _adjustment = 0;
+		private Range _range = new Range(0, 0);
+		private final int _buflen = _buffer.length();
+		private TwinCursor _exclude = null;
+
+		public CursorAdjuster(TreeMap<Integer, TwinCursor> tree, int strlen) {
+			_strlen = strlen;
+			_tree = tree;
+		}
+
+		private final Logger LOG = LoggerFactory.getLogger(CursorAdjuster.class);
+
+		public void adjustToCursor(TwinCursor cursor) {
+			LOG.debug("adjust cursor " + cursor + ": " + _range);
+			Cursor primary = cursor.getPrimary();
+			int end = primary.getCharIndex();
+			int adjustedEnd = end + _adjustment;
+			primary.setCharIndex(adjustedEnd, true);
+			int start = _range.getStart();
+			if (_exclude == null) {
+				start = primary.getCharIndex();
+			}
+			_range = new Range(start, end - start);
+			_exclude = cursor;
+			LOG.debug("adjust cursor " + cursor + ": " + _range);
+		}
+
+		public void adjustToEnd() {
+			LOG.debug("adjust end: " + _range);
+			int end = _buflen;
+			_range = new Range(_range.getStart(), end - _range.getStart());
+			LOG.debug("adjust end: " + _range);
+			flush();
+			LOG.debug("adjust end: " + _range);
+		}
+
+		public void flush() {
+			if (_adjustment != 0) {
+				while (_range.getLength() > 0) {
+					Entry<Integer, TwinCursor> entry = _tree.higherEntry(_range.getStart());
+					if (entry == null) {
+						LOG.debug("flush found null: " + _range);
+						_range = new Range(_range.getEnd(), 0);
+						LOG.debug("flush found null: " + _range);
+					} else {
+						int entryStart = entry.getKey();
+						if (entryStart >= _range.getEnd() || _exclude == entry.getValue()) {
+							LOG.debug("flush entry too high: " + _range + ", " + entryStart);
+							_range = new Range(_range.getEnd(), 0);
+							LOG.debug("flush entry too high: " + _range + ", " + entryStart);
+						} else {
+							TwinCursor twin = entry.getValue();
+							Cursor primary = twin.getPrimary();
+							int charIndex = primary.getCharIndex();
+							primary.setCharIndex(charIndex + _adjustment, true);
+							LOG.debug("flush found cursor: " + _range + ", " + charIndex + ", " + twin);
+							_range = new Range(entry.getKey(), _range.getEnd() - entryStart);
+							LOG.debug("flush found cursor: " + _range + ", " + charIndex + ", " + twin);
+						}
+					}
+				}
+			}
+			_adjustment += _strlen;
+		}
+	}
+
 	public void executeWrite(String string) {
-		TreeMap<Integer, TwinCursor> cursorStarts = getReverseCursorTree();
+		TreeMap<Integer, TwinCursor> activeCursorTree = getActiveCursorTree();
 		Runnable internal = () -> {
-			cursorStarts.forEach((start, cursor) -> {
+			CursorAdjuster adjuster = new CursorAdjuster(getAllCursorTree(), string.length());
+			activeCursorTree.forEach((start, cursor) -> {
+				adjuster.adjustToCursor(cursor);
 				if (_logged) {
 					_buffer.appendStringAtPointLogged(cursor.getPrimary(), string);
 				} else {
 					_buffer.appendStringAtPoint(cursor.getPrimary(), string);
 				}
+				adjuster.flush();
 			});
+			adjuster.adjustToEnd();
 		};
 		if (_logged) {
 			try (UndoScope us = _buffer.createUndoScope()) {
@@ -203,11 +332,13 @@ public class TextTransaction {
 		List<Range> getRanges(TwinCursor cursor);
 	}
 
+	private final Logger LOG = LoggerFactory.getLogger(TextTransaction.class);
+
 	private void executeDeleteInternal(RangeExpander expander) {
 		IntervalTree<TwinCursor> removeIntervals = new IntervalTree<>();
 		List<TwinCursor> deleteCursors = new ArrayList<>();
 		TreeMap<Integer, TwinCursor> cursorStarts = new TreeMap<>();
-		for (TwinCursor cursor : _cursors) {
+		for (TwinCursor cursor : getActiveCursors()) {
 			List<Range> expandedRanges = expander.getRanges(cursor);
 			for (Range expandedRange : expandedRanges) {
 				if (removeIntervals.isIntersecting(expandedRange)) {
@@ -239,18 +370,23 @@ public class TextTransaction {
 			} else {
 				_buffer.removeCharsInRange(range);
 			}
+			LOG.debug("Deleting range " + range);
 			Entry<Integer, TwinCursor> entry = cursorStarts.higherEntry(range.getStart());
+			LOG.debug("Searching for higher");
 			while (entry != null) {
 				int cursorStart = entry.getKey();
 				TwinCursor currentCursor = entry.getValue();
 				cursorStarts.remove(cursorStart, currentCursor);
 				int newPosition = cursorStart - range.getLength();
+				LOG.debug("Found higher " + cursorStart + " -> " + newPosition);
 				if (cursorStarts.containsKey(newPosition)) {
 					deleteCursors.add(currentCursor);
+					LOG.debug("Delete " + cursorStart + " -> " + newPosition);
 				} else {
 					cursorStarts.put(newPosition, currentCursor);
+					LOG.debug("Move " + cursorStart + " -> " + newPosition);
 				}
-				entry = cursorStarts.higherEntry(range.getEnd());
+				entry = cursorStarts.higherEntry(cursorStart);
 			}
 		});
 
