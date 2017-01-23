@@ -36,7 +36,6 @@ import java.util.List;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -124,8 +123,8 @@ public class FileIndexer {
 				filereader = new FileReader(file);
 				doc.add(new TextField("contents", filereader));
 				String relative = new File(_indexLocation).toURI().relativize(file.toURI()).getPath();
-				doc.add(new StringField("path", relative, Field.Store.YES));
-				doc.add(new StringField("filename", file.getName(), Field.Store.YES));
+				doc.add(new TextField("path", relative, Field.Store.YES));
+				doc.add(new TextField("filename", file.getName(), Field.Store.YES));
 
 				_writer.addDocument(doc);
 			} catch (Exception e) {
