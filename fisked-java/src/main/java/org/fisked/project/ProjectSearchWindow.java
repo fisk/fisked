@@ -68,7 +68,7 @@ public class ProjectSearchWindow extends Window {
 
 	private ListView<String> createListView() {
 		Rectangle listViewRect = new Rectangle(0, 0, _rootView.getBounds().getSize().getWidth(),
-				_rootView.getBounds().getSize().getHeight() - 1);
+				_rootView.getBounds().getSize().getHeight() - 2);
 		ListView<String> listView = new ListView<>(listViewRect);
 		ListViewDataSource<String> dataSource = _controller.createListViewDataSource();
 		listView.setDataSource(dataSource);

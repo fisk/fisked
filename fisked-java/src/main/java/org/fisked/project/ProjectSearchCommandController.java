@@ -28,6 +28,7 @@ package org.fisked.project;
 
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.command.CommandController;
+import org.fisked.util.models.Rectangle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +66,11 @@ public class ProjectSearchCommandController extends CommandController {
 	public void clearSearchString() {
 		_searchString = "";
 		clearCommand();
+	}
+
+	@Override
+	public String getString(Rectangle drawingRect) {
+		return _searchString;
 	}
 
 }
