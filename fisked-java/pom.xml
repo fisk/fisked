@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2016, Erik Österlund
+    Copyright (c) 2017, Erik Österlund
     All rights reserved.
    
     Redistribution and use in source and binary forms, with or without
@@ -77,16 +77,16 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-core</artifactId>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.lucene-queryparser</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers-common</artifactId>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.lucene</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-queryparser</artifactId>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.lucene-queries</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -170,12 +170,16 @@
 					<instructions>
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
 						<Export-Package>
-						    org.fisked.renderingengine.service.models,
-						    org.fisked.buffer,
-						    org.fisked.responder,
-						    org.fisked.mode,
-						    org.fisked.renderingengine.service,
-						    org.fisked
+							org.fisked.renderingengine.service.models,
+							org.fisked.buffer,
+							org.fisked.ui.buffer,
+							org.fisked.responder,
+							org.fisked.mode,
+							org.fisked.renderingengine.service,
+							org.apache.lucene.queryparser.classic,
+							org.apache.lucene.queryparser.flexible.standard,
+							org.apache.lucene.sandbox.queries,
+							org.fisked
 						</Export-Package>
 						<Import-Package>
 							org.osgi.framework,

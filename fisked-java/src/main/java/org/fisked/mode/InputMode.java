@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,9 @@
  *******************************************************************************/
 package org.fisked.mode;
 
-import org.fisked.buffer.BufferWindow;
 import org.fisked.mode.responder.NormalModeSwitchResponder;
 import org.fisked.mode.responder.TextInputResponder;
+import org.fisked.ui.buffer.BufferWindow;
 import org.fisked.util.models.Color;
 import org.fisked.util.models.Face;
 import org.fisked.util.models.selection.SelectionMode;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,8 @@ package org.fisked.shell;
 
 import java.util.Arrays;
 
-import org.fisked.buffer.BufferWindow;
 import org.fisked.command.api.ICommandHandler;
+import org.fisked.ui.buffer.BufferWindow;
 import org.fisked.util.shell.ShellCommandExecution;
 import org.fisked.util.shell.ShellCommandExecution.CommandResult;
 

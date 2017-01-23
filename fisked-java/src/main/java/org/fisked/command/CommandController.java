@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,36 +26,22 @@
  *******************************************************************************/
 package org.fisked.command;
 
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.fisked.behavior.BehaviorConnectionFactory;
-import org.fisked.behavior.IBehaviorConnection;
-import org.fisked.buffer.Buffer;
-import org.fisked.buffer.Buffer.UndoScope;
-import org.fisked.buffer.controller.FatTextSelection;
-import org.fisked.buffer.BufferWindow;
-import org.fisked.command.api.ICommandManager;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputRecognizer;
 import org.fisked.responder.RecognitionState;
-import org.fisked.util.datastructure.IntervalTree;
-import org.fisked.util.models.Range;
 import org.fisked.util.models.Rectangle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CommandController implements IInputRecognizer {
-	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(CommandController.class);
-	private final static Logger LOG = LoggerFactory.getLogger(CommandController.class);
-	private final BufferWindow _window;
 	private StringBuilder _command;
 	private boolean _writingCommand;
 	private String _feedback;
+	private CommandView _commandView;
 
-	public CommandController(BufferWindow bufferWindow) {
-		_window = bufferWindow;
+	public void setCommandView(CommandView commandView) {
+		_commandView = commandView;
+	}
+
+	public CommandController() {
 		_command = new StringBuilder();
 		_writingCommand = false;
 	}
@@ -74,17 +60,29 @@ public class CommandController implements IInputRecognizer {
 		_feedback = feedback;
 	}
 
+	private void updateCommandView() {
+		CommandView view = _commandView;
+		if (view != null) {
+			view.setNeedsDrawing();
+		}
+	}
+
 	@Override
 	public RecognitionState recognizesInput(Event nextEvent) {
 		if (nextEvent.isBackspace()) {
 			if (_command.length() > 0) {
 				_command.deleteCharAt(_command.length() - 1);
+				updateCommand(_command.toString());
+				updateCommandView();
 			}
 		} else if (nextEvent.isReturn()) {
 			finishCommand();
+			updateCommandView();
 			return RecognitionState.NotRecognized;
 		} else {
 			_command.append(nextEvent.getCharacter());
+			updateCommand(_command.toString());
+			updateCommandView();
 		}
 		return RecognitionState.Recognized;
 	}
@@ -101,62 +99,13 @@ public class CommandController implements IInputRecognizer {
 		handleCommand(command);
 	}
 
-	Pattern searchReplacePattern = Pattern.compile("s/(.*)/(.*)/g?");
-
-	private void handleCommand(String command) {
-		Matcher searchPattern = searchReplacePattern.matcher(command);
-		if (searchPattern.matches()) {
-			handleSearchReplace(searchPattern);
-			return;
-		}
-		String[] argv = command.split("\\s+");
-		if (argv.length >= 1) {
-			try (IBehaviorConnection<ICommandManager> commandBC = BEHAVIORS.getBehaviorConnection(ICommandManager.class)
-					.get()) {
-				commandBC.getBehavior().handle(_window, argv[0], argv);
-			} catch (Exception e) {
-				LOG.error("Command failed: ", e);
-			}
-		}
+	protected void updateCommand(String command) {
 	}
 
-	private void handleSearchReplace(Matcher searchPattern) {
-		String searchString = searchPattern.group(1);
-		String replaceString = searchPattern.group(2);
-
-		List<FatTextSelection> ranges = _window.getBufferController().getFatTextSelections();
-
-		Buffer buffer = _window.getBuffer();
-		try (UndoScope us = buffer.createUndoScope()) {
-			IntervalTree<String> intervalTree = new IntervalTree<>();
-
-			String bufferString = _window.getBuffer().toString();
-			ranges.forEach((FatTextSelection selection) -> {
-				for (Range range : selection.getRanges()) {
-					intervalTree.add(range, bufferString.substring(range.getStart(), range.getEnd()));
-				}
-				selection.getCursor().clearOtherSorted();
-			});
-
-			int first = intervalTree.getStart();
-			Pattern pattern = Pattern.compile(searchString);
-
-			intervalTree.forEachReverse((Range range, String text) -> {
-				String subString = bufferString.substring(range.getStart(), range.getEnd());
-				int adjust = range.getStart();
-				Matcher matcher = pattern.matcher(subString);
-
-				while (matcher.find()) {
-					int start = matcher.start(0) + adjust;
-					int end = matcher.end(0) + adjust;
-					buffer.removeCharsInRangeLogged(new Range(start, end - start));
-					buffer.insertStringLogged(start, replaceString);
-					adjust += replaceString.length() - (end - start);
-				}
-			});
-			_window.getBufferController().collapseCursors(first);
-		}
-
+	protected void handleCommand(String command) {
 	}
 
+	protected void clearCommand() {
+		_command = new StringBuilder();
+	}
 }

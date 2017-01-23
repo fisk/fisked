@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,11 +30,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.fisked.buffer.Buffer;
-import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.cursor.Cursor;
 import org.fisked.buffer.cursor.traverse.CursorStatus;
 import org.fisked.buffer.cursor.traverse.IFilterVertexVisitor;
 import org.fisked.text.TextLayout.InvalidLocationException;
+import org.fisked.ui.buffer.BufferWindow;
 import org.fisked.util.models.Point;
 import org.fisked.util.models.Rectangle;
 import org.slf4j.Logger;

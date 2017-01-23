@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,17 +24,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.buffer;
+package org.fisked.ui.buffer;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.fisked.buffer.Buffer;
+import org.fisked.buffer.controller.BufferCommandController;
 import org.fisked.buffer.controller.BufferController;
 import org.fisked.buffer.controller.LineNumberController;
 import org.fisked.buffer.controller.ModeLineController;
-import org.fisked.buffer.drawing.View;
-import org.fisked.buffer.drawing.Window;
 import org.fisked.command.CommandController;
 import org.fisked.command.CommandView;
 import org.fisked.mode.AbstractMode;
@@ -46,6 +46,8 @@ import org.fisked.responder.Event;
 import org.fisked.responder.RecognitionState;
 import org.fisked.settings.Settings;
 import org.fisked.text.TextLayout;
+import org.fisked.ui.drawing.View;
+import org.fisked.ui.window.Window;
 import org.fisked.util.models.Point;
 import org.fisked.util.models.Range;
 import org.fisked.util.models.Rectangle;
@@ -59,7 +61,7 @@ public class BufferWindow extends Window {
 	private final ModeLineController _modeLineController;
 	private final ModeLineView _modeLineView;
 
-	private final CommandController _commandController;
+	private final BufferCommandController _commandController;
 	private final CommandView _commandView;
 
 	private final LineNumberController _lineNumberController;
@@ -71,8 +73,8 @@ public class BufferWindow extends Window {
 	private AbstractMode _currentMode;
 	private AbstractMode _recognizedMode;
 
-	public BufferWindow(Rectangle windowRect) {
-		super(windowRect);
+	public BufferWindow(Rectangle windowRect, String name) {
+		super(windowRect, name);
 
 		int widthForLineNumbers = Settings.getInstance().getNumberOfDigitsForLineNumbers();
 		if (widthForLineNumbers > 0) {
@@ -93,7 +95,7 @@ public class BufferWindow extends Window {
 		_modeLineController = new ModeLineController(this);
 		_modeLineView = new ModeLineView(modeLineRect, _modeLineController);
 
-		_commandController = new CommandController(this);
+		_commandController = new BufferCommandController(this);
 		_commandView = new CommandView(commandLineRect, _commandController);
 
 		_bufferView = new BufferView(bufferViewRect);

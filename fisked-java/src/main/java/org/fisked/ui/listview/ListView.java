@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,13 +24,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.buffer.drawing.listview;
+package org.fisked.ui.listview;
 
-import org.fisked.buffer.drawing.View;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
+import org.fisked.responder.Event;
 import org.fisked.responder.InputResponderChain;
+import org.fisked.responder.RecognitionState;
+import org.fisked.ui.drawing.View;
 import org.fisked.util.models.AttributedString;
+import org.fisked.util.models.Point;
 import org.fisked.util.models.Rectangle;
+import org.fisked.util.models.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +44,7 @@ public class ListView<T> extends View {
 	private ListViewDelegate<T> _delegate;
 
 	private int _selectedIndex = 0;
-	private final int _topIndex = 0;
+	private int _topIndex = 0;
 
 	public interface ListViewDataSource<T> {
 		int length();
@@ -62,6 +66,7 @@ public class ListView<T> extends View {
 
 	@Override
 	public void drawInRect(Rectangle drawingRect, IRenderingContext context) {
+		adjustSelectedIndex();
 		int length = _dataSource.length();
 		int linesPerElement = _delegate.getElementLines();
 		LOG.debug("Drawing " + length + " lines, " + linesPerElement + " lines per element.");
@@ -79,27 +84,71 @@ public class ListView<T> extends View {
 		}
 	}
 
+	private void adjustSelectedIndex() {
+		int length = _dataSource.length();
+		if (_selectedIndex >= length) {
+			_selectedIndex = length - 1;
+		}
+		if (_selectedIndex < 0) {
+			_selectedIndex = 0;
+		}
+	}
+
+	private void adjustTopIndex() {
+		int linesPerElement = _delegate.getElementLines();
+		int selectedStart = linesPerElement * (_selectedIndex - _topIndex);
+		int selectedEnd = linesPerElement * (_selectedIndex - _topIndex + 1) - 1;
+
+		Size size = getBounds().getSize();
+
+		if (selectedEnd > size.getHeight()) {
+			_topIndex++;
+		} else if (selectedStart < 0) {
+			_topIndex--;
+		}
+	}
+
 	private void moveDown() {
 		if (_selectedIndex + 1 < _dataSource.length()) {
 			_selectedIndex++;
 		}
+		adjustTopIndex();
 	}
 
 	private void moveUp() {
 		if (_selectedIndex > 0) {
 			_selectedIndex--;
 		}
+		adjustTopIndex();
 	}
 
 	public InputResponderChain createResponder() {
 		InputResponderChain chain = new InputResponderChain();
-		chain.addResponder("j", () -> {
+		chain.addResponder((Event event) -> {
+			if (event.isControlChar('j')) {
+				return RecognitionState.Recognized;
+			} else {
+				return RecognitionState.NotRecognized;
+			}
+		}, () -> {
 			moveDown();
 		});
-		chain.addResponder("k", () -> {
+		chain.addResponder((Event event) -> {
+			if (event.isControlChar('k')) {
+				return RecognitionState.Recognized;
+			} else {
+				return RecognitionState.NotRecognized;
+			}
+		}, () -> {
 			moveUp();
 		});
-		chain.addResponder("e", () -> {
+		chain.addResponder((Event event) -> {
+			if (event.isReturn()) {
+				return RecognitionState.Recognized;
+			} else {
+				return RecognitionState.NotRecognized;
+			}
+		}, () -> {
 			_delegate.selectedItem(_selectedIndex);
 		});
 		return chain;
@@ -119,5 +168,13 @@ public class ListView<T> extends View {
 
 	public ListViewDelegate<T> getDelegate() {
 		return _delegate;
+	}
+
+	public void drawPoint(IRenderingContext context) {
+		int linesPerElement = _delegate.getElementLines();
+		int row = linesPerElement * (_selectedIndex - _topIndex);
+		Point point = new Point(0, row);
+		point = point.addedBy(getClippingRect().getOrigin());
+		context.moveTo(point.getX(), point.getY());
 	}
 }

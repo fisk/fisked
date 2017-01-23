@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,36 +24,47 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.buffer;
+package org.fisked.project;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import org.fisked.behavior.BehaviorConnectionFactory;
+import org.fisked.command.CommandController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class BufferManager {
-	private static BufferManager _sharedInstance;
-	public static BufferManager getSingleton() {
-		if (_sharedInstance != null) return _sharedInstance;
-		synchronized (BufferManager.class) {
-			if (_sharedInstance == null) {
-				_sharedInstance = new BufferManager();
-			}
-		}
-		return _sharedInstance;
+public class ProjectSearchCommandController extends CommandController {
+	private final static Logger LOG = LoggerFactory.getLogger(ProjectSearchCommandController.class);
+	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(
+			ProjectSearchCommandController.class);
+
+	private String _searchString = "";
+	private final ProjectSearchController _controller;
+
+	public ProjectSearchCommandController(ProjectSearchController controller) {
+		super();
+		_controller = controller;
 	}
-	
-	private List<Buffer> _buffers = new ArrayList<Buffer>();
-	
-	public void addBuffer(Buffer buffer) {
-		_buffers.add(buffer);
+
+	@Override
+	protected void updateCommand(String command) {
+		LOG.debug("Controller update command: " + command);
+		_searchString = command;
+		_controller.updateListView();
 	}
-	
-	public void removeBuffer(Buffer buffer) {
-		_buffers.remove(buffer);
+
+	@Override
+	protected void handleCommand(String command) {
+		LOG.debug("Controller finish command: " + command);
+		_searchString = command;
+		_controller.updateListView();
 	}
-	
-	public Collection<Buffer> getContainers() {
-		return _buffers;
+
+	public String getSearchString() {
+		return _searchString;
+	}
+
+	public void clearSearchString() {
+		_searchString = "";
+		clearCommand();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  *******************************************************************************/
 package org.fisked.buffer;
 
-import org.fisked.IApplication;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
-import org.fisked.buffer.drawing.Window;
 import org.fisked.text.IBufferDecorator;
+import org.fisked.ui.drawing.Screen;
+import org.fisked.ui.window.IWindowManager;
 import org.fisked.util.concurrency.Dispatcher;
 import org.fisked.util.models.AttributedString;
 import org.fisked.util.models.Range;
@@ -81,11 +81,11 @@ public class BufferTextState implements CharSequence {
 				_decorationFinished = true;
 				Dispatcher.getInstance().runMain(() -> {
 					LOG.debug("State decoration pushed to main");
-					try (IBehaviorConnection<IApplication> applicationBC = BEHAVIORS
-							.getBehaviorConnection(IApplication.class).get()) {
-						Window currentWindow = applicationBC.getBehavior().getPrimaryWindow();
-						currentWindow.setNeedsFullRedraw();
-						currentWindow.draw();
+					try (IBehaviorConnection<IWindowManager> windowManagerBC = BEHAVIORS
+							.getBehaviorConnection(IWindowManager.class).get()) {
+						Screen currentScreen = windowManagerBC.getBehavior().getPrimaryScreen();
+						currentScreen.setNeedsFullRedraw();
+						currentScreen.draw();
 					} catch (Exception e) {
 						LOG.error("Could not decorate state: ", e);
 					}

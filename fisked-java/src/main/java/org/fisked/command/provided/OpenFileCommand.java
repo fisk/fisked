@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,33 +24,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.buffer;
+package org.fisked.command.provided;
 
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
 
-import org.fisked.buffer.controller.LineNumberController;
-import org.fisked.buffer.drawing.View;
-import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
-import org.fisked.util.models.AttributedString;
-import org.fisked.util.models.Rectangle;
+import org.fisked.command.api.ICommandHandler;
+import org.fisked.ui.buffer.BufferWindow;
+import org.fisked.util.FileUtil;
 
-public class LineNumberView extends View {
+public class OpenFileCommand implements ICommandHandler {
 
-	private LineNumberController _controller;
-
-	public LineNumberView(Rectangle frame, LineNumberController controller) {
-		super(frame);
-		_controller = controller;
-	}
-	
-	public void drawInRect(Rectangle drawingRect, IRenderingContext context) {
-		super.drawInRect(drawingRect, context);
-
-		// TODO: some more work here..
-		List<AttributedString> attrStrings = _controller.getLineNumberText();
-		for (int i = 0; i < attrStrings.size(); i++) {
-			context.moveTo(drawingRect.getOrigin().getX(), drawingRect.getOrigin().getY() + i);
-			context.printString(attrStrings.get(i));
+	@Override
+	public void run(BufferWindow window, String[] argv) {
+		if (argv.length != 2) {
+			window.getCommandController().setCommandFeedback("Wrong number of arguments.");
+			window.refresh();
+			return;
+		}
+		
+		File file = FileUtil.getFile(argv[1]);
+		
+		try {
+			file.createNewFile();
+			window.openFile(file);
+		} catch (IOException e) {
+			window.getCommandController().setCommandFeedback("Could not open file: " + argv[1] + ".");
+			window.refresh();
 		}
 	}
 

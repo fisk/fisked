@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,8 +32,9 @@ import java.util.concurrent.BlockingQueue;
 
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
-import org.fisked.buffer.drawing.Window;
 import org.fisked.renderingengine.service.IConsoleService;
+import org.fisked.ui.drawing.Screen;
+import org.fisked.ui.window.IWindowManager;
 import org.fisked.util.concurrency.IRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,13 +43,21 @@ public class EventLoop implements IRunner {
 	private final static Logger LOG = LoggerFactory.getLogger(EventLoop.class);
 	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(EventLoop.class);
 	private final BlockingQueue<Runnable> _queue = new ArrayBlockingQueue<>(1024);
-	private Window _primaryResponder;
 	private IOThread _iothread;
 	private volatile boolean _exitRequested;
 
 	@Override
 	public void run(Runnable runnable) {
 		_queue.add(runnable);
+	}
+
+	private Screen getPrimaryScreen() {
+		try (IBehaviorConnection<IWindowManager> wmBC = BEHAVIORS.getBehaviorConnection(IWindowManager.class).get()) {
+			return wmBC.getBehavior().getPrimaryScreen();
+		} catch (Exception e) {
+			LOG.error("Exception getting primary responder: ", e);
+			throw new RuntimeException(e);
+		}
 	}
 
 	private void sendChar(int nextChar) {
@@ -61,7 +70,7 @@ public class EventLoop implements IRunner {
 			} else {
 				postponedStart = postponedEnd = nextEvent;
 			}
-			IInputResponder responder = _primaryResponder;
+			IInputResponder responder = getPrimaryScreen();
 			RecognitionState state = responder.recognizesInput(postponedStart);
 			switch (state) {
 			case Recognized:
@@ -167,20 +176,12 @@ public class EventLoop implements IRunner {
 					LOG.debug("Shut down event loop.");
 					return;
 				}
-				_primaryResponder.refresh();
+				getPrimaryScreen().fullRedraw();
 				_iothread.requestChar();
 			} catch (Exception e) {
 				LOG.error("Exception caught: ", e);
 			}
 		}
-	}
-
-	public IInputRecognizer getPrimaryResponder() {
-		return _primaryResponder;
-	}
-
-	public void setPrimaryResponder(Window primaryResponder) {
-		_primaryResponder = primaryResponder;
 	}
 
 	public void exit() {

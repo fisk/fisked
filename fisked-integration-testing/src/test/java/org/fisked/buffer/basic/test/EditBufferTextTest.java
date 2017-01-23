@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,6 @@ import javax.inject.Inject;
 import org.fisked.IApplication;
 import org.fisked.behavior.RootBehaviorProvider;
 import org.fisked.buffer.Buffer;
-import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.basic.utilities.AppUtilities;
 import org.fisked.buffer.basic.utilities.TestEventLoop;
 import org.fisked.launcher.TestLauncherService;
@@ -48,6 +47,7 @@ import org.fisked.mode.AbstractMode;
 import org.fisked.mode.NormalMode;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.ICursorService;
+import org.fisked.ui.buffer.BufferWindow;
 import org.fisked.util.models.AttributedString;
 import org.fisked.util.models.Color;
 import org.fisked.util.models.Range;

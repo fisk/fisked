@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,67 +27,93 @@
 package org.fisked.project;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.lucene.document.Document;
 import org.fisked.fileindex.FileIndexer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Project {
+	// TODO: make external module
 	private static Map<File, Project> _projectMap = new HashMap<>();
 	private final File _rootDirectory;
-	private final File _projectFiles;
+	private final File _indexDirectory;
 	private FileIndexer _index = null;
+	private final static Logger LOG = LoggerFactory.getLogger(Project.class);
 
-	private Project(File rootDirectory, File projectFiles) {
+	private Project(File rootDirectory) {
 		_rootDirectory = rootDirectory;
-		_projectFiles = projectFiles;
+		_indexDirectory = new File(new File(rootDirectory, ".fisked"), "index");
 		try {
-			_index = new FileIndexer(rootDirectory.getAbsolutePath());
+			LOG.debug("Indexing file: " + rootDirectory);
+			LOG.debug("Indexing path: " + rootDirectory.getAbsolutePath().toString());
+			FileUtils.deleteDirectory(_indexDirectory);
+			_index = new FileIndexer(_indexDirectory.getAbsolutePath());
 			_index.indexFileOrDirectory(_rootDirectory.getAbsolutePath());
 		} catch (Exception e) {
+			LOG.error("Error indexing: ", e);
 		}
 	}
 
 	private static Project getProjectMap(File file, File match) {
+		LOG.debug("Project match: " + match.toString());
 		Project project = _projectMap.get(match);
 		if (project == null) {
-			project = new Project(file, match);
-			_projectMap.put(file, project);
+			LOG.debug("Create new project for match: " + match.toString());
+			project = new Project(file);
+			_projectMap.put(match, project);
 		}
 		return project;
 	}
 
-	public boolean hasProjectData() {
-		return _projectFiles.exists();
-	}
-
-	public static Project getProject(File file) {
+	public static Project getProject(Path path) {
+		LOG.debug("Get project path: " + path);
 		final String postfix = ".fisked";
-		if (file == null) {
-			file = Paths.get(".").toAbsolutePath().normalize().toFile();
+		File file;
+		if (path == null) {
+			path = Paths.get(".").toAbsolutePath().normalize();
+			file = path.toFile();
 			File match = new File(file, postfix);
 			return getProjectMap(file, match);
 		}
+		file = path.toFile();
 		if (file.isFile()) {
 			file = file.getParentFile();
 		}
 		File match = new File(file, postfix);
 		if (match.exists()) {
+			LOG.debug("Found match file: " + file + ", with postfix: " + match);
 			return getProjectMap(file, match);
 		} else {
-			return getProject(file.getParentFile());
+			return getProject(path.getParent());
 		}
 	}
 
-	public List<Document> searchFilePath(String text) {
+	public static Project createProject(Path path) {
+		Path projectPath = path.resolve(".fisked");
+		File projectFile = projectPath.toAbsolutePath().toFile();
+		LOG.debug("Project path: " + projectPath.toString());
+		projectFile.mkdirs();
+
+		return getProject(projectPath);
+	}
+
+	public List<String> searchFilePath(String text) {
 		try {
-			return _index.searchPath(text);
+			List<String> paths = new ArrayList<>();
+			for (Document document : _index.searchPath(text)) {
+				paths.add(document.get("path"));
+			}
+			return paths;
 		} catch (Exception e) {
-			return new ArrayList<>();
+			throw new RuntimeException(e);
 		}
 	}
 }

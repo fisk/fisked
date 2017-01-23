@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,12 +34,12 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.fisked.buffer.BufferWindow;
 import org.fisked.scm.ISCMRepository;
 import org.fisked.scm.SCMRepositoryResolver;
 import org.fisked.settings.Settings;
 import org.fisked.theme.ITheme;
 import org.fisked.theme.ThemeManager;
+import org.fisked.ui.buffer.BufferWindow;
 import org.fisked.util.concurrency.Dispatcher;
 import org.fisked.util.models.AttributedString;
 import org.fisked.util.models.Color;

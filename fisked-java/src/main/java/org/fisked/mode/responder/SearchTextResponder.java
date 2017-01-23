@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.fisked.buffer.Buffer.UndoScope;
-import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.cursor.Cursor;
 import org.fisked.buffer.cursor.traverse.CursorStatus;
 import org.fisked.buffer.cursor.traverse.IFilterVertexVisitor;
@@ -38,6 +37,7 @@ import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.IRecognitionAction;
 import org.fisked.responder.RecognitionState;
+import org.fisked.ui.buffer.BufferWindow;
 
 public class SearchTextResponder implements IInputResponder {
 	private final BufferWindow _window;

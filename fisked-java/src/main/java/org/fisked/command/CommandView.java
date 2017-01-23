@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,36 +26,44 @@
  *******************************************************************************/
 package org.fisked.command;
 
-import org.fisked.buffer.drawing.View;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.theme.ThemeManager;
+import org.fisked.ui.drawing.View;
 import org.fisked.util.models.AttributedString;
 import org.fisked.util.models.Color;
 import org.fisked.util.models.Point;
 import org.fisked.util.models.Rectangle;
 
 public class CommandView extends View {
-	private CommandController _controller;
+	private final CommandController _controller;
+	private AttributedString _attrString;
 
 	public CommandView(Rectangle frame, CommandController controller) {
 		super(frame);
 		_controller = controller;
 	}
-	
+
+	@Override
 	public void drawInRect(Rectangle drawingRect, IRenderingContext context) {
 		super.drawInRect(drawingRect, context);
-		
+
 		Color backgroundColor = getBackgroundColor();
 		Color foregroundColor = ThemeManager.getThemeManager().getCurrentTheme().getCommandForegroundColor();
-		
+
 		String string = _controller.getString(drawingRect);
 		AttributedString attrString = new AttributedString(string);
 		attrString.setBackgroundColor(backgroundColor);
 		attrString.setForegroundColor(foregroundColor);
-		
+
 		Point point = getClippingRect().getOrigin();
 		context.moveTo(point.getX(), point.getY());
 		context.printString(attrString);
+		_attrString = attrString;
 	}
 
+	public void drawPoint(IRenderingContext context) {
+		Point point = new Point(_attrString.length(), 0);
+		point = point.addedBy(getClippingRect().getOrigin());
+		context.moveTo(point.getX(), point.getY());
+	}
 }

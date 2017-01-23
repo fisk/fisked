@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,16 +24,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.email.ui;
+package org.fisked.ui.email;
 
 import java.util.Stack;
 
-import org.fisked.IApplication;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
-import org.fisked.buffer.drawing.View;
-import org.fisked.buffer.drawing.Window;
 import org.fisked.responder.InputResponderChain;
+import org.fisked.ui.drawing.View;
+import org.fisked.ui.window.IWindowManager;
+import org.fisked.ui.window.Window;
 import org.fisked.util.models.Rectangle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,7 @@ public class EmailWindow extends Window {
 	}
 
 	public EmailWindow(Rectangle windowRect) {
-		super(windowRect);
+		super(windowRect, "Email");
 
 		Rectangle rootViewRect = windowRect;
 
@@ -59,10 +59,10 @@ public class EmailWindow extends Window {
 		InputResponderChain chain = new InputResponderChain();
 
 		chain.addResponder("q", () -> {
-			try (IBehaviorConnection<IApplication> applicationBC = BEHAVIORS.getBehaviorConnection(IApplication.class)
+			try (IBehaviorConnection<IWindowManager> wmBC = BEHAVIORS.getBehaviorConnection(IWindowManager.class)
 					.get()) {
 				LOG.debug("Quit command being invoked.");
-				applicationBC.getBehavior().popPrimaryWindow();
+				wmBC.getBehavior().popPrimaryScreen();
 			} catch (Exception e) {
 				LOG.error("Could not pop window: ", e);
 			}

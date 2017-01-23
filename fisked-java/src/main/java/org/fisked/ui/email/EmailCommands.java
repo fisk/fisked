@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.email.ui;
+package org.fisked.ui.email;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,11 +39,9 @@ import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Validate;
-import org.fisked.IApplication;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.Buffer;
-import org.fisked.buffer.BufferWindow;
 import org.fisked.command.api.CommandHandlerReference;
 import org.fisked.command.api.ICommandManager;
 import org.fisked.email.service.Email;
@@ -52,6 +50,9 @@ import org.fisked.email.service.IEmailProfileVendor;
 import org.fisked.email.service.IEmailSendService;
 import org.fisked.email.service.IEmailSendService.IEmailSendCallback;
 import org.fisked.renderingengine.service.IConsoleService;
+import org.fisked.ui.buffer.BufferWindow;
+import org.fisked.ui.drawing.Screen;
+import org.fisked.ui.window.IWindowManager;
 import org.fisked.util.models.Rectangle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,10 +81,12 @@ public class EmailCommands {
 					Rectangle windowRect = new Rectangle(0, 0, cs.getScreenWidth(), cs.getScreenHeight());
 					EmailWindow emailWindow = new EmailWindow(windowRect);
 
-					try (IBehaviorConnection<IApplication> applicationBC = BEHAVIORS
-							.getBehaviorConnection(IApplication.class).get()) {
+					try (IBehaviorConnection<IWindowManager> wmBC = BEHAVIORS
+							.getBehaviorConnection(IWindowManager.class).get()) {
 						LOG.debug("Activating email window.");
-						applicationBC.getBehavior().pushPrimaryWindow(emailWindow);
+						Screen screen = new Screen("Email Screen");
+						screen.attachWindow(emailWindow);
+						wmBC.getBehavior().pushPrimaryScreen(screen);
 						emailWindow.getController().start();
 					}
 				} catch (Exception e) {
@@ -122,13 +125,15 @@ public class EmailCommands {
 
 						Rectangle windowRect = new Rectangle(0, 0, cs.getScreenWidth(), cs.getScreenHeight());
 						Buffer buffer = new Buffer("To: " + to + "\nFrom: " + from + "\nSubject: " + "\n\n");
-						BufferWindow emailWindow = new BufferWindow(windowRect);
+						BufferWindow emailWindow = new BufferWindow(windowRect, "Send Email");
 						emailWindow.setBuffer(buffer);
 
-						try (IBehaviorConnection<IApplication> applicationBC = BEHAVIORS
-								.getBehaviorConnection(IApplication.class).get()) {
+						try (IBehaviorConnection<IWindowManager> wmBC = BEHAVIORS
+								.getBehaviorConnection(IWindowManager.class).get()) {
 							LOG.debug("Starting email window.");
-							applicationBC.getBehavior().pushPrimaryWindow(emailWindow);
+							Screen screen = new Screen("Email Screen");
+							screen.attachWindow(emailWindow);
+							wmBC.getBehavior().pushPrimaryScreen(screen);
 						}
 					} else {
 						LOG.debug("Wrong number or arguments");

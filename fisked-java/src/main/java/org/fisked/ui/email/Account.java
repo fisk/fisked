@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,8 +24,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.buffer.drawing;
+package org.fisked.ui.email;
 
-public interface IDrawable {
-	void draw();
+import javax.mail.Folder;
+
+import org.fisked.email.service.EmailProfile;
+
+public class Account {
+	private final EmailProfile _profile;
+	private final Folder[] _folders;
+
+	public Account(EmailProfile profile, Folder[] folders) {
+		_profile = profile;
+		_folders = folders;
+	}
+
+	public EmailProfile getProfile() {
+		return _profile;
+	}
+
+	public Folder[] getFolders() {
+		return _folders;
+	}
 }

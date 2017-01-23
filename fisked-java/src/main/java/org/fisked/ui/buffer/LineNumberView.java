@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,26 +24,34 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.email.ui;
+package org.fisked.ui.buffer;
 
-import javax.mail.Folder;
+import java.util.List;
 
-import org.fisked.email.service.EmailProfile;
+import org.fisked.buffer.controller.LineNumberController;
+import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
+import org.fisked.ui.drawing.View;
+import org.fisked.util.models.AttributedString;
+import org.fisked.util.models.Rectangle;
 
-public class Account {
-	private final EmailProfile _profile;
-	private final Folder[] _folders;
+public class LineNumberView extends View {
 
-	public Account(EmailProfile profile, Folder[] folders) {
-		_profile = profile;
-		_folders = folders;
+	private LineNumberController _controller;
+
+	public LineNumberView(Rectangle frame, LineNumberController controller) {
+		super(frame);
+		_controller = controller;
+	}
+	
+	public void drawInRect(Rectangle drawingRect, IRenderingContext context) {
+		super.drawInRect(drawingRect, context);
+
+		// TODO: some more work here..
+		List<AttributedString> attrStrings = _controller.getLineNumberText();
+		for (int i = 0; i < attrStrings.size(); i++) {
+			context.moveTo(drawingRect.getOrigin().getX(), drawingRect.getOrigin().getY() + i);
+			context.printString(attrStrings.get(i));
+		}
 	}
 
-	public EmailProfile getProfile() {
-		return _profile;
-	}
-
-	public Folder[] getFolders() {
-		return _folders;
-	}
 }

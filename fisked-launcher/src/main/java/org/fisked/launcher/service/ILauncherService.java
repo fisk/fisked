@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,12 @@
  *******************************************************************************/
 package org.fisked.launcher.service;
 
+import org.osgi.framework.BundleContext;
+
 public interface ILauncherService {
 	String[] getMainArgs();
+
+	BundleContext getBundleContext();
 
 	void stop(int code);
 }

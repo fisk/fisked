@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,25 +29,30 @@ package org.fisked.util.models;
 public class Point {
 	private final int _x;
 	private final int _y;
-	
+
 	public Point(int x, int y) {
 		_x = x;
 		_y = y;
 	}
-	
+
 	public int getX() {
 		return _x;
 	}
-	
+
 	public int getY() {
 		return _y;
 	}
-	
+
+	@Override
 	public String toString() {
 		return "{" + _x + ", " + _y + "}";
 	}
 
 	public Point addedBy(Point origin) {
 		return new Point(_x + origin._x, _y + origin._y);
+	}
+
+	public boolean equals(Point point) {
+		return _x == point._x && _y == point._y;
 	}
 }

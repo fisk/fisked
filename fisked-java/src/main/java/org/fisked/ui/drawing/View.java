@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.buffer.drawing;
+package org.fisked.ui.drawing;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,8 +45,9 @@ import org.slf4j.LoggerFactory;
 public class View implements IInputRecognizer, IDrawable {
 	private final static Logger LOG = LoggerFactory.getLogger(View.class);
 	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(View.class);
-	private final Rectangle _bounds;
+	private Rectangle _bounds;
 	private View _parent;
+	private Rectangle _parentBounds;
 	private final List<View> _subviews = new ArrayList<>();
 	private Color _backgroundColor;
 
@@ -54,14 +55,23 @@ public class View implements IInputRecognizer, IDrawable {
 		_bounds = frame;
 	}
 
+	private void setParent(View view) {
+		if (view != null) {
+			_parentBounds = view._bounds;
+		} else {
+			_parentBounds = null;
+		}
+		_parent = view;
+	}
+
 	public void addSubview(View subview) {
 		_subviews.add(subview);
-		subview._parent = this;
+		subview.setParent(this);
 	}
 
 	public void removeFromParent() {
 		_parent._subviews.remove(this);
-		_parent = null;
+		setParent(null);
 	}
 
 	public Rectangle getClippingRect() {
@@ -109,6 +119,7 @@ public class View implements IInputRecognizer, IDrawable {
 
 	@Override
 	public void draw() {
+		layoutIfNeeded();
 		try (IBehaviorConnection<IConsoleService> consoleBC = BEHAVIORS.getBehaviorConnection(IConsoleService.class)
 				.get()) {
 			try (IRenderingContext context = consoleBC.getBehavior().getRenderingContext()) {
@@ -125,6 +136,104 @@ public class View implements IInputRecognizer, IDrawable {
 		if (_backgroundColor != null && _backgroundColor.equals(getParentBackgroundColor())) {
 			context.clearRect(drawingRect, _backgroundColor);
 		}
+	}
+
+	public static final int AUTORESIZE_MASK_HORIZONTAL = 1 << 0;
+	public static final int AUTORESIZE_MASK_VERTICAL = 1 << 1;
+	public static final int AUTORESIZE_MASK_LEFT = 1 << 2;
+	public static final int AUTORESIZE_MASK_RIGHT = 1 << 3;
+	public static final int AUTORESIZE_MASK_TOP = 1 << 4;
+	public static final int AUTORESIZE_MASK_BOTTOM = 1 << 4;
+
+	private int _autoresizeMask = AUTORESIZE_MASK_HORIZONTAL | AUTORESIZE_MASK_VERTICAL | AUTORESIZE_MASK_LEFT
+			| AUTORESIZE_MASK_RIGHT | AUTORESIZE_MASK_TOP | AUTORESIZE_MASK_BOTTOM;
+	private boolean _needsLayout = false;
+	private boolean _needsDrawing = false;
+
+	public void setNeedsDrawing() {
+		_needsDrawing = true;
+		if (_parent != null) {
+			_parent.setNeedsDrawing();
+		}
+	}
+
+	public void setNeedsLayout() {
+		_needsLayout = true;
+	}
+
+	public void setAutoResizeMask(int mask) {
+		_autoresizeMask = mask;
+	}
+
+	public void addAutoResizeMask(int mask) {
+		_autoresizeMask = _autoresizeMask | mask;
+	}
+
+	protected boolean hasAutoResizeMask(int mask) {
+		return (_autoresizeMask & mask) != 0;
+	}
+
+	protected void layoutSubviews() {
+		Rectangle oldBounds = _bounds;
+		Rectangle oldParentBounds = _parentBounds;
+		Rectangle newParentBounds = _parent._bounds;
+
+		int left, right, top, bottom;
+
+		// left
+		left = oldBounds.getOrigin().getX();
+		if (!hasAutoResizeMask(AUTORESIZE_MASK_LEFT)) {
+			double ratio = (double) left / (double) oldParentBounds.getSize().getWidth();
+			left = (int) Math.round(ratio * newParentBounds.getSize().getWidth());
+		}
+
+		// right
+		right = oldParentBounds.getSize().getWidth() - oldBounds.getOrigin().getX() - oldBounds.getSize().getWidth();
+		if (!hasAutoResizeMask(AUTORESIZE_MASK_RIGHT)) {
+			double ratio = (double) right / (double) oldParentBounds.getSize().getWidth();
+			right = (int) Math.round(ratio * newParentBounds.getSize().getWidth());
+		}
+
+		// top
+		top = oldBounds.getOrigin().getY();
+		if (!hasAutoResizeMask(AUTORESIZE_MASK_TOP)) {
+			double ratio = (double) top / (double) oldParentBounds.getSize().getHeight();
+			top = (int) Math.round(ratio * newParentBounds.getSize().getHeight());
+		}
+
+		// bottom
+		bottom = oldParentBounds.getSize().getHeight() - oldBounds.getOrigin().getY() - oldBounds.getSize().getHeight();
+		if (!hasAutoResizeMask(AUTORESIZE_MASK_BOTTOM)) {
+			double ratio = (double) bottom / (double) oldParentBounds.getSize().getHeight();
+			bottom = (int) Math.round(ratio * newParentBounds.getSize().getHeight());
+		}
+
+		Rectangle newBounds = new Rectangle(left, top, newParentBounds.getSize().getWidth() - left - right,
+				newParentBounds.getSize().getHeight() - top - bottom);
+
+		if (!newBounds.equals(_bounds)) {
+			setNeedsDrawing();
+			for (View subview : _subviews) {
+				subview.setNeedsLayout();
+			}
+		}
+	}
+
+	public void layoutIfNeeded() {
+		if (!_needsLayout) {
+			return;
+		}
+		_needsLayout = false;
+		layoutSubviews();
+	}
+
+	public void setBounds(Rectangle bounds) {
+		_bounds = bounds;
+		setNeedsLayout();
+	}
+
+	public Rectangle getBounds() {
+		return _bounds;
 	}
 
 }

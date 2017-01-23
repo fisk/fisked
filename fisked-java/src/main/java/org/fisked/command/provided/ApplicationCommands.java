@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,11 +35,10 @@ import org.apache.felix.ipojo.annotations.Validate;
 import org.fisked.IApplication;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
-import org.fisked.buffer.BufferWindow;
-import org.fisked.command.OpenFileCommand;
 import org.fisked.command.api.CommandHandlerReference;
 import org.fisked.command.api.ICommandManager;
 import org.fisked.shell.ShellCommandHandler;
+import org.fisked.ui.buffer.BufferWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +63,7 @@ public class ApplicationCommands {
 			_quitCommand = cm.registerHandler("q", (BufferWindow window, String[] argv) -> {
 				try (IBehaviorConnection<IApplication> applicationBC = BEHAVIORS
 						.getBehaviorConnection(IApplication.class).get()) {
-					applicationBC.getBehavior().popPrimaryWindow();
+					applicationBC.getBehavior().exit(0);
 				} catch (Exception e) {
 					LOG.error("Couldn't shut down gracefully.", e);
 					System.exit(-1);

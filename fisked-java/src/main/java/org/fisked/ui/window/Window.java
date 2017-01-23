@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.buffer.drawing;
+package org.fisked.ui.window;
 
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
@@ -35,6 +35,9 @@ import org.fisked.responder.IInputResponder;
 import org.fisked.responder.RecognitionState;
 import org.fisked.theme.ITheme;
 import org.fisked.theme.ThemeManager;
+import org.fisked.ui.drawing.IDrawable;
+import org.fisked.ui.drawing.Screen;
+import org.fisked.ui.drawing.View;
 import org.fisked.util.models.Rectangle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,9 +49,33 @@ public class Window implements IInputResponder, IDrawable {
 	protected View _rootView;
 	protected Rectangle _windowRect;
 	protected IInputResponder _primaryResponder;
+	protected String _name;
+	protected String _id;
+	protected Screen _screen;
 
-	public Window(Rectangle windowRect) {
+	public Window(Rectangle windowRect, String name) {
 		_windowRect = windowRect;
+		_name = name;
+	}
+
+	public String getId() {
+		return _id;
+	}
+
+	public void setId(String id) {
+		_id = id;
+	}
+
+	public void attachScreen(Screen screen) {
+		_screen = screen;
+	}
+
+	public void detatchScreen() {
+		_screen = null;
+	}
+
+	public Screen getAttachedScreen() {
+		return _screen;
 	}
 
 	public void setRootView(View rootView) {
@@ -91,8 +118,6 @@ public class Window implements IInputResponder, IDrawable {
 				}
 				_needsLineRedraw = false;
 				_needsFullRedraw = false;
-
-				drawPoint(context);
 			}
 		} catch (Exception e) {
 			LOG.error("Can't get console service: ", e);
@@ -100,7 +125,6 @@ public class Window implements IInputResponder, IDrawable {
 	}
 
 	public void drawPoint(IRenderingContext context) {
-
 	}
 
 	protected boolean _needsFullRedraw = true;
@@ -116,6 +140,29 @@ public class Window implements IInputResponder, IDrawable {
 
 	public void refresh() {
 		draw();
+	}
+
+	public String getName() {
+		return _name;
+	}
+
+	public void register() {
+		if (_id == null) {
+			return;
+		}
+		try (IBehaviorConnection<IWindowManager> wmBC = BEHAVIORS.getBehaviorConnection(IWindowManager.class).get()) {
+			wmBC.getBehavior().registerWindow(this);
+		} catch (Exception e) {
+			LOG.error("Can't get window manager service: ", e);
+		}
+	}
+
+	public void unregister() {
+		try (IBehaviorConnection<IWindowManager> wmBC = BEHAVIORS.getBehaviorConnection(IWindowManager.class).get()) {
+			wmBC.getBehavior().unregisterWindow(this);
+		} catch (Exception e) {
+			LOG.error("Can't get window manager service: ", e);
+		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,47 +24,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.mode.responder;
+package org.fisked.ui.window;
 
-import java.io.File;
-import java.util.List;
+import org.fisked.ui.drawing.Screen;
 
-import org.apache.lucene.document.Document;
-import org.fisked.buffer.BufferWindow;
-import org.fisked.project.Project;
-import org.fisked.responder.Event;
-import org.fisked.responder.EventRecognition;
-import org.fisked.responder.IInputResponder;
-import org.fisked.responder.RecognitionState;
+public interface IWindowManager {
+	Window getWindow(String name);
 
-public class ProjectResponder implements IInputResponder {
-	private final BufferWindow _window;
+	Window registerWindow(Window window);
 
-	public ProjectResponder(BufferWindow window) {
-		_window = window;
-	}
+	void unregisterWindow(Window window);
 
-	@Override
-	public RecognitionState recognizesInput(Event nextEvent) {
-		return EventRecognition.matchesExact(nextEvent, ",p");
-	}
+	void pushPrimaryScreen(Screen screen);
 
-	@Override
-	public void onRecognize() {
-		File file = _window.getBuffer().getFile();
-		Project project = Project.getProject(file);
-		if (project == null) {
-			return;
-		}
-		StringBuilder builder = new StringBuilder();
-		List<Document> documents = project.searchFilePath("g1");
+	Screen getPrimaryScreen();
 
-		builder.append("Herp derp:\n");
-		for (Document document : documents) {
-			builder.append(document.getField("path").stringValue());
-			builder.append("\n");
-		}
-		_window.getBuffer().appendStringAtPointLogged(builder.toString());
-	}
-
+	Screen popPrimaryScreen();
 }

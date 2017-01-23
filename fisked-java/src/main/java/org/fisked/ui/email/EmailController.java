@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.email.ui;
+package org.fisked.ui.email;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,18 +41,19 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeUtility;
 
-import org.fisked.IApplication;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.Buffer;
-import org.fisked.buffer.BufferWindow;
-import org.fisked.buffer.drawing.listview.ListView;
-import org.fisked.buffer.drawing.listview.ListView.ListViewDataSource;
-import org.fisked.buffer.drawing.listview.ListView.ListViewDelegate;
 import org.fisked.email.service.EmailProfile;
 import org.fisked.email.service.IEmailFetchService;
 import org.fisked.email.service.IEmailFetchService.IEmailFetchFoldersCallback;
 import org.fisked.email.service.IEmailProfileVendor;
+import org.fisked.ui.buffer.BufferWindow;
+import org.fisked.ui.drawing.Screen;
+import org.fisked.ui.listview.ListView;
+import org.fisked.ui.listview.ListView.ListViewDataSource;
+import org.fisked.ui.listview.ListView.ListViewDelegate;
+import org.fisked.ui.window.IWindowManager;
 import org.fisked.util.concurrency.Dispatcher;
 import org.fisked.util.models.AttributedString;
 import org.fisked.util.models.Color;
@@ -123,7 +124,7 @@ public class EmailController {
 		LOG.debug("Setting up account list view.");
 		Rectangle windowRect = _window.getRootView().getClippingRect();
 		Rectangle listViewRect = new Rectangle(0, 0, windowRect.getSize().getWidth(), windowRect.getSize().getHeight());
-		ListView<Account> listView = new ListView<Account>(listViewRect);
+		ListView<Account> listView = new ListView<>(listViewRect);
 		listView.setDataSource(new ListViewDataSource<Account>() {
 
 			@Override
@@ -175,7 +176,7 @@ public class EmailController {
 		LOG.debug("Setting up email list view.");
 		Rectangle windowRect = _window.getRootView().getClippingRect();
 		Rectangle listViewRect = new Rectangle(0, 0, windowRect.getSize().getWidth(), windowRect.getSize().getHeight());
-		ListView<Folder> listView = new ListView<Folder>(listViewRect);
+		ListView<Folder> listView = new ListView<>(listViewRect);
 		listView.setDataSource(new ListViewDataSource<Folder>() {
 
 			@Override
@@ -315,13 +316,15 @@ public class EmailController {
 					}
 
 					Buffer buffer = new Buffer(stringBuilder.toString());
-					BufferWindow window = new BufferWindow(windowRect);
+					BufferWindow window = new BufferWindow(windowRect, "Email");
 					window.setBuffer(buffer);
 
-					try (IBehaviorConnection<IApplication> applicationBC = BEHAVIORS
-							.getBehaviorConnection(IApplication.class).get()) {
+					try (IBehaviorConnection<IWindowManager> wmBC = BEHAVIORS
+							.getBehaviorConnection(IWindowManager.class).get()) {
 						LOG.debug("Activating email window.");
-						applicationBC.getBehavior().pushPrimaryWindow(window);
+						Screen screen = new Screen("Email Screen");
+						screen.attachWindow(window);
+						wmBC.getBehavior().pushPrimaryScreen(screen);
 					}
 				} catch (Exception e) {
 					LOG.debug("Couldn't read email: ", e);

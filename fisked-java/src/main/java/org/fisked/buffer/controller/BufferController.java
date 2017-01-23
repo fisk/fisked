@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@ import java.util.List;
 
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.Buffer.UndoScope;
-import org.fisked.buffer.BufferView;
 import org.fisked.buffer.cursor.Cursor;
 import org.fisked.buffer.cursor.TwinCursor;
 import org.fisked.buffer.cursor.traverse.CursorStatus;
@@ -39,6 +38,7 @@ import org.fisked.buffer.cursor.traverse.CursorVertexNonPrimaryOrderer;
 import org.fisked.buffer.cursor.traverse.CursorVertexPrimaryOrderer;
 import org.fisked.buffer.cursor.traverse.IFilterVertexVisitor;
 import org.fisked.text.TextLayout;
+import org.fisked.ui.buffer.BufferView;
 import org.fisked.util.datastructure.IntervalTree;
 import org.fisked.util.models.Point;
 import org.fisked.util.models.Range;

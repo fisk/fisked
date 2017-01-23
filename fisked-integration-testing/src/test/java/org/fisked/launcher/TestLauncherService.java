@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@ import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.fisked.launcher.service.ILauncherService;
+import org.osgi.framework.BundleContext;
 
 @Component(immediate = true, publicFactory = false)
 @Instantiate
@@ -44,6 +45,11 @@ public class TestLauncherService implements ILauncherService {
 	@Override
 	public void stop(int code) {
 		System.exit(code);
+	}
+
+	@Override
+	public BundleContext getBundleContext() {
+		return null;
 	}
 
 }

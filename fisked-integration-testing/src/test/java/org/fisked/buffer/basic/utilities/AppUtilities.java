@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@
 package org.fisked.buffer.basic.utilities;
 
 import org.fisked.buffer.Buffer;
-import org.fisked.buffer.BufferWindow;
+import org.fisked.ui.buffer.BufferWindow;
 import org.fisked.util.models.Rectangle;
 
 public class AppUtilities {
@@ -37,7 +37,7 @@ public class AppUtilities {
 
 	public BufferWindow getWindow() {
 		Rectangle rect = getBounds();
-		BufferWindow window = new BufferWindow(rect);
+		BufferWindow window = new BufferWindow(rect, "Test Buffer");
 		Buffer buffer = new Buffer();
 		window.setBuffer(buffer);
 		return window;

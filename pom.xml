@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2016, Erik Österlund
+    Copyright (c) 2017, Erik Österlund
     All rights reserved.
    
     Redistribution and use in source and binary forms, with or without
@@ -55,11 +55,6 @@
 	</modules>
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-core</artifactId>
-				<version>6.0.0</version>
-			</dependency>
 			<dependency>
 				<groupId>org.jsoup</groupId>
 				<artifactId>jsoup</artifactId>
@@ -216,14 +211,19 @@
 				<version>1.0.1</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-analyzers-common</artifactId>
-				<version>6.0.0</version>
+				<groupId>org.apache.servicemix.bundles</groupId>
+				<artifactId>org.apache.servicemix.bundles.lucene-queryparser</artifactId>
+				<version>6.2.1_1</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-queryparser</artifactId>
-				<version>6.0.0</version>
+				<groupId>org.apache.servicemix.bundles</groupId>
+				<artifactId>org.apache.servicemix.bundles.lucene</artifactId>
+				<version>6.2.1_1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.servicemix.bundles</groupId>
+				<artifactId>org.apache.servicemix.bundles.lucene-queries</artifactId>
+				<version>6.2.1_1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.davidmoten</groupId>

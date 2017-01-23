@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,13 +49,18 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.FSDirectory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileIndexer {
+	// TODO: Make into module
 	private static StandardAnalyzer _analyzer = new StandardAnalyzer();
 
 	private final IndexWriter _writer;
-	private final ArrayList<File> _queue = new ArrayList<File>();
+	private final ArrayList<File> _queue = new ArrayList<>();
 	private final String _indexLocation;
+
+	private final static Logger LOG = LoggerFactory.getLogger(FileIndexer.class);
 
 	public List<Document> searchContent(String text) throws IOException, ParseException {
 		List<Document> result = new ArrayList<>();
@@ -72,51 +77,61 @@ public class FileIndexer {
 			Document document = searcher.doc(docId);
 			result.add(document);
 		}
+		reader.close();
 		return result;
 	}
 
 	public List<Document> searchPath(String text) throws IOException, ParseException {
+		LOG.debug("Start search at " + _indexLocation);
+		LOG.debug("Text: " + QueryParser.escape(text));
 		List<Document> result = new ArrayList<>();
 		IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(_indexLocation)));
 		IndexSearcher searcher = new IndexSearcher(reader);
-		TopScoreDocCollector collector = TopScoreDocCollector.create(128);
+		TopScoreDocCollector collector = TopScoreDocCollector.create(1024);
 
-		Query q = new QueryParser("path", _analyzer).parse(text);
+		QueryParser parser = new QueryParser("path", _analyzer);
+		parser.setAllowLeadingWildcard(true);
+		Query q = parser.parse("path: *" + QueryParser.escape(text) + "*");
 		searcher.search(q, collector);
-		ScoreDoc[] hits = collector.topDocs().scoreDocs;
+		ScoreDoc[] hits = collector.topDocs(0, collector.getTotalHits()).scoreDocs;
 
 		for (ScoreDoc hit : hits) {
 			int docId = hit.doc;
 			Document document = searcher.doc(docId);
 			result.add(document);
 		}
+		reader.close();
+		LOG.debug("Finish search " + hits.length);
+		LOG.debug("Finish search: " + collector.getTotalHits());
 		return result;
 	}
 
-	public FileIndexer(String indexDir) throws IOException {
-		FSDirectory dir = FSDirectory.open(Paths.get(indexDir));
+	public FileIndexer(String indexDirectory) throws IOException {
+		FSDirectory dir = FSDirectory.open(Paths.get(indexDirectory));
 		IndexWriterConfig config = new IndexWriterConfig(_analyzer);
 		_writer = new IndexWriter(dir, config);
-		_indexLocation = indexDir;
+		_indexLocation = indexDirectory;
 	}
 
 	public void indexFileOrDirectory(String fileName) throws IOException {
 		addFiles(new File(fileName));
+		LOG.debug("Indexing paths");
 
-		for (File f : _queue) {
-			FileReader fr = null;
+		for (File file : _queue) {
+			FileReader filereader = null;
 			try {
 				Document doc = new Document();
-				fr = new FileReader(f);
-				doc.add(new TextField("contents", fr));
-				doc.add(new StringField("path", f.getPath(), Field.Store.YES));
-				doc.add(new StringField("filename", f.getName(), Field.Store.YES));
+				filereader = new FileReader(file);
+				doc.add(new TextField("contents", filereader));
+				String relative = new File(_indexLocation).toURI().relativize(file.toURI()).getPath();
+				doc.add(new StringField("path", relative, Field.Store.YES));
+				doc.add(new StringField("filename", file.getName(), Field.Store.YES));
 
 				_writer.addDocument(doc);
 			} catch (Exception e) {
-				System.out.println("Could not add: " + f);
+				LOG.debug("Could not add: " + file);
 			} finally {
-				fr.close();
+				filereader.close();
 			}
 		}
 

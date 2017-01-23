@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,17 +29,21 @@ package org.fisked.util.models;
 public class Size {
 	private final int _width;
 	private final int _height;
-	
+
 	public Size(int width, int height) {
 		_width = width;
 		_height = height;
 	}
-	
+
 	public int getWidth() {
 		return _width;
 	}
-	
+
 	public int getHeight() {
 		return _height;
+	}
+
+	public boolean equals(Size size) {
+		return _width == size._width && _height == size._height;
 	}
 }

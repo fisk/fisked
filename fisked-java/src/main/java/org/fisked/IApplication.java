@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,10 @@
  *******************************************************************************/
 package org.fisked;
 
-import org.fisked.buffer.drawing.Window;
 import org.fisked.launcher.service.ILauncherService;
 
 public interface IApplication {
 	void start(ILauncherService launcher);
 
 	void exit(int status);
-
-	void pushPrimaryWindow(Window window);
-
-	Window getPrimaryWindow();
-
-	Window popPrimaryWindow();
 }

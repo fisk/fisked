@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,10 @@
  *******************************************************************************/
 package org.fisked.buffer.basic.utilities;
 
-import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.basic.test.EditBufferTextTest;
 import org.fisked.responder.Event;
 import org.fisked.responder.RecognitionState;
+import org.fisked.ui.buffer.BufferWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

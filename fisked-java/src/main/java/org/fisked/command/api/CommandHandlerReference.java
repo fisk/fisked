@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  *******************************************************************************/
 package org.fisked.command.api;
 
-import org.fisked.buffer.BufferWindow;
+import org.fisked.ui.buffer.BufferWindow;
 
 public class CommandHandlerReference implements ICommandHandler {
 	private final String _command;

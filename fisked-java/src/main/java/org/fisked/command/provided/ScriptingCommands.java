@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,12 +40,12 @@ import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.buffer.Buffer;
 import org.fisked.buffer.Buffer.UndoScope;
 import org.fisked.buffer.controller.FatTextSelection;
-import org.fisked.buffer.BufferWindow;
 import org.fisked.command.api.CommandHandlerReference;
 import org.fisked.command.api.ICommandManager;
 import org.fisked.language.eval.service.ISourceEvaluatorManager;
 import org.fisked.mode.AbstractMode;
 import org.fisked.mode.VisualMode;
+import org.fisked.ui.buffer.BufferWindow;
 import org.fisked.util.FileUtil;
 import org.fisked.util.Wrapper;
 import org.fisked.util.models.Range;

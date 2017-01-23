@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2016, Erik Österlund
+    Copyright (c) 2017, Erik Österlund
     All rights reserved.
    
     Redistribution and use in source and binary forms, with or without
@@ -170,16 +170,16 @@
 			<artifactId>jsoup</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-core</artifactId>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.lucene-queryparser</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers-common</artifactId>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.lucene</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-queryparser</artifactId>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.lucene-queries</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.github.davidmoten</groupId>
@@ -401,16 +401,16 @@
 									<artifactId>jsoup</artifactId>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.apache.lucene</groupId>
-									<artifactId>lucene-core</artifactId>
+									<groupId>org.apache.servicemix.bundles</groupId>
+									<artifactId>org.apache.servicemix.bundles.lucene-queryparser</artifactId>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.apache.lucene</groupId>
-									<artifactId>lucene-analyzers-common</artifactId>
+									<groupId>org.apache.servicemix.bundles</groupId>
+									<artifactId>org.apache.servicemix.bundles.lucene</artifactId>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.apache.lucene</groupId>
-									<artifactId>lucene-queryparser</artifactId>
+									<groupId>org.apache.servicemix.bundles</groupId>
+									<artifactId>org.apache.servicemix.bundles.lucene-queries</artifactId>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${HOME}/.fisked/bundle</outputDirectory>

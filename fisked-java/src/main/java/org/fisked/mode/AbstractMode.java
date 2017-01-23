@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,6 @@ package org.fisked.mode;
 
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
-import org.fisked.buffer.BufferWindow;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputRecognizer;
@@ -36,6 +35,7 @@ import org.fisked.responder.IInputResponder;
 import org.fisked.responder.IRecognitionAction;
 import org.fisked.responder.InputResponderChain;
 import org.fisked.responder.RecognitionState;
+import org.fisked.ui.buffer.BufferWindow;
 import org.fisked.util.models.Face;
 import org.fisked.util.models.selection.SelectionMode;
 import org.slf4j.Logger;

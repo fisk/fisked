@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,12 +27,12 @@
 package org.fisked.mode.responder;
 
 import org.fisked.buffer.Buffer;
-import org.fisked.buffer.BufferWindow;
 import org.fisked.buffer.controller.TextTransaction;
 import org.fisked.responder.Event;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.RecognitionState;
+import org.fisked.ui.buffer.BufferWindow;
 
 public class DeleteLineResponder implements IInputResponder {
 

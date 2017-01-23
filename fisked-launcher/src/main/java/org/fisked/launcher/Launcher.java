@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,6 +64,11 @@ public class Launcher {
 					Launcher.this.stop(code);
 				}
 
+				@Override
+				public BundleContext getBundleContext() {
+					return _context;
+				}
+
 			};
 			_registration = context.registerService(ILauncherService.class, service, null);
 		}
@@ -87,25 +92,6 @@ public class Launcher {
 
 	public Launcher(String[] args) {
 		_args = args;
-	}
-
-	private String state(int state) {
-		switch (state) {
-		case Bundle.UNINSTALLED:
-			return "UNINSTALLED";
-		case Bundle.INSTALLED:
-			return "INSTALLED";
-		case Bundle.RESOLVED:
-			return "RESOLVED";
-		case Bundle.STARTING:
-			return "STARTING";
-		case Bundle.STOPPING:
-			return "STOPPING";
-		case Bundle.ACTIVE:
-			return "ACTIVE";
-		default:
-			return "UNKNOWN";
-		}
 	}
 
 	private String join(List<String> strs, String delim) {

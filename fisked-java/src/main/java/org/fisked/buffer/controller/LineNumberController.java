@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,12 @@ package org.fisked.buffer.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.fisked.buffer.BufferWindow;
 import org.fisked.settings.Settings;
 import org.fisked.text.TextLayout;
 import org.fisked.text.TextLayout.InvalidLocationException;
 import org.fisked.theme.ITheme;
 import org.fisked.theme.ThemeManager;
+import org.fisked.ui.buffer.BufferWindow;
 import org.fisked.util.models.AttributedString;
 import org.fisked.util.models.Face;
 import org.fisked.util.models.Point;

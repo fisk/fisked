@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, Erik Österlund
+ * Copyright (c) 2017, Erik Österlund
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,6 @@ package org.fisked.mode;
 
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
-import org.fisked.buffer.BufferWindow;
 import org.fisked.mode.responder.BasicNavigationResponder;
 import org.fisked.mode.responder.CommandInputResponder;
 import org.fisked.mode.responder.CursorManagerResponder;
@@ -37,10 +36,12 @@ import org.fisked.mode.responder.InputModeSwitchResponder;
 import org.fisked.mode.responder.MotionActionResponder;
 import org.fisked.mode.responder.SearchTextResponder;
 import org.fisked.mode.responder.VisualModeSwitchResponder;
+import org.fisked.project.ProjectResponder;
 import org.fisked.renderingengine.service.IClipboardService;
 import org.fisked.responder.EventRecognition;
 import org.fisked.responder.RecognitionState;
 import org.fisked.text.TextNavigator;
+import org.fisked.ui.buffer.BufferWindow;
 import org.fisked.util.models.Color;
 import org.fisked.util.models.Face;
 import org.fisked.util.models.selection.SelectionMode;
@@ -103,6 +104,7 @@ public class NormalMode extends AbstractMode {
 			_window.setNeedsFullRedraw();
 		});
 		addResponder(new DeleteLineResponder(_window));
+		addResponder(new ProjectResponder(_window));
 	}
 
 	@Override
