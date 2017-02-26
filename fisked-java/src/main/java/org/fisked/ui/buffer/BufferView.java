@@ -40,6 +40,7 @@ import org.fisked.util.models.Color;
 import org.fisked.util.models.Point;
 import org.fisked.util.models.Range;
 import org.fisked.util.models.Rectangle;
+import org.fisked.util.models.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +54,14 @@ public class BufferView extends View {
 
 	public void setBufferController(BufferController controller) {
 		_controller = controller;
+	}
+
+	@Override
+	protected void layoutSubviews() {
+		super.layoutSubviews();
+		Size newSize = getFrame().getSize();
+		Rectangle oldTextRect = _controller.getTextLayout().getClippingRect();
+		_controller.getTextLayout().setClippingRect(new Rectangle(oldTextRect.getOrigin(), newSize));
 	}
 
 	@Override
@@ -73,8 +82,7 @@ public class BufferView extends View {
 			LOG.debug("Empty selection");
 			_controller.drawBuffer(drawingRect, (Point point, String str, int offset) -> {
 				AttributedString attributedSubstring = attributedString.substring(offset, offset + str.length());
-				context.moveTo(drawingRect.getOrigin().getX(), point.getY());
-				context.printString(attributedSubstring);
+				context.printString(new Point(0, point.getY()), attributedSubstring);
 			});
 		} else {
 			_controller.drawBuffer(drawingRect, (Point point, String str, int offset) -> {
@@ -96,8 +104,7 @@ public class BufferView extends View {
 					}
 				});
 
-				context.moveTo(drawingRect.getOrigin().getX(), point.getY());
-				context.printString(attributedSubstring);
+				context.printString(new Point(0, point.getY()), attributedSubstring);
 			});
 		}
 
@@ -111,8 +118,7 @@ public class BufferView extends View {
 			str.setBackgroundColor(Color.WHITE);
 			str.setForegroundColor(Color.WHITE);
 
-			context.moveTo(relativePoint.getX() + drawingRect.getOrigin().getX(), relativePoint.getY());
-			context.printString(str);
+			context.printString(relativePoint, str);
 		}, CursorStatus.ALL);
 	}
 }

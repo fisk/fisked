@@ -33,7 +33,7 @@ import java.util.concurrent.BlockingQueue;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.renderingengine.service.IConsoleService;
-import org.fisked.ui.drawing.Screen;
+import org.fisked.ui.screen.Screen;
 import org.fisked.ui.window.IWindowManager;
 import org.fisked.util.concurrency.IRunner;
 import org.slf4j.Logger;

@@ -33,11 +33,11 @@ import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.responder.Event;
 import org.fisked.responder.InputResponderChain;
 import org.fisked.responder.RecognitionState;
-import org.fisked.ui.drawing.Screen;
 import org.fisked.ui.drawing.View;
 import org.fisked.ui.listview.ListView;
 import org.fisked.ui.listview.ListView.ListViewDataSource;
 import org.fisked.ui.listview.ListView.ListViewDelegate;
+import org.fisked.ui.screen.Screen;
 import org.fisked.ui.window.IWindowManager;
 import org.fisked.ui.window.Window;
 import org.fisked.util.models.Rectangle;
@@ -58,8 +58,8 @@ public class ProjectSearchWindow extends Window {
 	}
 
 	private CommandView createCommandView() {
-		Rectangle rect = new Rectangle(0, _rootView.getBounds().getSize().getHeight() - 1,
-				_rootView.getBounds().getSize().getWidth(), 1);
+		Rectangle rect = new Rectangle(0, _rootView.getFrame().getSize().getHeight() - 1,
+				_rootView.getFrame().getSize().getWidth(), 1);
 		CommandView view = new CommandView(rect, _commandController);
 		_commandController.setCommandView(_commandView);
 		_rootView.addSubview(view);
@@ -67,8 +67,8 @@ public class ProjectSearchWindow extends Window {
 	}
 
 	private ListView<String> createListView() {
-		Rectangle listViewRect = new Rectangle(0, 0, _rootView.getBounds().getSize().getWidth(),
-				_rootView.getBounds().getSize().getHeight() - 2);
+		Rectangle listViewRect = new Rectangle(0, 0, _rootView.getFrame().getSize().getWidth(),
+				_rootView.getFrame().getSize().getHeight() - 2);
 		ListView<String> listView = new ListView<>(listViewRect);
 		ListViewDataSource<String> dataSource = _controller.createListViewDataSource();
 		listView.setDataSource(dataSource);

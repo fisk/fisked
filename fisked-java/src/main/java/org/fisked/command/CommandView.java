@@ -55,15 +55,12 @@ public class CommandView extends View {
 		attrString.setBackgroundColor(backgroundColor);
 		attrString.setForegroundColor(foregroundColor);
 
-		Point point = getClippingRect().getOrigin();
-		context.moveTo(point.getX(), point.getY());
-		context.printString(attrString);
+		context.printString(new Point(0, 0), attrString);
 		_attrString = attrString;
 	}
 
 	public void drawPoint(IRenderingContext context) {
 		Point point = new Point(_attrString.length(), 0);
-		point = point.addedBy(getClippingRect().getOrigin());
-		context.moveTo(point.getX(), point.getY());
+		context.moveTo(point);
 	}
 }

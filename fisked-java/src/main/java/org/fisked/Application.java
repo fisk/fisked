@@ -44,7 +44,7 @@ import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.ICursorService;
 import org.fisked.responder.EventLoop;
 import org.fisked.ui.buffer.BufferWindow;
-import org.fisked.ui.drawing.Screen;
+import org.fisked.ui.screen.Screen;
 import org.fisked.ui.window.IWindowManager;
 import org.fisked.util.ConsolePrinter;
 import org.fisked.util.FileUtil;

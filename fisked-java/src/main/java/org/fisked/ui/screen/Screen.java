@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package org.fisked.ui.drawing;
+package org.fisked.ui.screen;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -36,6 +36,9 @@ import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.RecognitionState;
+import org.fisked.theme.ITheme;
+import org.fisked.theme.ThemeManager;
+import org.fisked.ui.drawing.IDrawable;
 import org.fisked.ui.window.IWindowManager;
 import org.fisked.ui.window.Window;
 import org.fisked.util.models.Rectangle;
@@ -48,9 +51,15 @@ public class Screen implements IInputResponder, IDrawable {
 	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(Screen.class);
 
 	private final Set<Window> _windows = new HashSet<>();
+	private final WindowContainer _rootContainer = new WindowContainer();
 	private Window _primaryWindow;
 	private final String _name;
 	private Size _size;
+
+	private WindowContainer getContainer(Window window) {
+		WindowContainer container = _rootContainer.find(window);
+		return container;
+	}
 
 	public Screen(String name) {
 		_name = name;
@@ -101,7 +110,12 @@ public class Screen implements IInputResponder, IDrawable {
 	public void draw() {
 		try (IBehaviorConnection<IConsoleService> consoleBC = BEHAVIORS.getBehaviorConnection(IConsoleService.class)
 				.get()) {
-			try (IRenderingContext context = consoleBC.getBehavior().getRenderingContext()) {
+			Rectangle clippingRect = new Rectangle(0, 0, consoleBC.getBehavior().getScreenWidth(),
+					consoleBC.getBehavior().getScreenHeight());
+			try (IRenderingContext context = consoleBC.getBehavior().getRenderingContext(clippingRect)) {
+				ITheme theme = ThemeManager.getThemeManager().getCurrentTheme();
+				context.clearScreen(theme.getBackgroundColor());
+
 				for (Window window : _windows) {
 					window.draw();
 				}
@@ -159,7 +173,54 @@ public class Screen implements IInputResponder, IDrawable {
 		}
 	}
 
+	public void attachWindowVertical(Window window) {
+		LOG.debug("#1");
+		Window primaryWindow = getPrimaryWindow();
+		WindowContainer primaryContainer = getContainer(primaryWindow);
+		WindowContainer container = getContainer(window);
+		LOG.debug("#1");
+		if (container == null) {
+			LOG.debug("#2");
+			container = new WindowContainer();
+			container.setWindow(window);
+		}
+		LOG.debug("#3" + container + primaryContainer + primaryWindow + window);
+		WindowContainer primaryParentContainer = primaryContainer.getParent();
+		primaryContainer.removeFromParent();
+		LOG.debug("#4");
+
+		WindowContainer newParentContainer = new WindowContainer();
+		newParentContainer.addChild(primaryContainer);
+		newParentContainer.addChild(container);
+
+		primaryParentContainer.addChild(newParentContainer);
+
+		Rectangle rect = primaryWindow.getWindowRect();
+		int height = rect.getSize().getHeight();
+		int topHeight = height / 2;
+		int bottomHeight = height - topHeight;
+		Rectangle bottomRect = new Rectangle(rect.getOrigin().getX(), rect.getOrigin().getY() + topHeight,
+				rect.getSize().getWidth(), bottomHeight);
+		Rectangle topRect = new Rectangle(rect.getOrigin().getX(), rect.getOrigin().getY(), rect.getSize().getWidth(),
+				topHeight);
+
+		LOG.debug("Top rect: " + topRect);
+		LOG.debug("Bottom rect: " + bottomRect);
+
+		window.setWindowRect(bottomRect);
+		primaryWindow.setWindowRect(topRect);
+
+		addWindow(window);
+		window.attachScreen(this);
+		if (isPrimary()) {
+			fullRedraw();
+		}
+	}
+
 	public void attachWindow(Window window) {
+		WindowContainer container = new WindowContainer();
+		container.setWindow(window);
+		_rootContainer.addChild(container);
 		addWindow(window);
 		window.attachScreen(this);
 		if (isPrimary()) {
@@ -168,6 +229,28 @@ public class Screen implements IInputResponder, IDrawable {
 	}
 
 	public void detatchWindow(Window window) {
+		WindowContainer container = getContainer(window);
+		if (container != null) {
+			container.clearWindow();
+			WindowContainer parentContainer = container.getParent();
+			Window otherWindow = null;
+			for (WindowContainer sibling : parentContainer.getChildren()) {
+				if (sibling != container) {
+					otherWindow = sibling.getWindow();
+				}
+			}
+
+			int minY = Math.min(window.getWindowRect().getOrigin().getY(),
+					otherWindow.getWindowRect().getOrigin().getY());
+			int maxY = Math.min(
+					window.getWindowRect().getOrigin().getY() + window.getWindowRect().getSize().getHeight(),
+					otherWindow.getWindowRect().getOrigin().getY() + otherWindow.getWindowRect().getSize().getHeight());
+			int height = maxY - minY;
+
+			Rectangle rect = new Rectangle(otherWindow.getWindowRect().getOrigin().getX(), minY,
+					otherWindow.getWindowRect().getSize().getWidth(), height);
+			otherWindow.setWindowRect(rect);
+		}
 		removeWindow(window);
 		window.detatchScreen();
 		if (isPrimary()) {

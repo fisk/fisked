@@ -32,24 +32,28 @@ import org.fisked.buffer.controller.ModeLineController;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.ui.drawing.View;
 import org.fisked.util.models.AttributedString;
+import org.fisked.util.models.Point;
 import org.fisked.util.models.Rectangle;
 
 public class ModeLineView extends View {
-	
-	private ModeLineController _controller;
+
+	private final ModeLineController _controller;
 
 	public ModeLineView(Rectangle frame, ModeLineController controller) {
 		super(frame);
 		_controller = controller;
 	}
-	
+
+	@Override
 	public void drawInRect(Rectangle drawingRect, IRenderingContext context) {
 		super.drawInRect(drawingRect, context);
 
-		context.moveTo(drawingRect.getOrigin().getX(), drawingRect.getOrigin().getY());
 		List<AttributedString> attrStrings = _controller.getModeLineText();
+
+		int x = 0;
 		for (AttributedString attrString : attrStrings) {
-			context.printString(attrString);
+			context.printString(new Point(x, 0), attrString);
+			x += attrString.length();
 		}
 	}
 

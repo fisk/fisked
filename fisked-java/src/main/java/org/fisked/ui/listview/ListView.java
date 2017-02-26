@@ -73,14 +73,14 @@ public class ListView<T> extends View {
 		for (int i = _topIndex; i < length; i++) {
 			int row = linesPerElement * (i - _topIndex);
 			if (row > drawingRect.getSize().getHeight()) {
+				LOG.debug("Drawing exit: " + row + ", " + drawingRect.getSize().getHeight());
 				return;
 			}
 			T element = _dataSource.get(i);
 			boolean selected = i == _selectedIndex;
 			AttributedString text = _delegate.toString(element, selected);
-			LOG.debug("Element" + i + ", row: " + row + ", text: " + text.toString());
-			context.moveTo(drawingRect.getOrigin().getX(), row);
-			context.printString(text);
+			LOG.debug("Element " + i + ", row: " + row + ", text: " + text.toString());
+			context.printString(new Point(0, row), text);
 		}
 	}
 
@@ -99,7 +99,7 @@ public class ListView<T> extends View {
 		int selectedStart = linesPerElement * (_selectedIndex - _topIndex);
 		int selectedEnd = linesPerElement * (_selectedIndex - _topIndex + 1) - 1;
 
-		Size size = getBounds().getSize();
+		Size size = getFrame().getSize();
 
 		if (selectedEnd > size.getHeight()) {
 			_topIndex++;
@@ -174,7 +174,6 @@ public class ListView<T> extends View {
 		int linesPerElement = _delegate.getElementLines();
 		int row = linesPerElement * (_selectedIndex - _topIndex);
 		Point point = new Point(0, row);
-		point = point.addedBy(getClippingRect().getOrigin());
-		context.moveTo(point.getX(), point.getY());
+		context.moveTo(point);
 	}
 }

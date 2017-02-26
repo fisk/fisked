@@ -38,7 +38,7 @@ import org.fisked.responder.EventRecognition;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.RecognitionState;
 import org.fisked.ui.buffer.BufferWindow;
-import org.fisked.ui.drawing.Screen;
+import org.fisked.ui.screen.Screen;
 import org.fisked.ui.window.IWindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

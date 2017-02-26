@@ -44,6 +44,7 @@ import org.fisked.settings.Settings;
 import org.fisked.util.FileUtil;
 import org.fisked.util.models.AttributedString;
 import org.fisked.util.models.Color;
+import org.fisked.util.models.Point;
 import org.fisked.util.models.Range;
 import org.fisked.util.models.Rectangle;
 import org.fisked.util.shell.ShellCommandExecution;
@@ -120,6 +121,11 @@ public class ConsoleService implements IConsoleService {
 	}
 
 	class RenderingContext implements IRenderingContext {
+		private final Rectangle _clippingRect;
+
+		public RenderingContext(Rectangle clippingRect) {
+			_clippingRect = clippingRect;
+		}
 
 		@Override
 		public void clearScreen(Color color) {
@@ -128,16 +134,16 @@ public class ConsoleService implements IConsoleService {
 
 		@Override
 		public void clearRect(Rectangle rect, Color color) {
-			int line = rect.getOrigin().getY();
-			for (int j = 0; j < rect.getSize().getHeight(); j++) {
-				moveTo(rect.getOrigin().getX(), line);
+			Rectangle clearRect = new Rectangle(rect.getOrigin().addedBy(_clippingRect.getOrigin()), rect.getSize());
+			int line = clearRect.getOrigin().getY();
+			for (int j = 0; j < clearRect.getSize().getHeight(); j++) {
 				StringBuilder str = new StringBuilder();
-				for (int i = 0; i < rect.getSize().getWidth(); i++) {
+				for (int i = 0; i < clearRect.getSize().getWidth(); i++) {
 					str.append(' ');
 				}
 				AttributedString attrStr = new AttributedString(str.toString());
 				attrStr.setBackgroundColor(color);
-				printString(attrStr);
+				printString(new Point(rect.getOrigin().getX(), line), attrStr);
 				line++;
 			}
 		}
@@ -149,17 +155,21 @@ public class ConsoleService implements IConsoleService {
 		}
 
 		@Override
-		public void printString(String string) {
+		public void printString(Point point, String string) {
+			moveTo(point);
 			print(string);
 		}
 
 		@Override
-		public void printString(AttributedString string) {
+		public void printString(Point point, AttributedString string) {
+			moveTo(point);
 			print(string.toANSIString());
 		}
 
 		@Override
-		public void moveTo(int x, int y) {
+		public void moveTo(Point point) {
+			int x = point.getX() + _clippingRect.getOrigin().getX();
+			int y = point.getY() + _clippingRect.getOrigin().getY();
 			csi();
 			print(y + 1 + ";" + (x + 1) + "H");
 		}
@@ -188,8 +198,8 @@ public class ConsoleService implements IConsoleService {
 	}
 
 	@Override
-	public IRenderingContext getRenderingContext() {
-		RenderingContext context = new RenderingContext();
+	public IRenderingContext getRenderingContext(Rectangle clippingRect) {
+		RenderingContext context = new RenderingContext(clippingRect);
 		_renderingContexts.push(context);
 		if (_renderingContexts.size() == 1) {
 			context.hideCursor();
@@ -264,6 +274,11 @@ public class ConsoleService implements IConsoleService {
 		esc();
 		print("M");
 		flush();
+	}
+
+	@Override
+	public void sendEscapeSequence(String string) {
+		print(string);
 	}
 
 }

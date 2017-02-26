@@ -46,4 +46,9 @@ public class Size {
 	public boolean equals(Size size) {
 		return _width == size._width && _height == size._height;
 	}
+
+	@Override
+	public String toString() {
+		return "{" + _width + ", " + _height + "}";
+	}
 }

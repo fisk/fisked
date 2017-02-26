@@ -37,7 +37,7 @@ import org.apache.felix.ipojo.annotations.Validate;
 import org.fisked.IApplication;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
-import org.fisked.ui.drawing.Screen;
+import org.fisked.ui.screen.Screen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

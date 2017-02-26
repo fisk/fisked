@@ -130,13 +130,20 @@ public class ShellCommandExecution {
 
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 			String line;
-
+			boolean firstLine = true;
 			while ((line = reader.readLine()) != null) {
+				if (!firstLine) {
+					LOG.debug("Line break");
+					result.append("\n");
+				} else {
+					firstLine = false;
+				}
+				LOG.debug("Result line: " + line);
 				result.append(line);
 			}
 			status = process.exitValue();
-			LOG.debug(String.join(" ", _command));
-			LOG.debug(result.toString());
+			LOG.debug("Command: " + String.join(" ", _command));
+			LOG.debug("Result: " + result.toString());
 			return new ExecutionResult(result.toString(), status);
 		} catch (Throwable e) {
 			LOG.error("Could interpret command output: ", e);

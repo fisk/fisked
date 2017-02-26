@@ -33,11 +33,9 @@ import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.RecognitionState;
-import org.fisked.theme.ITheme;
-import org.fisked.theme.ThemeManager;
 import org.fisked.ui.drawing.IDrawable;
-import org.fisked.ui.drawing.Screen;
 import org.fisked.ui.drawing.View;
+import org.fisked.ui.screen.Screen;
 import org.fisked.util.models.Rectangle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,11 +107,8 @@ public class Window implements IInputResponder, IDrawable {
 	public void draw() {
 		try (IBehaviorConnection<IConsoleService> consoleBC = BEHAVIORS.getBehaviorConnection(IConsoleService.class)
 				.get()) {
-			try (IRenderingContext context = consoleBC.getBehavior().getRenderingContext()) {
-				ITheme theme = ThemeManager.getThemeManager().getCurrentTheme();
-
+			try (IRenderingContext context = consoleBC.getBehavior().getRenderingContext(_windowRect)) {
 				if (_needsFullRedraw) {
-					context.clearScreen(theme.getBackgroundColor());
 					_rootView.draw();
 				}
 				_needsLineRedraw = false;
@@ -163,6 +158,16 @@ public class Window implements IInputResponder, IDrawable {
 		} catch (Exception e) {
 			LOG.error("Can't get window manager service: ", e);
 		}
+	}
+
+	public Rectangle getWindowRect() {
+		return _windowRect;
+	}
+
+	public void setWindowRect(Rectangle windowRect) {
+		_windowRect = windowRect;
+		_rootView.setFrame(windowRect);
+		setNeedsFullRedraw();
 	}
 
 }

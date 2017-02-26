@@ -34,10 +34,10 @@ import java.util.List;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.ui.buffer.BufferWindow;
-import org.fisked.ui.drawing.Screen;
 import org.fisked.ui.listview.ListView;
 import org.fisked.ui.listview.ListView.ListViewDataSource;
 import org.fisked.ui.listview.ListView.ListViewDelegate;
+import org.fisked.ui.screen.Screen;
 import org.fisked.ui.window.IWindowManager;
 import org.fisked.ui.window.Window;
 import org.fisked.util.FileUtil;
@@ -111,7 +111,7 @@ public class ProjectSearchController {
 
 					String path = _paths.get(index);
 
-					BufferWindow window = new BufferWindow(primary.getRootView().getBounds(), path);
+					BufferWindow window = new BufferWindow(primary.getRootView().getFrame(), path);
 
 					File file = FileUtil.getFile(path);
 					try {

@@ -26,7 +26,7 @@
  *******************************************************************************/
 package org.fisked.ui.window;
 
-import org.fisked.ui.drawing.Screen;
+import org.fisked.ui.screen.Screen;
 
 public interface IWindowManager {
 	Window getWindow(String name);

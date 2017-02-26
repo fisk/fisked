@@ -51,7 +51,7 @@ import org.fisked.email.service.IEmailSendService;
 import org.fisked.email.service.IEmailSendService.IEmailSendCallback;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.ui.buffer.BufferWindow;
-import org.fisked.ui.drawing.Screen;
+import org.fisked.ui.screen.Screen;
 import org.fisked.ui.window.IWindowManager;
 import org.fisked.util.models.Rectangle;
 import org.slf4j.Logger;

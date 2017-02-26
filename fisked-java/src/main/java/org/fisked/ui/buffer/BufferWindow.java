@@ -94,9 +94,13 @@ public class BufferWindow extends Window {
 
 		_modeLineController = new ModeLineController(this);
 		_modeLineView = new ModeLineView(modeLineRect, _modeLineController);
+		_modeLineView.setAutoResizeMask(View.AUTORESIZE_MASK_LEFT | View.AUTORESIZE_MASK_RIGHT
+				| View.AUTORESIZE_MASK_BOTTOM | View.AUTORESIZE_MASK_HORIZONTAL);
 
 		_commandController = new BufferCommandController(this);
 		_commandView = new CommandView(commandLineRect, _commandController);
+		_commandView.setAutoResizeMask(View.AUTORESIZE_MASK_LEFT | View.AUTORESIZE_MASK_RIGHT
+				| View.AUTORESIZE_MASK_BOTTOM | View.AUTORESIZE_MASK_HORIZONTAL);
 
 		_bufferView = new BufferView(bufferViewRect);
 		_bufferController = new BufferController(_bufferView, bufferViewRect.getSize());
@@ -104,6 +108,8 @@ public class BufferWindow extends Window {
 
 		_lineNumberController = new LineNumberController(this);
 		_lineNumberView = new LineNumberView(lineNumberRect, _lineNumberController);
+		_lineNumberView.setAutoResizeMask(View.AUTORESIZE_MASK_LEFT | View.AUTORESIZE_MASK_BOTTOM
+				| View.AUTORESIZE_MASK_TOP | View.AUTORESIZE_MASK_VERTICAL);
 
 		_rootView.addSubview(_lineNumberView);
 		_rootView.addSubview(_bufferView);
@@ -160,8 +166,8 @@ public class BufferWindow extends Window {
 	@Override
 	public void drawPoint(IRenderingContext context) {
 		Point point = _bufferController.getPrimaryLogicalPoint();
-		point = point.addedBy(_bufferView.getClippingRect().getOrigin());
-		context.moveTo(point.getX(), point.getY());
+		point = point.addedBy(_bufferView.getFrame().getOrigin());
+		context.moveTo(point);
 	}
 
 	public void switchToBlockInputMode(List<Range> ranges) {

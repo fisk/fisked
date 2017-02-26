@@ -35,6 +35,7 @@ import org.apache.felix.ipojo.annotations.Validate;
 import org.fisked.IApplication;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
+import org.fisked.command.ag.AgSearchCommand;
 import org.fisked.command.api.CommandHandlerReference;
 import org.fisked.command.api.ICommandManager;
 import org.fisked.shell.ShellCommandHandler;
@@ -52,6 +53,7 @@ public class ApplicationCommands {
 	private CommandHandlerReference _openCommand;
 	private CommandHandlerReference _saveCommand;
 	private CommandHandlerReference _shellCommand;
+	private CommandHandlerReference _agSearchCommand;
 
 	@Validate
 	public void start() {
@@ -79,6 +81,7 @@ public class ApplicationCommands {
 				}
 			});
 			_shellCommand = cm.registerHandler("r", new ShellCommandHandler());
+			_agSearchCommand = cm.registerHandler("ag", new AgSearchCommand());
 		} catch (Exception e) {
 			LOG.error("Couldn't start application commands: ", e);
 		}

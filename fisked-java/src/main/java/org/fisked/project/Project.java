@@ -47,6 +47,11 @@ public class Project {
 	private final File _indexDirectory;
 	private FileIndexer _index = null;
 	private final static Logger LOG = LoggerFactory.getLogger(Project.class);
+	private boolean _indexingDone = false;
+
+	public File getRootDirectory() {
+		return _rootDirectory;
+	}
 
 	private Project(File rootDirectory) {
 		_rootDirectory = rootDirectory;
@@ -56,9 +61,8 @@ public class Project {
 			LOG.debug("Indexing path: " + rootDirectory.getAbsolutePath().toString());
 			FileUtils.deleteDirectory(_indexDirectory);
 			_index = new FileIndexer(_indexDirectory.getAbsolutePath());
-			_index.indexFileOrDirectory(_rootDirectory.getAbsolutePath());
 		} catch (Exception e) {
-			LOG.error("Error indexing: ", e);
+			LOG.error("Error initializing project: ", e);
 		}
 	}
 
@@ -107,6 +111,10 @@ public class Project {
 
 	public List<String> searchFilePath(String text) {
 		try {
+			if (!_indexingDone) {
+				_indexingDone = true;
+				_index.indexFileOrDirectory(_rootDirectory.getAbsolutePath());
+			}
 			List<String> paths = new ArrayList<>();
 			for (Document document : _index.searchPath(text)) {
 				paths.add(document.get("path"));

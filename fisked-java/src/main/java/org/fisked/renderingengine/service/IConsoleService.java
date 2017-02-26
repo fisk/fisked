@@ -30,6 +30,7 @@ import java.io.IOException;
 
 import org.fisked.util.models.AttributedString;
 import org.fisked.util.models.Color;
+import org.fisked.util.models.Point;
 import org.fisked.util.models.Range;
 import org.fisked.util.models.Rectangle;
 
@@ -40,6 +41,8 @@ public interface IConsoleService {
 
 	int getChar() throws IOException;
 
+	void sendEscapeSequence(String string);
+
 	void flush();
 
 	int getScreenWidth();
@@ -47,11 +50,11 @@ public interface IConsoleService {
 	int getScreenHeight();
 
 	public interface IRenderingContext extends AutoCloseable {
-		void moveTo(int x, int y);
+		void moveTo(Point point);
 
-		void printString(String string);
+		void printString(Point point, String string);
 
-		void printString(AttributedString string);
+		void printString(Point point, AttributedString string);
 
 		void clearScreen();
 
@@ -61,9 +64,10 @@ public interface IConsoleService {
 
 		@Override
 		void close();
+
 	}
 
-	IRenderingContext getRenderingContext();
+	IRenderingContext getRenderingContext(Rectangle clippingRect);
 
 	ICursorService getCursorService();
 

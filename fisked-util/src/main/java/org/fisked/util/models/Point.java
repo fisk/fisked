@@ -52,6 +52,10 @@ public class Point {
 		return new Point(_x + origin._x, _y + origin._y);
 	}
 
+	public Point subtractedBy(Point origin) {
+		return new Point(_x - origin._x, _y - origin._y);
+	}
+
 	public boolean equals(Point point) {
 		return _x == point._x && _y == point._y;
 	}

@@ -29,7 +29,7 @@ package org.fisked.buffer;
 import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.text.IBufferDecorator;
-import org.fisked.ui.drawing.Screen;
+import org.fisked.ui.screen.Screen;
 import org.fisked.ui.window.IWindowManager;
 import org.fisked.util.concurrency.Dispatcher;
 import org.fisked.util.models.AttributedString;
