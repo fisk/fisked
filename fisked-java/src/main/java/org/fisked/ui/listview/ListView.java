@@ -109,17 +109,21 @@ public class ListView<T> extends View {
 	}
 
 	private void moveDown() {
+		LOG.debug("Moving down " + _selectedIndex);
 		if (_selectedIndex + 1 < _dataSource.length()) {
 			_selectedIndex++;
 		}
 		adjustTopIndex();
+		LOG.debug("Moved down " + _selectedIndex);
 	}
 
 	private void moveUp() {
+		LOG.debug("Moving up " + _selectedIndex);
 		if (_selectedIndex > 0) {
 			_selectedIndex--;
 		}
 		adjustTopIndex();
+		LOG.debug("Moved up " + _selectedIndex);
 	}
 
 	public InputResponderChain createResponder() {
@@ -174,6 +178,7 @@ public class ListView<T> extends View {
 		int linesPerElement = _delegate.getElementLines();
 		int row = linesPerElement * (_selectedIndex - _topIndex);
 		Point point = new Point(0, row);
+		point = point.addedBy(getClippingRect().getOrigin());
 		context.moveTo(point);
 	}
 }

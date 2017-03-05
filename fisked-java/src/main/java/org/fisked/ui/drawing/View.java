@@ -34,7 +34,7 @@ import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.renderingengine.service.IConsoleService;
 import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.responder.Event;
-import org.fisked.responder.IInputRecognizer;
+import org.fisked.responder.IInputResponder;
 import org.fisked.responder.RecognitionState;
 import org.fisked.theme.ThemeManager;
 import org.fisked.util.models.Color;
@@ -43,7 +43,7 @@ import org.fisked.util.models.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class View implements IInputRecognizer, IDrawable {
+public class View implements IInputResponder, IDrawable {
 	private final static Logger LOG = LoggerFactory.getLogger(View.class);
 	private final static BehaviorConnectionFactory BEHAVIORS = new BehaviorConnectionFactory(View.class);
 	private Rectangle _bounds;
@@ -93,10 +93,13 @@ public class View implements IInputRecognizer, IDrawable {
 		return clipRect;
 	}
 
+	private View _lastRecognized;
+
 	@Override
 	public RecognitionState recognizesInput(Event input) {
 		boolean maybeRecognized = false;
 		for (View view : _subviews) {
+			_lastRecognized = view;
 			RecognitionState state = view.recognizesInput(input);
 			if (state == RecognitionState.Recognized) {
 				return RecognitionState.Recognized;
@@ -105,6 +108,11 @@ public class View implements IInputRecognizer, IDrawable {
 			}
 		}
 		return maybeRecognized ? RecognitionState.MaybeRecognized : RecognitionState.NotRecognized;
+	}
+
+	@Override
+	public void onRecognize() {
+		_lastRecognized.onRecognize();
 	}
 
 	public Color getParentBackgroundColor() {
@@ -279,8 +287,6 @@ public class View implements IInputRecognizer, IDrawable {
 				subview.setNeedsLayout();
 			}
 		}
-
-		_oldFrame = _frame;
 	}
 
 	protected void layoutSubviews() {
@@ -295,6 +301,8 @@ public class View implements IInputRecognizer, IDrawable {
 		Size oldParentSize = _parentSize;
 		Size newParentSize = _parent._bounds.getSize();
 		layoutSubviews(oldParentSize, newParentSize);
+		_parentSize = newParentSize;
+		_oldFrame = _frame;
 	}
 
 	public void layoutIfNeeded() {

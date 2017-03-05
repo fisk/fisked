@@ -33,6 +33,8 @@ import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.RecognitionState;
+import org.fisked.theme.ITheme;
+import org.fisked.theme.ThemeManager;
 import org.fisked.ui.drawing.IDrawable;
 import org.fisked.ui.drawing.View;
 import org.fisked.ui.screen.Screen;
@@ -54,6 +56,14 @@ public class Window implements IInputResponder, IDrawable {
 	public Window(Rectangle windowRect, String name) {
 		_windowRect = windowRect;
 		_name = name;
+	}
+
+	public IInputResponder getPrimaryResponder() {
+		return _primaryResponder;
+	}
+
+	public void setPrimaryResponder(IInputResponder primaryResponder) {
+		_primaryResponder = primaryResponder;
 	}
 
 	public String getId() {
@@ -109,6 +119,8 @@ public class Window implements IInputResponder, IDrawable {
 				.get()) {
 			try (IRenderingContext context = consoleBC.getBehavior().getRenderingContext(_windowRect)) {
 				if (_needsFullRedraw) {
+					ITheme theme = ThemeManager.getThemeManager().getCurrentTheme();
+					context.clearRect(getWindowRect(), theme.getBackgroundColor());
 					_rootView.draw();
 				}
 				_needsLineRedraw = false;

@@ -36,8 +36,6 @@ import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.responder.Event;
 import org.fisked.responder.IInputResponder;
 import org.fisked.responder.RecognitionState;
-import org.fisked.theme.ITheme;
-import org.fisked.theme.ThemeManager;
 import org.fisked.ui.drawing.IDrawable;
 import org.fisked.ui.window.IWindowManager;
 import org.fisked.ui.window.Window;
@@ -113,9 +111,6 @@ public class Screen implements IInputResponder, IDrawable {
 			Rectangle clippingRect = new Rectangle(0, 0, consoleBC.getBehavior().getScreenWidth(),
 					consoleBC.getBehavior().getScreenHeight());
 			try (IRenderingContext context = consoleBC.getBehavior().getRenderingContext(clippingRect)) {
-				ITheme theme = ThemeManager.getThemeManager().getCurrentTheme();
-				context.clearScreen(theme.getBackgroundColor());
-
 				for (Window window : _windows) {
 					window.draw();
 				}
@@ -129,14 +124,21 @@ public class Screen implements IInputResponder, IDrawable {
 		}
 	}
 
+	private Window _lastRecognized;
+
 	@Override
 	public RecognitionState recognizesInput(Event nextEvent) {
-		return _primaryWindow.recognizesInput(nextEvent);
+		_lastRecognized = _primaryWindow;
+		if (_primaryWindow != null) {
+			return _primaryWindow.recognizesInput(nextEvent);
+		} else {
+			return RecognitionState.NotRecognized;
+		}
 	}
 
 	@Override
 	public void onRecognize() {
-		_primaryWindow.onRecognize();
+		_lastRecognized.onRecognize();
 	}
 
 	public void addVerticalSplit(Window window) {
@@ -174,20 +176,15 @@ public class Screen implements IInputResponder, IDrawable {
 	}
 
 	public void attachWindowVertical(Window window) {
-		LOG.debug("#1");
 		Window primaryWindow = getPrimaryWindow();
 		WindowContainer primaryContainer = getContainer(primaryWindow);
 		WindowContainer container = getContainer(window);
-		LOG.debug("#1");
 		if (container == null) {
-			LOG.debug("#2");
 			container = new WindowContainer();
 			container.setWindow(window);
 		}
-		LOG.debug("#3" + container + primaryContainer + primaryWindow + window);
 		WindowContainer primaryParentContainer = primaryContainer.getParent();
 		primaryContainer.removeFromParent();
-		LOG.debug("#4");
 
 		WindowContainer newParentContainer = new WindowContainer();
 		newParentContainer.addChild(primaryContainer);
@@ -212,6 +209,7 @@ public class Screen implements IInputResponder, IDrawable {
 
 		addWindow(window);
 		window.attachScreen(this);
+		setPrimaryWindow(window);
 		if (isPrimary()) {
 			fullRedraw();
 		}
@@ -240,16 +238,23 @@ public class Screen implements IInputResponder, IDrawable {
 				}
 			}
 
+			LOG.debug("Detach window: " + window + ", sibling: " + otherWindow);
+			LOG.debug("window rect: " + window.getWindowRect() + ", sibling rect: " + otherWindow.getWindowRect());
+
 			int minY = Math.min(window.getWindowRect().getOrigin().getY(),
 					otherWindow.getWindowRect().getOrigin().getY());
-			int maxY = Math.min(
+			int maxY = Math.max(
 					window.getWindowRect().getOrigin().getY() + window.getWindowRect().getSize().getHeight(),
 					otherWindow.getWindowRect().getOrigin().getY() + otherWindow.getWindowRect().getSize().getHeight());
 			int height = maxY - minY;
 
 			Rectangle rect = new Rectangle(otherWindow.getWindowRect().getOrigin().getX(), minY,
 					otherWindow.getWindowRect().getSize().getWidth(), height);
+
+			LOG.debug("New rect: " + rect);
+
 			otherWindow.setWindowRect(rect);
+			setPrimaryWindow(otherWindow);
 		}
 		removeWindow(window);
 		window.detatchScreen();

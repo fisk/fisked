@@ -1,3 +1,29 @@
+/*******************************************************************************
+ * Copyright (c) 2017, Erik Österlund
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the organization nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL ERIK ÖSTERLUND BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *******************************************************************************/
 package org.fisked.command.ag;
 
 import java.io.File;
@@ -11,6 +37,7 @@ import org.fisked.behavior.BehaviorConnectionFactory;
 import org.fisked.behavior.IBehaviorConnection;
 import org.fisked.command.api.ICommandHandler;
 import org.fisked.project.Project;
+import org.fisked.renderingengine.service.IConsoleService.IRenderingContext;
 import org.fisked.ui.buffer.BufferWindow;
 import org.fisked.ui.listview.ListView;
 import org.fisked.ui.listview.ListView.ListViewDataSource;
@@ -100,9 +127,22 @@ public class AgSearchCommand implements ICommandHandler {
 		protected ListViewDelegate<AgSearchResultLine> _delegate;
 		protected ListViewDataSource<AgSearchResultLine> _dataSource;
 
+		@Override
+		public void drawPoint(IRenderingContext context) {
+			_listView.drawPoint(context);
+		}
+
 		public AgSearchResultWindow() {
 			super("Ag Search Results");
 			setId(POPUP_WINDOW_KEY);
+		}
+
+		public void setup(List<AgSearchResultLine> list, Screen screen, BufferWindow invoker) {
+			_list = list;
+			if (_listView != null) {
+				_listView.removeFromParent();
+			}
+
 			_listView = new ListView<>(new Rectangle(new Point(0, 0), _windowRect.getSize()));
 			_delegate = new ListViewDelegate<AgSearchResultLine>() {
 				@Override
@@ -112,7 +152,18 @@ public class AgSearchCommand implements ICommandHandler {
 
 				@Override
 				public void selectedItem(int index) {
-					LOG.debug("Selected element");
+					LOG.debug("Selected element " + index);
+					AgSearchResultLine result = _list.get(index);
+					Path path = result._path;
+					try (IBehaviorConnection<IWindowManager> wmBC = BEHAVIORS
+							.getBehaviorConnection(IWindowManager.class).get()) {
+						Screen screen = wmBC.getBehavior().getPrimaryScreen();
+						screen.detatchWindow(AgSearchResultWindow.this);
+						BufferWindow window = _invoker;
+						window.openFile(path.toFile());
+					} catch (Exception e) {
+						LOG.error("Could not setup popup window: ", e);
+					}
 				}
 
 				@Override
@@ -123,7 +174,6 @@ public class AgSearchCommand implements ICommandHandler {
 							path + ":" + element._line + ":" + element._index + ": " + text);
 					return attrString;
 				}
-
 			};
 			_dataSource = new ListViewDataSource<AgSearchResultLine>() {
 				@Override
@@ -138,26 +188,20 @@ public class AgSearchCommand implements ICommandHandler {
 			};
 			_listView.setDelegate(_delegate);
 			_listView.setDataSource(_dataSource);
-		}
-
-		public void setup(List<AgSearchResultLine> list, Screen screen) {
-			_list = list;
-			_listView.removeFromParent();
-			setupPopupView(_listView);
-			screen.attachWindowVertical(this);
+			setupPopupView(invoker, _listView, _listView.createResponder());
 		}
 	}
 
-	private void setupAgResultView(List<AgSearchResultLine> list) {
+	private void setupAgResultView(BufferWindow invoker, List<AgSearchResultLine> list) {
 		try (IBehaviorConnection<IWindowManager> wmBC = BEHAVIORS.getBehaviorConnection(IWindowManager.class).get()) {
 			Screen screen = wmBC.getBehavior().getPrimaryScreen();
 			Window cachedWindow = wmBC.getBehavior().getWindow(POPUP_WINDOW_KEY);
 			if (cachedWindow != null) {
-				((AgSearchResultWindow) cachedWindow).setup(list, screen);
+				((AgSearchResultWindow) cachedWindow).setup(list, screen, invoker);
 			} else {
 				AgSearchResultWindow window = new AgSearchResultWindow();
 				window = (AgSearchResultWindow) wmBC.getBehavior().registerWindow(window);
-				window.setup(list, screen);
+				window.setup(list, screen, invoker);
 			}
 		} catch (Exception e) {
 			LOG.error("Could not setup popup window: ", e);
@@ -187,7 +231,7 @@ public class AgSearchCommand implements ICommandHandler {
 			window.getCommandController().setCommandFeedback("Could execute the ag command.");
 		} else {
 			List<AgSearchResultLine> resultList = parse(result.getResult());
-			setupAgResultView(resultList);
+			setupAgResultView(window, resultList);
 			window.getCommandController().setCommandFeedback("");
 		}
 		window.refresh();

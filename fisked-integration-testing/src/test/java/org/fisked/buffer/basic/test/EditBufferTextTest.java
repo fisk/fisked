@@ -50,6 +50,7 @@ import org.fisked.renderingengine.service.ICursorService;
 import org.fisked.ui.buffer.BufferWindow;
 import org.fisked.util.models.AttributedString;
 import org.fisked.util.models.Color;
+import org.fisked.util.models.Point;
 import org.fisked.util.models.Range;
 import org.fisked.util.models.Rectangle;
 import org.junit.After;
@@ -112,19 +113,23 @@ public class EditBufferTextTest {
 					}
 
 					@Override
-					public IRenderingContext getRenderingContext() {
+					public void sendEscapeSequence(String string) {
+					}
+
+					@Override
+					public IRenderingContext getRenderingContext(Rectangle clippingRect) {
 						return new IRenderingContext() {
 
 							@Override
-							public void moveTo(int x, int y) {
+							public void moveTo(Point point) {
 							}
 
 							@Override
-							public void printString(String string) {
+							public void printString(Point point, String string) {
 							}
 
 							@Override
-							public void printString(AttributedString string) {
+							public void printString(Point point, AttributedString string) {
 							}
 
 							@Override
