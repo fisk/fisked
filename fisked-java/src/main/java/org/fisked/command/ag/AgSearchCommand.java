@@ -222,7 +222,7 @@ public class AgSearchCommand implements ICommandHandler {
 		}
 		LOG.debug("command: ag " + sb.toString());
 		Project project = Project.getProject(Paths.get(window.getBuffer().getFile().getAbsolutePath()));
-		File rootFile = project.getRootDirectory();
+		File rootFile = project.getRootDirectoryFile();
 		String[] args = { "ag", "--vimgrep", sb.toString(), rootFile.getAbsolutePath() };
 		ShellCommandExecution execution = new ShellCommandExecution(args);
 		execution.redirectInput();

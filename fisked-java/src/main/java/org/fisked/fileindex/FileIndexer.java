@@ -48,11 +48,13 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.FSDirectory;
+import org.fisked.project.IgnoreFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FileIndexer {
 	// TODO: Make into module
+	private final IgnoreFiles _ignoreFiles;
 	private static StandardAnalyzer _analyzer = new StandardAnalyzer();
 
 	private final IndexWriter _writer;
@@ -105,11 +107,12 @@ public class FileIndexer {
 		return result;
 	}
 
-	public FileIndexer(String indexDirectory) throws IOException {
+	public FileIndexer(String indexDirectory, IgnoreFiles ignoreFiles) throws IOException {
 		FSDirectory dir = FSDirectory.open(Paths.get(indexDirectory));
 		IndexWriterConfig config = new IndexWriterConfig(_analyzer);
 		_writer = new IndexWriter(dir, config);
 		_indexLocation = indexDirectory;
+		_ignoreFiles = ignoreFiles;
 	}
 
 	public void indexFileOrDirectory(String fileName) throws IOException {
@@ -139,7 +142,7 @@ public class FileIndexer {
 	}
 
 	private void addFiles(File file) {
-		if (!file.exists()) {
+		if (!file.exists() || _ignoreFiles.isIgnored(file)) {
 			return;
 		}
 		if (file.isDirectory()) {

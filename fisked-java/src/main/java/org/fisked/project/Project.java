@@ -49,8 +49,22 @@ public class Project {
 	private final static Logger LOG = LoggerFactory.getLogger(Project.class);
 	private boolean _indexingDone = false;
 
-	public File getRootDirectory() {
-		return _rootDirectory;
+	private IgnoreFiles _ignoreFiles = null;
+
+	public File getRootDirectoryFile() {
+		return _rootDirectory.getAbsoluteFile();
+	}
+
+	public Path getRootDirectoryPath() {
+		return getRootDirectoryFile().toPath();
+	}
+
+	public File getProjectDirectoryFile() {
+		return getProjectDirectoryPath().toFile();
+	}
+
+	public Path getProjectDirectoryPath() {
+		return getRootDirectoryPath().resolve(".fisked");
 	}
 
 	private Project(File rootDirectory) {
@@ -60,7 +74,8 @@ public class Project {
 			LOG.debug("Indexing file: " + rootDirectory);
 			LOG.debug("Indexing path: " + rootDirectory.getAbsolutePath().toString());
 			FileUtils.deleteDirectory(_indexDirectory);
-			_index = new FileIndexer(_indexDirectory.getAbsolutePath());
+			_ignoreFiles = new IgnoreFiles(this);
+			_index = new FileIndexer(_indexDirectory.getAbsolutePath(), _ignoreFiles);
 		} catch (Exception e) {
 			LOG.error("Error initializing project: ", e);
 		}
