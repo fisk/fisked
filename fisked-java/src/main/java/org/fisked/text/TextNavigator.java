@@ -154,9 +154,15 @@ public class TextNavigator {
 		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
 			@Override
 			public boolean visit(Cursor cursor) {
-				Point point = getAbsolutePoint(cursor);
-				Point newPoint = new Point(getLastColumn(cursor), point.getY() + 1);
-				setAbsolutePoint(cursor, newPoint, false);
+				int lastLine = getAbsolutePoint(cursor).getY();
+				int lastColumn = getLastColumn(cursor);
+				Point newPoint = new Point(lastColumn, lastLine + 1);
+				int charIndex = _buffer.length();
+				try {
+					charIndex = _layout.getCharIndexForAbsoluteLogicalPoint(newPoint);
+				} catch (InvalidLocationException e) {
+				}
+				setIndex(cursor, charIndex, false);
 				return true;
 			}
 		};
@@ -167,9 +173,15 @@ public class TextNavigator {
 		IFilterVertexVisitor<Cursor> visitor = new IFilterVertexVisitor<Cursor>() {
 			@Override
 			public boolean visit(Cursor cursor) {
-				Point point = getAbsolutePoint(cursor);
-				Point newPoint = new Point(getLastColumn(cursor), point.getY() - 1);
-				setAbsolutePoint(cursor, newPoint, false);
+				int lastLine = getAbsolutePoint(cursor).getY();
+				int lastColumn = getLastColumn(cursor);
+				Point newPoint = new Point(lastColumn, lastLine - 1);
+				int charIndex = 0;
+				try {
+					charIndex = _layout.getCharIndexForAbsoluteLogicalPoint(newPoint);
+				} catch (InvalidLocationException e) {
+				}
+				setIndex(cursor, charIndex, false);
 				return true;
 			}
 		};

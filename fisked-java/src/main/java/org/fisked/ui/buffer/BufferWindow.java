@@ -166,7 +166,12 @@ public class BufferWindow extends Window {
 	@Override
 	public void drawPoint(IRenderingContext context) {
 		Point point = _bufferController.getPrimaryLogicalPoint();
+		LOG.debug("Draw point: " + point);
+
 		point = point.addedBy(_bufferView.getFrame().getOrigin());
+
+		LOG.debug("Draw resolved point: " + point);
+
 		context.moveTo(point);
 	}
 

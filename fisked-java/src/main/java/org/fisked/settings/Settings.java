@@ -46,6 +46,7 @@ public class Settings {
 	private static final String _settingsFileName = "conf/fiskedrc";
 
 	private int _numberOfDigitsForLineNumbers;
+	private int _tabWhitespaces;
 	private boolean _usingPowerlinePatchedFont;
 	private TerminalType _terminalType;
 
@@ -75,6 +76,10 @@ public class Settings {
 		return _numberOfDigitsForLineNumbers;
 	}
 
+	public int getTabWhitespaces() {
+		return _tabWhitespaces;
+	}
+
 	public boolean isPowerlinePatchedFontUsed() {
 		return _usingPowerlinePatchedFont;
 	}
@@ -87,7 +92,12 @@ public class Settings {
 	// runtime.
 	private void save(File f) {
 		StringBuilder sb = new StringBuilder();
-		List<String> lines = new ArrayList<String>();
+		List<String> lines = new ArrayList<>();
+
+		lines.add("# The number of whitespaces used for a tab.");
+		lines.add("view.tabWhitespaces" + "=" + SettingsConverter.toString(_tabWhitespaces));
+		lines.add("");
+
 		lines.add("# The number of digits used for displaying line numbers. Set to 0 to hide the line numbers.");
 		lines.add("view.linenumbers.numberofdigits" + "=" + SettingsConverter.toString(_numberOfDigitsForLineNumbers));
 		lines.add("");
@@ -134,6 +144,7 @@ public class Settings {
 
 		_numberOfDigitsForLineNumbers = SettingsConverter.convert(prop.getProperty("view.linenumbers.numberofdigits"),
 				4);
+		_tabWhitespaces = SettingsConverter.convert(prop.getProperty("view.tabWhitespaces"), 4);
 		_usingPowerlinePatchedFont = SettingsConverter.convert(prop.getProperty("view.usingPowerlinePatchedFont"),
 				false);
 		_terminalType = SettingsConverter.convert(prop.getProperty("terminal.type"), TerminalType.Unknown);

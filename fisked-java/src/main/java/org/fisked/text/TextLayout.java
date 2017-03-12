@@ -29,6 +29,7 @@ package org.fisked.text;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.fisked.settings.Settings;
 import org.fisked.util.models.Point;
 import org.fisked.util.models.Range;
 import org.fisked.util.models.Rectangle;
@@ -89,6 +90,8 @@ public class TextLayout {
 		final int width = _rect.getSize().getWidth();
 
 		int currentLineIndex = 0;
+		int tabWidth = Settings.getInstance().getTabWhitespaces();
+
 		StringBuilder currentLogicalLine = new StringBuilder();
 		StringBuilder currentPhysicalLine = new StringBuilder();
 
@@ -100,6 +103,15 @@ public class TextLayout {
 				currentLogicalLine = new StringBuilder();
 				currentPhysicalLine = new StringBuilder();
 				currentLineIndex = 0;
+			} else if (character == '\t') {
+				currentPhysicalLine.append(character);
+				currentLogicalLine.append("\t");
+				currentLineIndex += tabWidth;
+				if (currentLineIndex >= width) {
+					_logicalLines.add(new Line(currentLogicalLine.toString(), false));
+					currentLineIndex = 0;
+					currentLogicalLine = new StringBuilder();
+				}
 			} else {
 				currentPhysicalLine.append(character);
 				currentLogicalLine.append(character);
@@ -174,11 +186,42 @@ public class TextLayout {
 		return getPointForCharIndexAtOffset(charIndex, 0, _logicalLines);
 	}
 
+	private Point tabCompensatedRelativeLogicalPoint(Point point, int charIndex) {
+		int column = point.getX();
+		int line = point.getY();
+
+		int extraWhitespace = 0;
+		int tabWidth = Settings.getInstance().getTabWhitespaces();
+		CharSequence str = _text;
+		for (int i = 0; i < column; i++) {
+			LOG.debug("Add column, whitespace: " + extraWhitespace);
+			int index = charIndex - column + i;
+			LOG.debug("Primary index: " + charIndex + ", index: " + index);
+			char character = str.charAt(index);
+			if (character == '\t') {
+				LOG.debug("Add tab " + extraWhitespace);
+				extraWhitespace += tabWidth - 1;
+			}
+		}
+		column += extraWhitespace;
+
+		return new Point(column, line);
+	}
+
 	public Point getRelativeLogicalPointForCharIndex(int charIndex) {
+		Point result = getUncompensatedRelativeLogicalPointForCharIndex(charIndex);
+		if (result != null) {
+			result = tabCompensatedRelativeLogicalPoint(result, charIndex);
+		}
+		return result;
+	}
+
+	private Point getUncompensatedRelativeLogicalPointForCharIndex(int charIndex) {
 		layoutIfNeeded();
 		Point point = getPointForCharIndexAtOffset(charIndex, _rect.getOrigin().getY(), _logicalLines);
-		int line = point.getY();
+
 		int column = point.getX();
+		int line = point.getY();
 
 		if (column >= _rect.getSize().getWidth()) {
 			column = 0;
@@ -197,7 +240,7 @@ public class TextLayout {
 	}
 
 	public int getColumnAtCharIndex(int index) {
-		return getRelativeLogicalPointForCharIndex(index).getX();
+		return getUncompensatedRelativeLogicalPointForCharIndex(index).getX();
 	}
 
 	public class InvalidLocationException extends Exception {
@@ -218,7 +261,7 @@ public class TextLayout {
 		return getCharIndexForAbsolutePoint(point, _physicalLines);
 	}
 
-	public int getCharIndexForAbsolutePoint(Point point, List<Line> lines) throws InvalidLocationException {
+	private int getCharIndexForAbsolutePoint(Point point, List<Line> lines) throws InvalidLocationException {
 		layoutIfNeeded();
 		int line = 0;
 
@@ -242,9 +285,20 @@ public class TextLayout {
 			throw new InvalidLocationException();
 		}
 
-		int lineExcess = Math.min(point.getX(), lastLine.length());
+		int tabWidth = Settings.getInstance().getTabWhitespaces();
 
-		int result = i + lineExcess;
+		int charIndex = i;
+		int column = 0;
+		for (i = 0; i < lastLine.length() && column < point.getX(); i++) {
+			char character = _text.charAt(charIndex + i);
+			if (character == '\t') {
+				column += tabWidth;
+			} else {
+				column++;
+			}
+		}
+
+		int result = charIndex + i;
 
 		return result;
 	}
