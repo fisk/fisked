@@ -15,11 +15,24 @@ import org.fisk.fisked.text.Powerline;
 
 public class ModeLineView extends View {
     private String _time;
+    private String _mode = "NORMAL";
+    private String _branch = "master";
+    private String _line = "0:0";
+    private String _name = "*scratch*";
     private TextColor _foregroundColour;
 
     private String getTime() {
         var format = DateFormat.getTimeInstance(2);
         return format.format(new Date());
+    }
+
+    private TextColor getModeColor() {
+        switch (_mode) {
+        case "NORMAL":
+            return TextColor.ANSI.YELLOW;
+        default:
+            return null;
+        }
     }
 
     public ModeLineView(Rect bounds) {
@@ -45,13 +58,14 @@ public class ModeLineView extends View {
 
     private AttributedString getLeftString() {
         var str = new AttributedString();
-        str.append(" NORMAL ", _backgroundColour, _foregroundColour);
-        str.append(Powerline.SYMBOL_FILLED_RIGHT_ARROW, _foregroundColour, _backgroundColour);
-        str.append(" *scratch* ", _foregroundColour, _backgroundColour);
+        TextColor modeColour = getModeColor();
+        str.append(" " + _mode + " ", _backgroundColour, modeColour);
+        str.append(Powerline.SYMBOL_FILLED_RIGHT_ARROW, modeColour, _backgroundColour);
+        str.append(" " + _name + " ", _foregroundColour, _backgroundColour);
         str.append(Powerline.SYMBOL_RIGHT_ARROW, _foregroundColour, _backgroundColour);
         str.append(" ", _foregroundColour, _backgroundColour);
         str.append(Powerline.SYMBOL_LN, _foregroundColour, _backgroundColour);
-        str.append(" 0:0 ", _foregroundColour, _backgroundColour);
+        str.append(" " + _line + " ", _foregroundColour, _backgroundColour);
         str.append(Powerline.SYMBOL_RIGHT_ARROW, _foregroundColour, _backgroundColour);
         return str;
     }
@@ -60,7 +74,7 @@ public class ModeLineView extends View {
         var str = new AttributedString();
         str.append(Powerline.SYMBOL_LEFT_ARROW, _foregroundColour, _backgroundColour);
         str.append(" " + Powerline.SYMBOL_BRANCH + " ", _foregroundColour, _backgroundColour);
-        str.append("master", _foregroundColour, _backgroundColour);
+        str.append(_branch, _foregroundColour, _backgroundColour);
         str.append(" ", _foregroundColour, _backgroundColour);
         str.append(Powerline.SYMBOL_LEFT_ARROW, _foregroundColour, _backgroundColour);
         str.append(" " + _time + " ", _foregroundColour, _backgroundColour);
