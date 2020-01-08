@@ -15,7 +15,6 @@ import org.fisk.fisked.text.Powerline;
 
 public class ModeLineView extends View {
     private String _time;
-    private String _mode = "NORMAL";
     private String _branch = "master";
     private String _line = "0:0";
     private String _name = "*scratch*";
@@ -26,8 +25,12 @@ public class ModeLineView extends View {
         return format.format(new Date());
     }
 
+    private String getMode() {
+        return Window.getInstance().getCurrentMode().getName();
+    }
+
     private TextColor getModeColor() {
-        switch (_mode) {
+        switch (getMode()) {
         case "NORMAL":
             return TextColor.ANSI.YELLOW;
         default:
@@ -59,7 +62,7 @@ public class ModeLineView extends View {
     private AttributedString getLeftString() {
         var str = new AttributedString();
         TextColor modeColour = getModeColor();
-        str.append(" " + _mode + " ", _backgroundColour, modeColour);
+        str.append(" " + getMode() + " ", _backgroundColour, modeColour);
         str.append(Powerline.SYMBOL_FILLED_RIGHT_ARROW, modeColour, _backgroundColour);
         str.append(" " + _name + " ", _foregroundColour, _backgroundColour);
         str.append(Powerline.SYMBOL_RIGHT_ARROW, _foregroundColour, _backgroundColour);

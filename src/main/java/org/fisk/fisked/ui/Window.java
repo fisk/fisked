@@ -14,7 +14,8 @@ import org.fisk.fisked.event.EventListener;
 import org.fisk.fisked.event.EventResponder;
 import org.fisk.fisked.event.KeyStrokeEvent;
 import org.fisk.fisked.event.RunnableEvent;
-import org.fisk.fisked.event.TextEventResponder;
+import org.fisk.fisked.mode.Mode;
+import org.fisk.fisked.mode.NormalMode;
 import org.fisk.fisked.terminal.TerminalContext;
 import org.fisk.fisked.text.Buffer;
 import org.fisk.fisked.utils.LogFactory;
@@ -37,6 +38,8 @@ public class Window implements Drawable {
     private Size _size;
     private BufferView _bufferView;
     private Buffer _buffer;
+    private NormalMode _normalMode;
+    private Mode _currentMode;
 
     private void setupViews() {
         var terminalContext = TerminalContext.getInstance();
@@ -66,11 +69,11 @@ public class Window implements Drawable {
     }
 
     private void setupBindings() {
+        _normalMode = new NormalMode();
+        _currentMode = _normalMode;
         var eventThread = EventThread.getInstance();
         var responders = eventThread.getResponder();
-        responders.addEventResponder(new TextEventResponder("q", () -> {
-            System.exit(0);
-        }));
+        responders.addEventResponder(_currentMode);
         responders.addEventResponder(new EventResponder() {
             @Override
             public Response processEvent(KeyStrokeEvent event) {
@@ -91,6 +94,10 @@ public class Window implements Drawable {
         _buffer = new Buffer(path);
         setupViews();
         setupBindings();
+    }
+
+    public Mode getCurrentMode() {
+        return _currentMode;
     }
 
     public void setRootView(View view) {
