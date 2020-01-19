@@ -57,6 +57,26 @@ public class TextEventResponder implements EventResponder {
                     return EventListener.Response.NO;
                 }
                 break;
+            case ArrowUp:
+                if (!str.equals("<UP>")) {
+                    return EventListener.Response.NO;
+                }
+                break;
+            case ArrowDown:
+                if (!str.equals("<DOWN>")) {
+                    return EventListener.Response.NO;
+                }
+                break;
+            case ArrowLeft:
+                if (!str.equals("<LEFT>")) {
+                    return EventListener.Response.NO;
+                }
+                break;
+            case ArrowRight:
+                if (!str.equals("<RIGHT>")) {
+                    return EventListener.Response.NO;
+                }
+                break;
             default:
                 return EventListener.Response.NO;
             }

@@ -20,5 +20,21 @@ public class NormalMode extends Mode {
             var window = Window.getInstance();
             window.getBufferContext().getBuffer().write();
         });
+        _rootResponder.addEventResponder("h", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().getCursor().goBack();
+        });
+        _rootResponder.addEventResponder("<LEFT>", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().getCursor().goBack();
+        });
+        _rootResponder.addEventResponder("l", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().getCursor().goForward();
+        });
+        _rootResponder.addEventResponder("<RIGHT>", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().getCursor().goForward();
+        });
     }
 }

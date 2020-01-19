@@ -37,8 +37,6 @@ public class BufferView extends View {
 
     @Override
     public Cursor getCursor() {
-        var position = _bufferContext.getBuffer().getPosition();
-        var point = _bufferContext.getTextLayout().getPoint(position);
-        return new Cursor(position, point.getX(), point.getY());
+        return _bufferContext.getBuffer().getCursor();
     }
 }
