@@ -39,6 +39,18 @@ public class View implements Drawable, EventResponder {
         _bounds = bounds;
     }
 
+    public void setFirstResponder(EventResponder responder) {
+        _firstResponder = responder;
+    }
+
+    public Cursor getCursor() {
+        var responder = _firstResponder;
+        if (responder instanceof View) {
+            return ((View) responder).getCursor();
+        }
+        return null;
+    }
+
     @Override
     public void draw(Rect rect) {
         _log.info("View draw rect: " + rect.getPoint().getX() + ", " + rect.getPoint().getY() + ", " + rect.getSize().getWidth() + ", " + rect.getSize().getHeight());
@@ -61,7 +73,7 @@ public class View implements Drawable, EventResponder {
             var subRect = Rect.create(rect.getPoint().getX() + view._bounds.getPoint().getX(),
                                       rect.getPoint().getY() + view._bounds.getPoint().getY(), view._bounds.getSize().getWidth(),
                                       view._bounds.getSize().getHeight());
-            view.update(subRect, forced);
+            view.update(subRect, true /* forced */);
         }
     }
 

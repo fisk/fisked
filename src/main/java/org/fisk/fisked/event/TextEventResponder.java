@@ -6,11 +6,11 @@ import java.util.List;
 import com.googlecode.lanterna.input.KeyType;
 
 public class TextEventResponder implements EventResponder {
-    private String _string;
+    private String[] _keyStrokes;
     private Runnable _action;
 
     public TextEventResponder(String string, Runnable action) {
-        _string = string;
+        _keyStrokes = string.split(" ");
         _action = action;
     }
 
@@ -26,18 +26,43 @@ public class TextEventResponder implements EventResponder {
     public EventListener.Response processEvent(KeyStrokeEvent event) {
         List<KeyStrokeEvent> events = new ArrayList<>();
         constructEvents(event, events);
+
+        if (events.size() > _keyStrokes.length) {
+            return EventListener.Response.NO;
+        }
+
         int processed = 0;
 
         for (var e: events) {
-            if (e.getKeyStroke().getKeyType() != KeyType.Character) {
-                return EventListener.Response.NO;
-            }
-            if (!e.getKeyStroke().getCharacter().equals(_string.charAt(processed++))) {
+            var keyStroke = e.getKeyStroke();
+            String str = _keyStrokes[processed++];
+            switch (keyStroke.getKeyType()) {
+            case Character:
+                if (keyStroke.getCharacter() != str.charAt(0)) {
+                    return EventListener.Response.NO;
+                }
+                break;
+            case Escape:
+                if (!str.equals("<ESC>")) {
+                    return EventListener.Response.NO;
+                }
+                break;
+            case Backspace:
+                if (!str.equals("<BACKSPACE>")) {
+                    return EventListener.Response.NO;
+                }
+                break;
+            case Enter:
+                if (!str.equals("<ENTER>")) {
+                    return EventListener.Response.NO;
+                }
+                break;
+            default:
                 return EventListener.Response.NO;
             }
         }
 
-        if (processed == _string.length()) {
+        if (processed == _keyStrokes.length) {
             return EventListener.Response.YES;
         } else {
             return EventListener.Response.MAYBE;

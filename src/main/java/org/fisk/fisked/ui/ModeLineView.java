@@ -33,6 +33,10 @@ public class ModeLineView extends View {
         switch (getMode()) {
         case "NORMAL":
             return TextColor.ANSI.YELLOW;
+        case "INPUT":
+            return TextColor.ANSI.RED;
+        case "VISUAL":
+            return TextColor.ANSI.GREEN;
         default:
             return null;
         }

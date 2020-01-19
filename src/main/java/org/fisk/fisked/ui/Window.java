@@ -3,6 +3,7 @@ package org.fisk.fisked.ui;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.input.KeyType;
@@ -14,10 +15,12 @@ import org.fisk.fisked.event.EventListener;
 import org.fisk.fisked.event.EventResponder;
 import org.fisk.fisked.event.KeyStrokeEvent;
 import org.fisk.fisked.event.RunnableEvent;
+import org.fisk.fisked.mode.InputMode;
 import org.fisk.fisked.mode.Mode;
 import org.fisk.fisked.mode.NormalMode;
 import org.fisk.fisked.terminal.TerminalContext;
 import org.fisk.fisked.text.Buffer;
+import org.fisk.fisked.text.BufferContext;
 import org.fisk.fisked.utils.LogFactory;
 import org.slf4j.Logger;
 
@@ -34,14 +37,14 @@ public class Window implements Drawable {
     }
 
     private View _rootView;
-    private View _modeLineView;
+    private ModeLineView _modeLineView;
     private Size _size;
-    private BufferView _bufferView;
-    private Buffer _buffer;
-    private NormalMode _normalMode;
-    private Mode _currentMode;
+    private BufferContext _bufferContext;
+    private NormalMode _normalMode = new NormalMode();
+    private InputMode _inputMode = new InputMode();
+    private Mode _currentMode = _normalMode;
 
-    private void setupViews() {
+    private void setupViews(Path path) {
         var terminalContext = TerminalContext.getInstance();
         var terminalSize = terminalContext.getScreen().getTerminalSize();
         terminalContext.getTerminal().addResizeListener(new TerminalResizeListener() {
@@ -55,6 +58,8 @@ public class Window implements Drawable {
         });
 
         _log.info("Terminal size: " + terminalSize.getColumns() + ", " + terminalSize.getRows());
+
+        _bufferContext = new BufferContext(Rect.create(0, 0, terminalSize.getRows() - 1, terminalSize.getColumns()), path);
         _rootView = new View(Rect.create(0, 0, terminalSize.getColumns(), terminalSize.getRows()));
         _rootView.setBackgroundColour(TextColor.ANSI.DEFAULT);
 
@@ -62,18 +67,26 @@ public class Window implements Drawable {
         _modeLineView.setResizeMask(View.RESIZE_MASK_BOTTOM | View.RESIZE_MASK_LEFT | View.RESIZE_MASK_RIGHT | View.RESIZE_MASK_HEIGHT);
         _rootView.addSubview(_modeLineView);
 
-        _bufferView = new BufferView(Rect.create(0, 0, terminalSize.getRows() - 1, terminalSize.getColumns()), _buffer);
-        _rootView.addSubview(_bufferView);
+        _rootView.addSubview(_bufferContext.getBufferView());
+        _rootView.setFirstResponder(_bufferContext.getBufferView());
 
         _size = _rootView.getBounds().getSize();
     }
 
     private void setupBindings() {
-        _normalMode = new NormalMode();
-        _currentMode = _normalMode;
         var eventThread = EventThread.getInstance();
         var responders = eventThread.getResponder();
-        responders.addEventResponder(_currentMode);
+        responders.addEventResponder(new EventResponder() {
+            @Override
+            public Response processEvent(KeyStrokeEvent event) {
+                return _currentMode.processEvent(event);
+            }
+
+            @Override
+            public void respond() {
+                _currentMode.respond();
+            }
+        });
         responders.addEventResponder(new EventResponder() {
             @Override
             public Response processEvent(KeyStrokeEvent event) {
@@ -91,13 +104,33 @@ public class Window implements Drawable {
     }
 
     public Window(Path path) {
-        _buffer = new Buffer(path);
-        setupViews();
+        setupViews(path);
         setupBindings();
     }
 
     public Mode getCurrentMode() {
         return _currentMode;
+    }
+
+    public Mode getNormalMode() {
+        return _normalMode;
+    }
+
+    public Mode getInputMode() {
+        return _inputMode;
+    }
+
+    public void switchToMode(Mode mode) {
+        _currentMode = mode;
+        _modeLineView.setNeedsRedraw();
+    }
+
+    public BufferContext getBufferContext() {
+        return _bufferContext;
+    }
+
+    public ModeLineView getModeLineView() {
+        return _modeLineView;
     }
 
     public void setRootView(View view) {
@@ -127,6 +160,10 @@ public class Window implements Drawable {
         }
         _rootView.update(Rect.create(0, 0, terminalSize.getColumns(), terminalSize.getRows()), forced);
         _size = size;
+        var cursor = _rootView.getCursor();
+        if (cursor != null) {
+            screen.setCursorPosition(new TerminalPosition(cursor.getX(), cursor.getY()));
+        }
         try {
             screen.refresh();
         } catch (IOException e) {}

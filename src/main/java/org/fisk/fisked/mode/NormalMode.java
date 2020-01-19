@@ -1,12 +1,6 @@
 package org.fisk.fisked.mode;
 
-import com.googlecode.lanterna.input.KeyType;
-
-import org.fisk.fisked.EventThread;
-import org.fisk.fisked.event.EventListener;
-import org.fisk.fisked.event.EventResponder;
-import org.fisk.fisked.event.KeyStrokeEvent;
-import org.fisk.fisked.event.TextEventResponder;
+import org.fisk.fisked.ui.Window;
 
 public class NormalMode extends Mode {
     public NormalMode() {
@@ -15,8 +9,16 @@ public class NormalMode extends Mode {
     }
 
     private void setupBasicResponders() {
-        _rootResponder.addEventResponder(new TextEventResponder("q", () -> {
+        _rootResponder.addEventResponder("q", () -> {
             System.exit(0);
-        }));
+        });
+        _rootResponder.addEventResponder("i", () -> {
+            var window = Window.getInstance();
+            window.switchToMode(window.getInputMode());
+        });
+        _rootResponder.addEventResponder("w", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().write();
+        });
     }
 }
