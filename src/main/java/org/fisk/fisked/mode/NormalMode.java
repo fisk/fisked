@@ -22,19 +22,35 @@ public class NormalMode extends Mode {
         });
         _rootResponder.addEventResponder("h", () -> {
             var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goBack();
+            window.getBufferContext().getBuffer().getCursor().goLeft();
+        });
+        _rootResponder.addEventResponder("l", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().getCursor().goRight();
+        });
+        _rootResponder.addEventResponder("j", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().getCursor().goDown();
+        });
+        _rootResponder.addEventResponder("k", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().getCursor().goUp();
         });
         _rootResponder.addEventResponder("<LEFT>", () -> {
             var window = Window.getInstance();
             window.getBufferContext().getBuffer().getCursor().goBack();
         });
-        _rootResponder.addEventResponder("l", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goForward();
-        });
         _rootResponder.addEventResponder("<RIGHT>", () -> {
             var window = Window.getInstance();
             window.getBufferContext().getBuffer().getCursor().goForward();
+        });
+        _rootResponder.addEventResponder("<DOWN>", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().getCursor().goDown();
+        });
+        _rootResponder.addEventResponder("<UP>", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().getCursor().goUp();
         });
     }
 }

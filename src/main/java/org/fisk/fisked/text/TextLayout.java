@@ -1,0 +1,222 @@
+package org.fisk.fisked.text;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
+import java.util.stream.Stream;
+
+import org.fisk.fisked.ui.Point;
+import org.fisk.fisked.ui.Rect;
+import org.fisk.fisked.utils.LogFactory;
+import org.slf4j.Logger;
+
+public class TextLayout {
+    private static final Logger _log = LogFactory.createLog();
+
+    public static class Glyph {
+        private int _x;
+        private int _y;
+        private int _position;
+        private String _character;
+
+        public Glyph(int x, int y, int position, String character) {
+            _x = x;
+            _y = y;
+            _position = position;
+            _character = character;
+        }
+
+        public int getX() {
+            return _x;
+        }
+
+        public int getY() {
+            return _y;
+        }
+
+        public int getPosition() {
+            return _position;
+        }
+
+        public String getCharacter() {
+            return _character;
+        }
+    }
+
+    public static class Line {
+        private int _y;
+        private int _startPosition;
+        private boolean _isNewline;
+        private Line _prev;
+        private Line _next;
+        private List<Glyph> _glyphs = new ArrayList<>();
+
+        public List<Glyph> getGlyphs() {
+            return _glyphs;
+        }
+
+        private Line(int y, int startPosition, Line prev, boolean isNewline) {
+            _y = y;
+            _startPosition = startPosition;
+            _prev = prev;
+            _isNewline = isNewline;
+        }
+
+        private void setNext(Line line) {
+            _next = line;
+        }
+
+        public boolean isNewline() {
+            return _isNewline;
+        }
+
+        public int getY() {
+            return _y;
+        }
+
+        public Line getPrev() {
+            return _prev;
+        }
+
+        public Line getNext() {
+            return _next;
+        }
+
+        public int getIndex(int position) {
+            if (_isNewline) {
+                return position - _startPosition - 1;
+            } else {
+                return position - _startPosition;
+            }
+        }
+
+        public Glyph getGlyphAt(int index) {
+            if (index < 0 || index >= _glyphs.size()) {
+                return null;
+            }
+            return _glyphs.get(index);
+        }
+
+        public String getCharacterAt(int index) {
+            if (index < 0 || index >= _glyphs.size()) {
+                return null;
+            }
+            return _glyphs.get(index).getCharacter();
+        }
+    }
+
+    private TreeMap<Integer, Line> _lines;
+    private TreeMap<Integer, Line> _lineAtPosition;
+    private BufferContext _bufferContext;
+
+    public TextLayout(BufferContext bufferContext) {
+        _bufferContext = bufferContext;
+        calculate();
+    }
+
+    public Line getLineAt(int position) {
+        if (position < 0) {
+            position = 0;
+        }
+        return _lineAtPosition.floorEntry(position).getValue();
+    }
+
+    private static class LayoutIterator {
+        Line _line;
+        TreeMap<Integer, Line> _lines = new TreeMap<>();
+        TreeMap<Integer, Line> _lineAtPosition = new TreeMap<>();
+        int _x = 0;
+        int _y = -1;
+        int _position = 0;
+        String _text;
+        String _character;
+        boolean _isNewline;
+        boolean _isWrapped;
+        int _width;
+
+        LayoutIterator(String text, int width) {
+            _text = text;
+            _width = width;
+            newLine();
+        }
+
+        void newLine() {
+            ++_y;
+            _x = 0;
+            var line  = new Line(_y, _position, _line, _isNewline);
+            if (_line != null) {
+                _line.setNext(line);
+            }
+            _line = line;
+            _lines.put(_y, line);
+            _lineAtPosition.put(_position, line);
+        }
+
+        void insertGlyph() {
+            _line.getGlyphs().add(new Glyph(_x, _y, _position, _character));
+        }
+
+        void next() {
+            ++_position;
+        }
+
+        void incX() {
+            ++_x;
+        }
+
+        boolean hasNext() {
+            if (_position < _text.length()) {
+                _character = _text.substring(_position, _position + 1);
+                _isNewline = _character.equals("\n");
+                _isWrapped = _x == _width;
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        boolean isNewline() {
+            return _isNewline;
+        }
+
+        boolean isWrapped() {
+            return _isWrapped;
+        }
+
+        TreeMap<Integer, Line> getLines() {
+            return _lines;
+        }
+
+        TreeMap<Integer, Line> getLineAtPosition() {
+            return _lineAtPosition;
+        }
+    }
+
+    public void calculate() {
+        int width = _bufferContext.getBufferView().getBounds().getSize().getWidth();
+        var string = _bufferContext.getBuffer().getString();
+        var iter = new LayoutIterator(string, width);
+        while (iter.hasNext()) {
+            if (iter.isNewline()) {
+                iter.insertGlyph();
+                iter.newLine();
+            } else if (iter.isWrapped()) {
+                iter.newLine();
+                iter.insertGlyph();
+            } else {
+                iter.insertGlyph();
+                iter.incX();
+            }
+            iter.next();
+        }
+
+        _lines = iter.getLines();
+        _lineAtPosition = iter.getLineAtPosition();
+    }
+
+    public Stream<Glyph> getGlyphs() {
+        Rect rect = _bufferContext.getBufferView().getBounds();
+        var range = _lines.subMap(0, rect.getSize().getHeight());
+        return range.entrySet().stream().map((entry) -> entry.getValue().getGlyphs()).flatMap((list) -> list.stream());
+    }
+}

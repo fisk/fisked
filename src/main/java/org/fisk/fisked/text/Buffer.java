@@ -9,7 +9,6 @@ import org.fisk.fisked.ui.Cursor;
 public class Buffer {
     private StringBuilder _string = new StringBuilder();
     private Path _path;
-    private int _position;
     private Cursor _cursor;
     private BufferContext _bufferContext;
 
@@ -28,6 +27,13 @@ public class Buffer {
             _string.append(Files.readString(path));
         } catch (IOException e) {
         }
+    }
+
+    public String getCharacter(int position) {
+        if (position < 0 || _string.length() == 0) {
+            return "";
+        }
+        return _string.substring(position, position + 1);
     }
 
     public void insert(String str) {

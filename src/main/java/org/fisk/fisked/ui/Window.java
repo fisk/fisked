@@ -123,6 +123,7 @@ public class Window implements Drawable {
     public void switchToMode(Mode mode) {
         _currentMode = mode;
         _modeLineView.setNeedsRedraw();
+        mode.activate();
     }
 
     public BufferContext getBufferContext() {
