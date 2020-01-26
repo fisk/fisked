@@ -58,5 +58,6 @@ public class InputMode extends Mode {
     @Override
     public void activate() {
         Window.getInstance().getBufferContext().getBuffer().getCursor().setAfter(true);
+        Window.getInstance().getBufferContext().getBuffer().getCursor().goBack();;
     }
 }

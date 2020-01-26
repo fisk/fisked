@@ -7,7 +7,7 @@
   <artifactId>fisked</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
-  <name>Fisked - The Legendary Text Editor</name>
+  <name>fisked</name>
   <url>https://github.com/fisk/fisked</url>
   <properties>
     <maven.compiler.source>11</maven.compiler.source>
@@ -16,20 +16,38 @@
   <build>
     <plugins>
       <plugin>
-        <version>2.4</version>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
+        <groupId>fvarrui.maven</groupId>
+        <artifactId>javapackager</artifactId>
+        <version>0.8.9</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>package</goal>
+            </goals>
+            <configuration>
               <mainClass>org.fisk.fisked.App</mainClass>
-            </manifest>
-          </archive>
-        </configuration>
+              <copyDependencies>true</copyDependencies>
+              <vmArgs>-XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xmx4G</vmArgs>
+              <bundleJre>false</bundleJre>
+              <generateInstaller>false</generateInstaller>        
+              <administratorRequired>false</administratorRequired>
+              <platform>auto</platform>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>javapackager-repo</id>
+      <url>https://github.com/fvarrui/JavaPackager/raw/master/releases</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </pluginRepository>
+  </pluginRepositories>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

@@ -38,11 +38,11 @@ public class NormalMode extends Mode {
         });
         _rootResponder.addEventResponder("<LEFT>", () -> {
             var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goBack();
+            window.getBufferContext().getBuffer().getCursor().goLeft();
         });
         _rootResponder.addEventResponder("<RIGHT>", () -> {
             var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goForward();
+            window.getBufferContext().getBuffer().getCursor().goRight();
         });
         _rootResponder.addEventResponder("<DOWN>", () -> {
             var window = Window.getInstance();

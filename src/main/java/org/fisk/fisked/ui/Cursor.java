@@ -62,11 +62,9 @@ public class Cursor {
     }
 
     public void goBack() {
+        var buffer = Window.getInstance().getBufferContext().getBuffer();
         if (_position > 0) {
             --_position;
-            if (_position < buffer.getLength() && buffer.getCharacter(_position).equals("\n")) {
-                --_position;
-            }
         }
         calculate();
     }
@@ -75,20 +73,35 @@ public class Cursor {
         var buffer = Window.getInstance().getBufferContext().getBuffer();
         if (_position < buffer.getLength()) {
             ++_position;
-            if (_position < buffer.getLength() && buffer.getCharacter(_position).equals("\n")) {
-                ++_position;
-            }
         }
         calculate();
     }
 
     public void goLeft() {
-        goBack();
+        var buffer = Window.getInstance().getBufferContext().getBuffer();
+        if (_position > 0) {
+            String characterBefore = buffer.getCharacter(_position - 1);
+            --_position;
+            String characterAfter = buffer.getCharacter(_position - 1);
+            if (!characterBefore.equals("\n") && characterAfter.equals("\n")) {
+                --_position;
+            }
+        }
+        calculate();
         _lastX = _x;
     }
 
     public void goRight() {
-        goForward();
+        var buffer = Window.getInstance().getBufferContext().getBuffer();
+        if (_position < buffer.getLength()) {
+            String characterBefore = buffer.getCharacter(_position);
+            ++_position;
+            String characterAfter = _position == buffer.getLength() ? "" : buffer.getCharacter(_position);
+            if (characterBefore.equals("\n") && !characterAfter.equals("\n")) {
+                ++_position;
+            }
+        }
+        calculate();
         _lastX = _x;
     }
 
