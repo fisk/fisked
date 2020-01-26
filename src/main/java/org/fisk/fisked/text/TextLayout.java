@@ -143,7 +143,7 @@ public class TextLayout {
         void newLine() {
             ++_y;
             _x = 0;
-            var line  = new Line(_y, _position, _line, _isNewline);
+            var line  = new Line(_y, _position + 1, _line, _isNewline);
             if (_line != null) {
                 _line.setNext(line);
             }
