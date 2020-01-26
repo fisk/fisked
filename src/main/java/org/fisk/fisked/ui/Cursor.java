@@ -24,25 +24,9 @@ public class Cursor {
 
     private Point getPoint() {
         var textLayout = _bufferContext.getTextLayout();
-        var position = _position - 1;
-        var line = textLayout.getLineAt(position);
-        var index = line.getIndex(position);
-        var character = _bufferContext.getBuffer().getCharacter(position);
-        var isFirst = false;
-        if (index < 0) {
-            index = 0;
-            isFirst = true;
-        }
-        var point = Point.create(index, line.getY());
-        if (!isFirst && _after && !character.equals("\n")) {
-            var width = _bufferContext.getBufferView().getBounds().getSize().getWidth();
-            if (point.getX() < width - 1) {
-                point = Point.create(point.getX() + 1, point.getY());
-            } else {
-                point = Point.create(0, point.getY() + 1);
-            }
-        }
-        return point;
+        var line = textLayout.getLogicalLineAt(_position);
+        var index = line.getIndex(_position);
+        return Point.create(index, line.getY());
     }
 
     public int getUpPosition(int position, int lastX) {
@@ -67,6 +51,7 @@ public class Cursor {
             --_position;
         }
         calculate();
+        _lastX = _x;
     }
 
     public void goForward() {
@@ -75,6 +60,7 @@ public class Cursor {
             ++_position;
         }
         calculate();
+        _lastX = _x;
     }
 
     public void goLeft() {
@@ -82,9 +68,8 @@ public class Cursor {
         if (_position > 0) {
             String characterBefore = buffer.getCharacter(_position - 1);
             --_position;
-            String characterAfter = buffer.getCharacter(_position - 1);
-            if (!characterBefore.equals("\n") && characterAfter.equals("\n")) {
-                --_position;
+            if (characterBefore.equals("\n")) {
+                ++_position;
             }
         }
         calculate();
@@ -96,9 +81,8 @@ public class Cursor {
         if (_position < buffer.getLength()) {
             String characterBefore = buffer.getCharacter(_position);
             ++_position;
-            String characterAfter = _position == buffer.getLength() ? "" : buffer.getCharacter(_position);
-            if (characterBefore.equals("\n") && !characterAfter.equals("\n")) {
-                ++_position;
+            if (characterBefore.equals("\n")) {
+                --_position;
             }
         }
         calculate();
@@ -106,9 +90,47 @@ public class Cursor {
     }
 
     public void goUp() {
+        var textLayout = _bufferContext.getTextLayout();
+        var position = _position;
+        var line = textLayout.getLogicalLineAt(position);
+        var prevLine = line.getPrev();
+        if (prevLine == null) {
+            return;
+        }
+        var glyph = prevLine.getGlyphAt(_lastX);
+        if (glyph == null) {
+            glyph = prevLine.getLastGlyph();
+            if (glyph != null) {
+                _position = glyph.getPosition() + 1;
+            } else {
+                _position = prevLine.getStartPosition();
+            }
+        } else {
+            _position = glyph.getPosition();
+        }
+        calculate();
     }
 
     public void goDown() {
+      var textLayout = _bufferContext.getTextLayout();
+      var position = _position;
+      var line = textLayout.getLogicalLineAt(position);
+      var nextLine = line.getNext();
+      if (nextLine == null) {
+          return;
+      }
+      var glyph = nextLine.getGlyphAt(_lastX);
+      if (glyph == null) {
+          glyph = nextLine.getLastGlyph();
+          if (glyph != null) {
+              _position = glyph.getPosition() + 1;
+          } else {
+              _position = nextLine.getStartPosition();
+          }
+      } else {
+          _position = glyph.getPosition();
+      }
+      calculate();
     }
 
     public void setAfter(boolean after) {
