@@ -17,6 +17,7 @@ public class InputMode extends Mode {
         _rootResponder.addEventResponder("<ESC>", () -> {
             var window = Window.getInstance();
             window.switchToMode(window.getNormalMode());
+            window.getBufferContext().getBuffer().getCursor().goLeft();
         });
         _rootResponder.addEventResponder(new EventResponder() {
             private char _character;
@@ -52,6 +53,22 @@ public class InputMode extends Mode {
             bufferContext.getBuffer().insert("\n");
             bufferContext.getBufferView().setNeedsRedraw();
             window.getModeLineView().setNeedsRedraw();
+        });
+        _rootResponder.addEventResponder("<LEFT>", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().getCursor().goLeft();
+        });
+        _rootResponder.addEventResponder("<RIGHT>", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().getCursor().goRight();
+        });
+        _rootResponder.addEventResponder("<DOWN>", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().getCursor().goDown();
+        });
+        _rootResponder.addEventResponder("<UP>", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().getCursor().goUp();
         });
     }
 

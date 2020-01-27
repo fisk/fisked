@@ -16,6 +16,11 @@ public class NormalMode extends Mode {
             var window = Window.getInstance();
             window.switchToMode(window.getInputMode());
         });
+        _rootResponder.addEventResponder("a", () -> {
+            var window = Window.getInstance();
+            window.switchToMode(window.getInputMode());
+            window.getBufferContext().getBuffer().getCursor().goRight();
+        });
         _rootResponder.addEventResponder("w", () -> {
             var window = Window.getInstance();
             window.getBufferContext().getBuffer().write();
