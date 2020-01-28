@@ -16,14 +16,42 @@ public class NormalMode extends Mode {
             var window = Window.getInstance();
             window.switchToMode(window.getInputMode());
         });
+        _rootResponder.addEventResponder("w", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().write();
+        });
+        _rootResponder.addEventResponder("d i w", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().deleteInnerWord();;
+        });
+        _rootResponder.addEventResponder("c i w", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().deleteInnerWord();
+            window.switchToMode(window.getInputMode());
+        });
         _rootResponder.addEventResponder("a", () -> {
             var window = Window.getInstance();
             window.switchToMode(window.getInputMode());
             window.getBufferContext().getBuffer().getCursor().goRight();
         });
-        _rootResponder.addEventResponder("w", () -> {
+        _rootResponder.addEventResponder("A", () -> {
             var window = Window.getInstance();
-            window.getBufferContext().getBuffer().write();
+            window.switchToMode(window.getInputMode());
+            window.getBufferContext().getBuffer().getCursor().goEndOfLine();
+        });
+        _rootResponder.addEventResponder("o", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().getCursor().goEndOfLine();
+            window.switchToMode(window.getInputMode());
+            window.getBufferContext().getBuffer().insert("\n");
+        });
+        _rootResponder.addEventResponder("$", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().getCursor().goEndOfLine();
+        });
+        _rootResponder.addEventResponder("^", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().getCursor().goStartOfLine();
         });
         _rootResponder.addEventResponder("h", () -> {
             var window = Window.getInstance();

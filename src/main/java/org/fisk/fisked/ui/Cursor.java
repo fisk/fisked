@@ -133,6 +133,32 @@ public class Cursor {
       calculate();
     }
 
+    public void goEndOfLine() {
+        var textLayout = _bufferContext.getTextLayout();
+        var position = _position;
+        var line = textLayout.getLogicalLineAt(position);
+        var glyph = line.getLastGlyph();
+        if (glyph == null) {
+            _position = line.getStartPosition();
+        } else {
+            _position = glyph.getPosition() + 1;
+        }
+        calculate();
+    }
+
+    public void goStartOfLine() {
+        var textLayout = _bufferContext.getTextLayout();
+        var position = _position;
+        var line = textLayout.getLogicalLineAt(position);
+        _position = line.getStartPosition();
+        calculate();
+    }
+
+    public void setPosition(int position) {
+        _position = position;
+        calculate();
+    }
+
     public void setAfter(boolean after) {
         _after = after;
         calculate();
