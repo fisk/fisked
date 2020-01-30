@@ -41,6 +41,7 @@ public class Buffer {
         _string.insert(_cursor.getPosition(), str);
         _bufferContext.getTextLayout().calculate();
         _cursor.goForward();
+        _bufferContext.getBufferView().adaptViewToCursor();
     }
 
     public void removeBefore() {
@@ -50,6 +51,7 @@ public class Buffer {
         _cursor.goBack();
         _string.deleteCharAt(_cursor.getPosition());
         _bufferContext.getTextLayout().calculate();
+        _bufferContext.getBufferView().adaptViewToCursor();
     }
 
     static Pattern _wordPattern = Pattern.compile("\\w");
@@ -89,6 +91,7 @@ public class Buffer {
         _string.delete(start, end);
         _cursor.setPosition(start);
         _bufferContext.getTextLayout().calculate();
+        _bufferContext.getBufferView().adaptViewToCursor();
     }
 
     public void write() {

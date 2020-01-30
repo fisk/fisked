@@ -53,7 +53,7 @@ public class View implements Drawable, EventResponder {
 
     @Override
     public void draw(Rect rect) {
-        _log.info("View draw rect: " + rect.getPoint().getX() + ", " + rect.getPoint().getY() + ", " + rect.getSize().getWidth() + ", " + rect.getSize().getHeight());
+        _log.info("View draw rect: " + _bounds);
         var terminalContext = TerminalContext.getInstance();
         var textGraphics = terminalContext.getGraphics();
         if (_backgroundColour != null) {
@@ -190,6 +190,7 @@ public class View implements Drawable, EventResponder {
         }
 
         _bounds = Rect.create(newLeft, newTop, newWidth, newHeight);
+        _log.info("Resizing view to " + _bounds);
     }
 
     public Rect getBounds() {

@@ -29,6 +29,14 @@ public class NormalMode extends Mode {
             window.getBufferContext().getBuffer().deleteInnerWord();
             window.switchToMode(window.getInputMode());
         });
+        _rootResponder.addEventResponder("<CTRL>-y", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBufferView().scrollUp();
+        });
+        _rootResponder.addEventResponder("<CTRL>-e", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBufferView().scrollDown();
+        });
         _rootResponder.addEventResponder("a", () -> {
             var window = Window.getInstance();
             window.switchToMode(window.getInputMode());

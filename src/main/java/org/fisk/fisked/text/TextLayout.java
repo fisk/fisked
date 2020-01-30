@@ -256,8 +256,14 @@ public class TextLayout {
     }
 
     public Stream<Glyph> getGlyphs() {
-        Rect rect = _bufferContext.getBufferView().getBounds();
-        var range = _logicalLines.subMap(0, rect.getSize().getHeight());
+        var bufferView = _bufferContext.getBufferView();
+        var rect = bufferView.getBounds();
+        var start = bufferView.getStartLine();
+        var range = _logicalLines.subMap(start, start + rect.getSize().getHeight());
         return range.entrySet().stream().map((entry) -> entry.getValue().getGlyphs()).flatMap((list) -> list.stream());
+    }
+
+    public int getLogicalLineCount() {
+        return _logicalLines.size();
     }
 }

@@ -59,7 +59,7 @@ public class Window implements Drawable {
 
         _log.info("Terminal size: " + terminalSize.getColumns() + ", " + terminalSize.getRows());
 
-        _bufferContext = new BufferContext(Rect.create(0, 0, terminalSize.getRows() - 1, terminalSize.getColumns()), path);
+        _bufferContext = new BufferContext(Rect.create(0, 0, terminalSize.getColumns(), terminalSize.getRows() - 1), path);
         _rootView = new View(Rect.create(0, 0, terminalSize.getColumns(), terminalSize.getRows()));
         _rootView.setBackgroundColour(TextColor.ANSI.DEFAULT);
 
@@ -163,7 +163,7 @@ public class Window implements Drawable {
         _size = size;
         var cursor = _rootView.getCursor();
         if (cursor != null) {
-            screen.setCursorPosition(new TerminalPosition(cursor.getX(), cursor.getY()));
+            screen.setCursorPosition(new TerminalPosition(cursor.getX(), cursor.getYRelative()));
         }
         try {
             screen.refresh();

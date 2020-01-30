@@ -24,4 +24,9 @@ public class Rect {
     public boolean equals(Rect rect) {
         return _point.equals(rect._point) && _size.equals(rect._size);
     }
+
+    @Override
+    public String toString() {
+        return "{" + _point.getX() + ", " + _point.getY() + ", " + _size.getWidth() + ", " + _size.getHeight() + "}";
+    }
 }

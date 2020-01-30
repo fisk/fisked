@@ -37,7 +37,11 @@ public class Cursor {
         return _x;
     }
 
-    public int getY() {
+    public int getYRelative() {
+        return _y - _bufferContext.getBufferView().getStartLine();
+    }
+
+    public int getYAbsolute() {
         return _y;
     }
 

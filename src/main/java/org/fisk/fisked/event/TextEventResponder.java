@@ -36,6 +36,25 @@ public class TextEventResponder implements EventResponder {
         for (var e: events) {
             var keyStroke = e.getKeyStroke();
             String str = _keyStrokes[processed++];
+            String[] strs = str.split("-");
+            boolean isCtrlModified = false;
+            boolean isAltModified = false;
+            if (strs.length == 2) {
+                if (strs[0].equals("<CTRL>")) {
+                    isCtrlModified = true;
+                    str = strs[1];
+                }
+                if (strs[0].equals("<ALT>")) {
+                    isAltModified = true;
+                    str = strs[1];
+                }
+            }
+            if (isCtrlModified != keyStroke.isCtrlDown()) {
+                return EventListener.Response.NO;
+            }
+            if (isAltModified != keyStroke.isAltDown()) {
+                return EventListener.Response.NO;
+            }
             switch (keyStroke.getKeyType()) {
             case Character:
                 if (keyStroke.getCharacter() != str.charAt(0)) {
