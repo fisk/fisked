@@ -6,12 +6,14 @@ import java.nio.file.Path;
 import java.util.regex.Pattern;
 
 import org.fisk.fisked.ui.Cursor;
+import org.fisk.fisked.undo.UndoLog;
 
 public class Buffer {
     private StringBuilder _string = new StringBuilder();
     private Path _path;
     private Cursor _cursor;
     private BufferContext _bufferContext;
+    private UndoLog _undoLog;
 
     public Buffer() {
     }
@@ -24,6 +26,7 @@ public class Buffer {
         _path = path;
         _bufferContext = bufferContext;
         _cursor = new Cursor(bufferContext);
+        _undoLog = new UndoLog(bufferContext);
         try {
             _string.append(Files.readString(path));
         } catch (IOException e) {
@@ -37,7 +40,40 @@ public class Buffer {
         return _string.substring(position, position + 1);
     }
 
+    public void undo() {
+        int position = _undoLog.undo();
+        if (position == -1) {
+            return;
+        }
+        _cursor.setPosition(position);
+        _bufferContext.getTextLayout().calculate();
+        _bufferContext.getBufferView().adaptViewToCursor();
+    }
+
+    public void redo() {
+        int position = _undoLog.redo();
+        if (position == -1) {
+            return;
+        }
+        _cursor.setPosition(position);
+        _bufferContext.getTextLayout().calculate();
+        _bufferContext.getBufferView().adaptViewToCursor();
+    }
+
+    public UndoLog getUndoLog() {
+        return _undoLog;
+    }
+
+    public void rawInsert(int position, String str) {
+        _string.insert(position, str);
+    }
+
+    public void rawRemove(int startPosition, int endPosition) {
+        _string.delete(startPosition, endPosition);
+    }
+
     public void insert(String str) {
+        _undoLog.recordInsert(_cursor.getPosition(), str);
         _string.insert(_cursor.getPosition(), str);
         _bufferContext.getTextLayout().calculate();
         _cursor.goForward();
@@ -48,8 +84,23 @@ public class Buffer {
         if (_cursor.getPosition() == 0 || _string.length() == 0) {
             return;
         }
+        int position = _cursor.getPosition();
+        _undoLog.recordRemove(position - 1, position);
         _cursor.goBack();
         _string.deleteCharAt(_cursor.getPosition());
+        _bufferContext.getTextLayout().calculate();
+        _bufferContext.getBufferView().adaptViewToCursor();
+    }
+
+    public void deleteInnerWord() {
+        int start = findStartOfWord();
+        int end = findEndOfWord();
+        if (start == -1 || end == -1) {
+            return;
+        }
+        _undoLog.recordRemove(start, end);
+        _string.delete(start, end);
+        _cursor.setPosition(start);
         _bufferContext.getTextLayout().calculate();
         _bufferContext.getBufferView().adaptViewToCursor();
     }
@@ -82,18 +133,6 @@ public class Buffer {
         return getLength();
     }
 
-    public void deleteInnerWord() {
-        int start = findStartOfWord();
-        int end = findEndOfWord();
-        if (start == -1 || end == -1) {
-            return;
-        }
-        _string.delete(start, end);
-        _cursor.setPosition(start);
-        _bufferContext.getTextLayout().calculate();
-        _bufferContext.getBufferView().adaptViewToCursor();
-    }
-
     public void write() {
         try {
             Files.writeString(_path, _string.toString());
@@ -107,5 +146,9 @@ public class Buffer {
 
     public String getString() {
         return _string.toString();
+    }
+
+    public String getSubstring(int start, int end) {
+        return _string.substring(start, end);
     }
 }

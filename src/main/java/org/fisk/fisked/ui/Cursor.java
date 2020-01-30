@@ -50,7 +50,6 @@ public class Cursor {
     }
 
     public void goBack() {
-        var buffer = Window.getInstance().getBufferContext().getBuffer();
         if (_position > 0) {
             --_position;
         }

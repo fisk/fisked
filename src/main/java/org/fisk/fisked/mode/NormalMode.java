@@ -20,9 +20,17 @@ public class NormalMode extends Mode {
             var window = Window.getInstance();
             window.getBufferContext().getBuffer().write();
         });
+        _rootResponder.addEventResponder("u", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().undo();
+        });
+        _rootResponder.addEventResponder("<CTRL>-r", () -> {
+            var window = Window.getInstance();
+            window.getBufferContext().getBuffer().redo();
+        });
         _rootResponder.addEventResponder("d i w", () -> {
             var window = Window.getInstance();
-            window.getBufferContext().getBuffer().deleteInnerWord();;
+            window.getBufferContext().getBuffer().deleteInnerWord();
         });
         _rootResponder.addEventResponder("c i w", () -> {
             var window = Window.getInstance();
@@ -93,5 +101,11 @@ public class NormalMode extends Mode {
             var window = Window.getInstance();
             window.getBufferContext().getBuffer().getCursor().goUp();
         });
+    }
+
+    @Override
+    public void activate() {
+        var window = Window.getInstance();
+        window.getBufferContext().getBuffer().getUndoLog().commit();
     }
 }
