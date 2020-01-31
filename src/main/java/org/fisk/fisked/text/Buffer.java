@@ -72,6 +72,18 @@ public class Buffer {
         _string.delete(startPosition, endPosition);
     }
 
+    public void remove(int startPosition, int endPosition) {
+        if (endPosition - startPosition <= 0) {
+            return;
+        }
+        endPosition++;
+        _undoLog.recordRemove(startPosition, endPosition);
+        _string.delete(startPosition, endPosition);
+        _cursor.setPosition(startPosition);
+        _bufferContext.getTextLayout().calculate();
+        _bufferContext.getBufferView().adaptViewToCursor();
+    }
+
     public void insert(String str) {
         _undoLog.recordInsert(_cursor.getPosition(), str);
         _string.insert(_cursor.getPosition(), str);

@@ -32,8 +32,16 @@ public class BufferView extends View {
         var terminalContext = TerminalContext.getInstance();
         var textGraphics = terminalContext.getGraphics();
         _log.info("Draw buffer view");
+        var mode = Window.getInstance().getCurrentMode();
+        mode.draw(rect);
         _bufferContext.getTextLayout().getGlyphs().forEach((glyph) -> {
-            var c = AttributedString.create(glyph.getCharacter(), _backgroundColour, TextColor.ANSI.DEFAULT);
+            var backgroundColour = _backgroundColour;
+            var foregroundColour = TextColor.ANSI.DEFAULT;
+            if (mode.isSelected(glyph.getPosition())) {
+                backgroundColour = TextColor.ANSI.YELLOW;
+                foregroundColour = TextColor.ANSI.BLACK;
+            }
+            var c = AttributedString.create(glyph.getCharacter(), foregroundColour, backgroundColour);
             var point = Point.create(rect.getPoint().getX() + glyph.getX(), rect.getPoint().getY() + glyph.getY() - _startLine);
             c.drawAt(point, textGraphics);
         });

@@ -35,7 +35,7 @@ public class UndoLog {
         }
 
         int position() {
-            return _position + _string.length();
+            return _position;
         }
     }
 

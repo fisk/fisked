@@ -1,13 +1,18 @@
 package org.fisk.fisked.mode;
 
-import java.io.IOException;
+import com.googlecode.lanterna.TextColor;
 
 import org.fisk.fisked.event.EventResponder;
 import org.fisk.fisked.event.KeyStrokeEvent;
 import org.fisk.fisked.event.ListEventResponder;
+import org.fisk.fisked.terminal.TerminalContext;
+import org.fisk.fisked.text.AttributedString;
+import org.fisk.fisked.ui.Drawable;
+import org.fisk.fisked.ui.Point;
+import org.fisk.fisked.ui.Rect;
 import org.fisk.fisked.ui.Window;
 
-public class Mode implements EventResponder {
+public class Mode implements EventResponder, Drawable {
     protected ListEventResponder _rootResponder = new ListEventResponder();
     private String _name;
 
@@ -62,5 +67,13 @@ public class Mode implements EventResponder {
         Window.getInstance().getBufferContext().getBuffer().getCursor().setAfter(false);
         // This stuff isn't quite working.
         //activateCursorMode(CursorMode.Normal);
+    }
+
+    @Override
+    public void draw(Rect rect) {
+    }
+
+    public boolean isSelected(int position) {
+        return false;
     }
 }
