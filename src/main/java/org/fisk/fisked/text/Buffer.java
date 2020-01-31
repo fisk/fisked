@@ -143,6 +143,28 @@ public class Buffer {
         _bufferContext.getBufferView().adaptViewToCursor();
     }
 
+    public void deleteLine() {
+        var textLayout = _bufferContext.getTextLayout();
+        var line = textLayout.getPhysicalLineAt(_cursor.getPosition());
+        int start = line.getStartPosition();
+        var glyph = line.getLastGlyph();
+        int end;
+        if (glyph != null) {
+            end = glyph.getPosition() + 1;
+        } else {
+            end = line.getStartPosition();
+        }
+        if (line.getNext() == null) {
+            // Last line is special
+            start = Math.max(0, start - 1);
+        }
+        _undoLog.recordRemove(start, end);
+        _string.delete(start, end);
+        _bufferContext.getTextLayout().calculate();
+        _cursor.setPosition(start);
+        _bufferContext.getBufferView().adaptViewToCursor();
+    }
+
     static Pattern _wordPattern = Pattern.compile("\\w");
 
     private int findStartOfWord() {

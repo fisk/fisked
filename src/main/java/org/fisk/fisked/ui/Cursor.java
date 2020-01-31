@@ -139,7 +139,7 @@ public class Cursor {
     public void goEndOfLine() {
         var textLayout = _bufferContext.getTextLayout();
         var position = _position;
-        var line = textLayout.getLogicalLineAt(position);
+        var line = textLayout.getPhysicalLineAt(position);
         var glyph = line.getLastGlyph();
         if (glyph == null) {
             _position = line.getStartPosition();
@@ -152,7 +152,7 @@ public class Cursor {
     public void goStartOfLine() {
         var textLayout = _bufferContext.getTextLayout();
         var position = _position;
-        var line = textLayout.getLogicalLineAt(position);
+        var line = textLayout.getPhysicalLineAt(position);
         _position = line.getStartPosition();
         calculate();
     }

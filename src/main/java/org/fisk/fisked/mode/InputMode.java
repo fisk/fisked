@@ -8,11 +8,8 @@ import org.fisk.fisked.event.KeyStrokeEvent;
 import org.fisk.fisked.ui.Window;
 
 public class InputMode extends Mode {
-    private Window _window;
-
     public InputMode(Window window) {
-        super("INPUT");
-        _window = window;
+        super("INPUT", window);
         setupBasicResponders();
     }
 

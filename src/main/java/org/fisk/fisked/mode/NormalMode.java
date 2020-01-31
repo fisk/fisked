@@ -3,12 +3,10 @@ package org.fisk.fisked.mode;
 import org.fisk.fisked.ui.Window;
 
 public class NormalMode extends Mode {
-    private Window _window;
-
     public NormalMode(Window window) {
-        super("NORMAL");
-        _window = window;
+        super("NORMAL", window);
         setupBasicResponders();
+        setupNavigationResponders();
     }
 
     private void setupBasicResponders() {
@@ -30,6 +28,10 @@ public class NormalMode extends Mode {
             buffer.deleteWord();
             buffer.getUndoLog().commit();
         });
+        _rootResponder.addEventResponder("d d", () -> {
+            buffer.deleteLine();
+            buffer.getUndoLog().commit();
+        });
         _rootResponder.addEventResponder("x", () -> {
             buffer.removeAt();
             buffer.getUndoLog().commit();
@@ -42,8 +44,6 @@ public class NormalMode extends Mode {
             buffer.deleteWord();
             window.switchToMode(window.getInputMode());
         });
-        _rootResponder.addEventResponder("<CTRL>-y", () -> { bufferContext.getBufferView().scrollUp(); });
-        _rootResponder.addEventResponder("<CTRL>-e", () -> { bufferContext.getBufferView().scrollDown(); });
         _rootResponder.addEventResponder("a", () -> {
             window.switchToMode(window.getInputMode());
             buffer.getCursor().goRight();
@@ -56,17 +56,18 @@ public class NormalMode extends Mode {
             cursor.goEndOfLine();
             window.switchToMode(window.getInputMode());
             buffer.insert("\n");
+            cursor.goBack();
         });
-        _rootResponder.addEventResponder("$", () -> { cursor.goEndOfLine(); });
-        _rootResponder.addEventResponder("^", () -> { cursor.goStartOfLine(); });
-        _rootResponder.addEventResponder("h", () -> { cursor.goLeft(); });
-        _rootResponder.addEventResponder("l", () -> { cursor.goRight(); });
-        _rootResponder.addEventResponder("j", () -> { cursor.goDown(); });
-        _rootResponder.addEventResponder("k", () -> { cursor.goUp(); });
-        _rootResponder.addEventResponder("<LEFT>", () -> { cursor.goLeft(); });
-        _rootResponder.addEventResponder("<RIGHT>", () -> { cursor.goRight(); });
-        _rootResponder.addEventResponder("<DOWN>", () -> { cursor.goDown(); });
-        _rootResponder.addEventResponder("<UP>", () -> { cursor.goUp(); });
+        _rootResponder.addEventResponder("O", () -> {
+            cursor.goStartOfLine();
+            cursor.goBack();
+            boolean isFirst = cursor.getPosition() == 0;
+            window.switchToMode(window.getInputMode());
+            buffer.insert("\n");
+            if (isFirst) {
+                cursor.goBack();
+            }
+        });
     }
 
     @Override

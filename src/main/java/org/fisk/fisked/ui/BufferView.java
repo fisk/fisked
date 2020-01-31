@@ -74,20 +74,20 @@ public class BufferView extends View {
     }
 
     public void scrollUp() {
-        var textLayout = _bufferContext.getTextLayout();
-        if (_startLine > textLayout.getLogicalLineCount() - 2) {
+        if (_startLine <= 0) {
             return;
         }
-        _startLine++;
+        _startLine--;
         adaptCursorToView();
         setNeedsRedraw();
     }
 
     public void scrollDown() {
-        if (_startLine <= 0) {
+        var textLayout = _bufferContext.getTextLayout();
+        if (_startLine > textLayout.getLogicalLineCount() - 2) {
             return;
         }
-        _startLine--;
+        _startLine++;
         adaptCursorToView();
         setNeedsRedraw();
     }

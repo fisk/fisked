@@ -11,13 +11,12 @@ import org.fisk.fisked.ui.Rect;
 import org.fisk.fisked.ui.Window;
 
 public class VisualMode extends Mode {
-    private Window _window;
     private Cursor _other;
 
     public VisualMode(Window window) {
-        super("VISUAL");
-        _window = window;
+        super("VISUAL", window);
         setupBasicResponders();
+        setupNavigationResponders();
     }
 
     private void setupBasicResponders() {
@@ -44,18 +43,6 @@ public class VisualMode extends Mode {
             buffer.remove(minCursor.getPosition(), maxCursor.getPosition());
             window.switchToMode(window.getInputMode());
         });
-        _rootResponder.addEventResponder("<CTRL>-y", () -> { bufferContext.getBufferView().scrollUp(); });
-        _rootResponder.addEventResponder("<CTRL>-e", () -> { bufferContext.getBufferView().scrollDown(); });
-        _rootResponder.addEventResponder("$", () -> { cursor.goEndOfLine(); });
-        _rootResponder.addEventResponder("^", () -> { cursor.goStartOfLine(); });
-        _rootResponder.addEventResponder("h", () -> { cursor.goLeft(); });
-        _rootResponder.addEventResponder("l", () -> { cursor.goRight(); });
-        _rootResponder.addEventResponder("j", () -> { cursor.goDown(); });
-        _rootResponder.addEventResponder("k", () -> { cursor.goUp(); });
-        _rootResponder.addEventResponder("<LEFT>", () -> { cursor.goLeft(); });
-        _rootResponder.addEventResponder("<RIGHT>", () -> { cursor.goRight(); });
-        _rootResponder.addEventResponder("<DOWN>", () -> { cursor.goDown(); });
-        _rootResponder.addEventResponder("<UP>", () -> { cursor.goUp(); });
     }
 
     @Override
