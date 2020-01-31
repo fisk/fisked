@@ -76,7 +76,6 @@ public class Buffer {
         if (endPosition - startPosition <= 0) {
             return;
         }
-        endPosition++;
         _undoLog.recordRemove(startPosition, endPosition);
         _string.delete(startPosition, endPosition);
         _cursor.setPosition(startPosition);
@@ -109,6 +108,9 @@ public class Buffer {
             return;
         }
         int position = _cursor.getPosition();
+        if (position >= _string.length()) {
+            return;
+        }
         _undoLog.recordRemove(position, position + 1);
         _string.deleteCharAt(_cursor.getPosition());
         _bufferContext.getTextLayout().calculate();

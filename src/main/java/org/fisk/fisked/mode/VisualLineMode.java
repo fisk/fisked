@@ -6,29 +6,27 @@ import com.googlecode.lanterna.TextColor;
 
 import org.fisk.fisked.terminal.TerminalContext;
 import org.fisk.fisked.ui.Cursor;
-import org.fisk.fisked.ui.Point;
 import org.fisk.fisked.ui.Rect;
 import org.fisk.fisked.ui.Window;
 
-public class VisualMode extends Mode {
-    protected Cursor _other;
-
-    public VisualMode(Window window) {
-        super("VISUAL", window);
-        setupBasicResponders();
-        setupNavigationResponders();
+public class VisualLineMode extends VisualMode {
+    public VisualLineMode(Window window) {
+        super(window);
     }
 
-    protected Cursor minCursor() {
-        var cursor = _window.getBufferContext().getBuffer().getCursor();
-        return cursor.getPosition() < _other.getPosition() ? cursor : _other;
+    private void deleteSelection() {
+        var buffer = _window.getBufferContext().getBuffer();
+        var minLine = minCursor().getPhysicalLine();
+        var maxLine = maxCursor().getPhysicalLine();
+        int start = minLine.getStartPosition();
+        int end = maxLine.getEndPosition();
+        if (maxLine.getNext() == null) {
+            start = Math.max(0, start - 1);
+        }
+        buffer.remove(start, end);
     }
 
-    protected Cursor maxCursor() {
-        var cursor = _window.getBufferContext().getBuffer().getCursor();
-        return cursor.getPosition() >= _other.getPosition() ? cursor : _other;
-    }
-
+    @Override
     protected void setupBasicResponders() {
         var window = _window;
         var bufferContext = window.getBufferContext();
@@ -42,11 +40,11 @@ public class VisualMode extends Mode {
             bufferContext.getBufferView().adaptViewToCursor();
         });
         _rootResponder.addEventResponder("d", () -> {
-            buffer.remove(minCursor().getPosition(), maxCursor().getPosition());
+            deleteSelection();
             window.switchToMode(window.getNormalMode());
         });
         _rootResponder.addEventResponder("c", () -> {
-            buffer.remove(minCursor().getPosition(), maxCursor().getPosition());
+            deleteSelection();
             window.switchToMode(window.getInputMode());
         });
     }
@@ -67,27 +65,21 @@ public class VisualMode extends Mode {
             return;
         }
         int minY = minCursor.getYRelative();
-        int minX = minCursor.getX();
+        int minX = rect.getPoint().getX();
         int maxY = maxCursor.getYRelative();
-        int maxX = maxCursor.getX();
+        int maxX = minX + rect.getSize().getWidth();
         for (int line = minY; line <= maxY; ++line) {
-            int fromColumn = rect.getPoint().getX();
-            int toColumn = fromColumn + rect.getSize().getWidth();
-            if (line == minY) {
-                fromColumn = minX;
-            }
-            if (line == maxY) {
-                toColumn = maxX;
-            }
             graphics.setBackgroundColor(TextColor.ANSI.YELLOW);
-            graphics.drawRectangle(new TerminalPosition(fromColumn, line), new TerminalSize(toColumn - fromColumn, 1), ' ');
+            graphics.drawRectangle(new TerminalPosition(minX, line), new TerminalSize(maxX - minX, 1), ' ');
         }
     }
 
     public boolean isSelected(int position) {
-        var cursor = _window.getBufferContext().getBuffer().getCursor();
-        var minCursor = cursor.getPosition() < _other.getPosition() ? cursor : _other;
-        var maxCursor = cursor.getPosition() >= _other.getPosition() ? cursor : _other;
-        return position >= minCursor.getPosition() && position <= maxCursor.getPosition();
+        var minPosition = minCursor().getPhysicalLine().getStartPosition();
+        var maxPosition = maxCursor().getPhysicalLine().getEndPosition();
+        if (maxCursor().getPhysicalLine().getNext() == null) {
+            minPosition = Math.max(0, minPosition - 1);
+        }
+        return position >= minPosition && position < maxPosition;
     }
 }

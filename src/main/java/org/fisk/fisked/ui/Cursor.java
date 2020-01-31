@@ -1,6 +1,7 @@
 package org.fisk.fisked.ui;
 
 import org.fisk.fisked.text.BufferContext;
+import org.fisk.fisked.text.TextLayout.Line;
 
 public class Cursor {
     private int _x;
@@ -165,5 +166,15 @@ public class Cursor {
     public void setAfter(boolean after) {
         _after = after;
         calculate();
+    }
+
+    public Line getPhysicalLine() {
+        var textLayout = _bufferContext.getTextLayout();
+        return textLayout.getPhysicalLineAt(_position);
+    }
+
+    public Line getLogicalLine() {
+        var textLayout = _bufferContext.getTextLayout();
+        return textLayout.getLogicalLineAt(_position);
     }
 }

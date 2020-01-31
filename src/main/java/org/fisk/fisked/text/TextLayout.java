@@ -110,6 +110,15 @@ public class TextLayout {
         public int getStartPosition() {
             return _startPosition;
         }
+
+        public int getEndPosition() {
+            var glyph = getLastGlyph();
+            if (glyph == null) {
+                return getStartPosition();
+            } else {
+                return glyph.getPosition() + 1;
+            }
+        }
     }
 
     private TreeMap<Integer, Line> _logicalLines;

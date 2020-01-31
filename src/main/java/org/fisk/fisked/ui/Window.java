@@ -18,6 +18,7 @@ import org.fisk.fisked.event.RunnableEvent;
 import org.fisk.fisked.mode.InputMode;
 import org.fisk.fisked.mode.Mode;
 import org.fisk.fisked.mode.NormalMode;
+import org.fisk.fisked.mode.VisualLineMode;
 import org.fisk.fisked.mode.VisualMode;
 import org.fisk.fisked.terminal.TerminalContext;
 import org.fisk.fisked.text.BufferContext;
@@ -43,12 +44,14 @@ public class Window implements Drawable {
     private NormalMode _normalMode;
     private InputMode _inputMode;
     private VisualMode _visualMode;
+    private VisualLineMode _visualLineMode;
     private Mode _currentMode;
 
     private void setupModes() {
         _normalMode = new NormalMode(this);
         _inputMode = new InputMode(this);
         _visualMode = new VisualMode(this);
+        _visualLineMode = new VisualLineMode(this);
         _currentMode = _normalMode;
     }
 
@@ -131,6 +134,10 @@ public class Window implements Drawable {
 
     public Mode getVisualMode() {
         return _visualMode;
+    }
+
+    public Mode getVisualLineMode() {
+        return _visualLineMode;
     }
 
     public void switchToMode(Mode mode) {
