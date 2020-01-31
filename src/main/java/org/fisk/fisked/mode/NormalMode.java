@@ -25,8 +25,16 @@ public class NormalMode extends Mode {
             buffer.deleteInnerWord();
             buffer.getUndoLog().commit();
         });
+        _rootResponder.addEventResponder("d w", () -> {
+            buffer.deleteWord();
+            buffer.getUndoLog().commit();
+        });
         _rootResponder.addEventResponder("c i w", () -> {
             buffer.deleteInnerWord();
+            window.switchToMode(window.getInputMode());
+        });
+        _rootResponder.addEventResponder("c i w", () -> {
+            buffer.deleteWord();
             window.switchToMode(window.getInputMode());
         });
         _rootResponder.addEventResponder("<CTRL>-y", () -> { bufferContext.getBufferView().scrollUp(); });

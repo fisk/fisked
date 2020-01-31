@@ -105,6 +105,21 @@ public class Buffer {
         _bufferContext.getBufferView().adaptViewToCursor();
     }
 
+    public void deleteWord() {
+        int start = _cursor.getPosition();
+        if (!_wordPattern.matcher(getCharacter(start)).matches()) {
+            return;
+        }
+        int end = findEndOfWord();
+        if (end == -1) {
+            return;
+        }
+        _undoLog.recordRemove(start, end);
+        _string.delete(start, end);
+        _bufferContext.getTextLayout().calculate();
+        _bufferContext.getBufferView().adaptViewToCursor();
+    }
+
     static Pattern _wordPattern = Pattern.compile("\\w");
 
     private int findStartOfWord() {
