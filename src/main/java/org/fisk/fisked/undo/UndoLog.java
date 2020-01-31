@@ -123,6 +123,9 @@ public class UndoLog {
     }
 
     public void commit() {
+        if (_head == null) {
+            return;
+        }
         _redoHead = null;
         var record = new BatchRecord(_head);
         _head = null;

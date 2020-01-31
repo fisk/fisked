@@ -51,6 +51,5 @@ public class InputMode extends Mode {
 
     @Override
     public void activate() {
-        _window.getBufferContext().getBuffer().getCursor().setAfter(true);
     }
 }

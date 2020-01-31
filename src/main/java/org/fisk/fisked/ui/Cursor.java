@@ -8,7 +8,6 @@ public class Cursor {
     private int _y;
     private int _position;
     private int _lastX;
-    private boolean _after;
 
     private BufferContext _bufferContext;
 
@@ -77,6 +76,7 @@ public class Cursor {
             }
         }
         calculate();
+        Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();
         _lastX = _x;
     }
 
@@ -90,6 +90,7 @@ public class Cursor {
             }
         }
         calculate();
+        Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();
         _lastX = _x;
     }
 
@@ -113,6 +114,7 @@ public class Cursor {
             _position = glyph.getPosition();
         }
         calculate();
+        Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();
     }
 
     public void goDown() {
@@ -135,6 +137,7 @@ public class Cursor {
           _position = glyph.getPosition();
       }
       calculate();
+      Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();
     }
 
     public void goEndOfLine() {
@@ -148,6 +151,7 @@ public class Cursor {
             _position = glyph.getPosition() + 1;
         }
         calculate();
+        Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();
     }
 
     public void goStartOfLine() {
@@ -156,16 +160,13 @@ public class Cursor {
         var line = textLayout.getPhysicalLineAt(position);
         _position = line.getStartPosition();
         calculate();
+        Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();
     }
 
     public void setPosition(int position) {
         _position = position;
         calculate();
-    }
-
-    public void setAfter(boolean after) {
-        _after = after;
-        calculate();
+        Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();
     }
 
     public Line getPhysicalLine() {

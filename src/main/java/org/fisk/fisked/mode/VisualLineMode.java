@@ -61,9 +61,6 @@ public class VisualLineMode extends VisualMode {
         var graphics = terminalContext.getGraphics();
         var minCursor = minCursor();
         var maxCursor = maxCursor();
-        if (maxCursor.getPosition() - minCursor.getPosition() == 0) {
-            return;
-        }
         int minY = minCursor.getYRelative();
         int minX = rect.getPoint().getX();
         int maxY = maxCursor.getYRelative();
