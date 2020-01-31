@@ -40,9 +40,15 @@ public class Window implements Drawable {
     private ModeLineView _modeLineView;
     private Size _size;
     private BufferContext _bufferContext;
-    private NormalMode _normalMode = new NormalMode();
-    private InputMode _inputMode = new InputMode();
-    private Mode _currentMode = _normalMode;
+    private NormalMode _normalMode;
+    private InputMode _inputMode;
+    private Mode _currentMode;
+
+    private void setupModes() {
+        _normalMode = new NormalMode(this);
+        _inputMode = new InputMode(this);
+        _currentMode = _normalMode;
+    }
 
     private void setupViews(Path path) {
         var terminalContext = TerminalContext.getInstance();
@@ -106,6 +112,7 @@ public class Window implements Drawable {
     public Window(Path path) {
         setupViews(path);
         setupBindings();
+        setupModes();
     }
 
     public Mode getCurrentMode() {

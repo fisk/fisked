@@ -16,7 +16,6 @@ import org.fisk.fisked.text.Powerline;
 public class ModeLineView extends View {
     private String _time;
     private String _branch = "master";
-    private String _line = "0:0";
     private String _name = "*scratch*";
     private TextColor _foregroundColour;
 
@@ -27,6 +26,17 @@ public class ModeLineView extends View {
 
     private String getMode() {
         return Window.getInstance().getCurrentMode().getName();
+    }
+
+    private String getLine() {
+        var window = Window.getInstance();
+        var buffer = window.getBufferContext().getBuffer();
+        var cursor = buffer.getCursor();
+        var textLayout = window.getBufferContext().getTextLayout();
+        var line = cursor.getYAbsolute();
+        var position = cursor.getPosition();
+        var index = textLayout.getLogicalLineAt(position).getIndex(position);
+        return "" + position + ": " + line + ", " + index;
     }
 
     private TextColor getModeColor() {
@@ -72,7 +82,7 @@ public class ModeLineView extends View {
         str.append(Powerline.SYMBOL_RIGHT_ARROW, _foregroundColour, _backgroundColour);
         str.append(" ", _foregroundColour, _backgroundColour);
         str.append(Powerline.SYMBOL_LN, _foregroundColour, _backgroundColour);
-        str.append(" " + _line + " ", _foregroundColour, _backgroundColour);
+        str.append(" " + getLine() + " ", _foregroundColour, _backgroundColour);
         str.append(Powerline.SYMBOL_RIGHT_ARROW, _foregroundColour, _backgroundColour);
         return str;
     }

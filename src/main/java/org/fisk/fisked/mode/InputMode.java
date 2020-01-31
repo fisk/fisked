@@ -8,16 +8,22 @@ import org.fisk.fisked.event.KeyStrokeEvent;
 import org.fisk.fisked.ui.Window;
 
 public class InputMode extends Mode {
-    public InputMode() {
+    private Window _window;
+
+    public InputMode(Window window) {
         super("INPUT");
+        _window = window;
         setupBasicResponders();
     }
 
     private void setupBasicResponders() {
+        var window = _window;
+        var bufferContext = window.getBufferContext();
+        var buffer = bufferContext.getBuffer();
+        var cursor = buffer.getCursor();
         _rootResponder.addEventResponder("<ESC>", () -> {
-            var window = Window.getInstance();
             window.switchToMode(window.getNormalMode());
-            window.getBufferContext().getBuffer().getCursor().goLeft();
+            buffer.getCursor().goLeft();
         });
         _rootResponder.addEventResponder(new EventResponder() {
             private char _character;
@@ -33,47 +39,29 @@ public class InputMode extends Mode {
 
             @Override
             public void respond() {
-                var window = Window.getInstance();
-                var bufferContext = window.getBufferContext();
-                bufferContext.getBuffer().insert(Character.toString(_character));
+                buffer.insert(Character.toString(_character));
                 bufferContext.getBufferView().setNeedsRedraw();
                 window.getModeLineView().setNeedsRedraw();
             }
         });
         _rootResponder.addEventResponder("<BACKSPACE>", () -> {
-            var window = Window.getInstance();
-            var bufferContext = window.getBufferContext();
-            bufferContext.getBuffer().removeBefore();
+            buffer.removeBefore();
             bufferContext.getBufferView().setNeedsRedraw();
             window.getModeLineView().setNeedsRedraw();
         });
         _rootResponder.addEventResponder("<ENTER>", () -> {
-            var window = Window.getInstance();
-            var bufferContext = window.getBufferContext();
-            bufferContext.getBuffer().insert("\n");
+            buffer.insert("\n");
             bufferContext.getBufferView().setNeedsRedraw();
             window.getModeLineView().setNeedsRedraw();
         });
-        _rootResponder.addEventResponder("<LEFT>", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goLeft();
-        });
-        _rootResponder.addEventResponder("<RIGHT>", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goRight();
-        });
-        _rootResponder.addEventResponder("<DOWN>", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goDown();
-        });
-        _rootResponder.addEventResponder("<UP>", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goUp();
-        });
+        _rootResponder.addEventResponder("<LEFT>", () -> { cursor.goLeft(); });
+        _rootResponder.addEventResponder("<RIGHT>", () -> { cursor.goRight(); });
+        _rootResponder.addEventResponder("<DOWN>", () -> { cursor.goDown(); });
+        _rootResponder.addEventResponder("<UP>", () -> { cursor.goUp(); });
     }
 
     @Override
     public void activate() {
-        Window.getInstance().getBufferContext().getBuffer().getCursor().setAfter(true);
+        _window.getBufferContext().getBuffer().getCursor().setAfter(true);
     }
 }

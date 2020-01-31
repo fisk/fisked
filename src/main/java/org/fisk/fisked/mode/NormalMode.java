@@ -3,109 +3,61 @@ package org.fisk.fisked.mode;
 import org.fisk.fisked.ui.Window;
 
 public class NormalMode extends Mode {
-    public NormalMode() {
+    private Window _window;
+
+    public NormalMode(Window window) {
         super("NORMAL");
+        _window = window;
         setupBasicResponders();
     }
 
     private void setupBasicResponders() {
-        _rootResponder.addEventResponder("q", () -> {
-            System.exit(0);
-        });
-        _rootResponder.addEventResponder("i", () -> {
-            var window = Window.getInstance();
-            window.switchToMode(window.getInputMode());
-        });
-        _rootResponder.addEventResponder("w", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().write();
-        });
-        _rootResponder.addEventResponder("u", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().undo();
-        });
-        _rootResponder.addEventResponder("<CTRL>-r", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().redo();
-        });
+        var window = _window;
+        var bufferContext = window.getBufferContext();
+        var buffer = bufferContext.getBuffer();
+        var cursor = buffer.getCursor();
+        _rootResponder.addEventResponder("q", () -> { System.exit(0); });
+        _rootResponder.addEventResponder("i", () -> { window.switchToMode(window.getInputMode()); });
+        _rootResponder.addEventResponder("w", () -> { buffer.write(); });
+        _rootResponder.addEventResponder("u", () -> { buffer.undo(); });
+        _rootResponder.addEventResponder("<CTRL>-r", () -> {window.getBufferContext().getBuffer().redo(); });
         _rootResponder.addEventResponder("d i w", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().deleteInnerWord();
+            buffer.deleteInnerWord();
+            buffer.getUndoLog().commit();
         });
         _rootResponder.addEventResponder("c i w", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().deleteInnerWord();
+            buffer.deleteInnerWord();
             window.switchToMode(window.getInputMode());
         });
-        _rootResponder.addEventResponder("<CTRL>-y", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBufferView().scrollUp();
-        });
-        _rootResponder.addEventResponder("<CTRL>-e", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBufferView().scrollDown();
-        });
+        _rootResponder.addEventResponder("<CTRL>-y", () -> { bufferContext.getBufferView().scrollUp(); });
+        _rootResponder.addEventResponder("<CTRL>-e", () -> { bufferContext.getBufferView().scrollDown(); });
         _rootResponder.addEventResponder("a", () -> {
-            var window = Window.getInstance();
             window.switchToMode(window.getInputMode());
-            window.getBufferContext().getBuffer().getCursor().goRight();
+            buffer.getCursor().goRight();
         });
         _rootResponder.addEventResponder("A", () -> {
-            var window = Window.getInstance();
             window.switchToMode(window.getInputMode());
-            window.getBufferContext().getBuffer().getCursor().goEndOfLine();
+            cursor.goEndOfLine();
         });
         _rootResponder.addEventResponder("o", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goEndOfLine();
+            cursor.goEndOfLine();
             window.switchToMode(window.getInputMode());
-            window.getBufferContext().getBuffer().insert("\n");
+            buffer.insert("\n");
         });
-        _rootResponder.addEventResponder("$", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goEndOfLine();
-        });
-        _rootResponder.addEventResponder("^", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goStartOfLine();
-        });
-        _rootResponder.addEventResponder("h", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goLeft();
-        });
-        _rootResponder.addEventResponder("l", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goRight();
-        });
-        _rootResponder.addEventResponder("j", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goDown();
-        });
-        _rootResponder.addEventResponder("k", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goUp();
-        });
-        _rootResponder.addEventResponder("<LEFT>", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goLeft();
-        });
-        _rootResponder.addEventResponder("<RIGHT>", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goRight();
-        });
-        _rootResponder.addEventResponder("<DOWN>", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goDown();
-        });
-        _rootResponder.addEventResponder("<UP>", () -> {
-            var window = Window.getInstance();
-            window.getBufferContext().getBuffer().getCursor().goUp();
-        });
+        _rootResponder.addEventResponder("$", () -> { cursor.goEndOfLine(); });
+        _rootResponder.addEventResponder("^", () -> { cursor.goStartOfLine(); });
+        _rootResponder.addEventResponder("h", () -> { cursor.goLeft(); });
+        _rootResponder.addEventResponder("l", () -> { cursor.goRight(); });
+        _rootResponder.addEventResponder("j", () -> { cursor.goDown(); });
+        _rootResponder.addEventResponder("k", () -> { cursor.goUp(); });
+        _rootResponder.addEventResponder("<LEFT>", () -> { cursor.goLeft(); });
+        _rootResponder.addEventResponder("<RIGHT>", () -> { cursor.goRight(); });
+        _rootResponder.addEventResponder("<DOWN>", () -> { cursor.goDown(); });
+        _rootResponder.addEventResponder("<UP>", () -> { cursor.goUp(); });
     }
 
     @Override
     public void activate() {
-        var window = Window.getInstance();
-        window.getBufferContext().getBuffer().getUndoLog().commit();
+        _window.getBufferContext().getBuffer().getUndoLog().commit();
     }
 }
