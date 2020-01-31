@@ -29,6 +29,10 @@ public class NormalMode extends Mode {
             buffer.deleteWord();
             buffer.getUndoLog().commit();
         });
+        _rootResponder.addEventResponder("x", () -> {
+            buffer.removeAt();
+            buffer.getUndoLog().commit();
+        });
         _rootResponder.addEventResponder("c i w", () -> {
             buffer.deleteInnerWord();
             window.switchToMode(window.getInputMode());

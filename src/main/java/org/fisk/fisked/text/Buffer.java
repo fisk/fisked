@@ -92,6 +92,17 @@ public class Buffer {
         _bufferContext.getBufferView().adaptViewToCursor();
     }
 
+    public void removeAt() {
+        if (_string.length() == 0) {
+            return;
+        }
+        int position = _cursor.getPosition();
+        _undoLog.recordRemove(position, position + 1);
+        _string.deleteCharAt(_cursor.getPosition());
+        _bufferContext.getTextLayout().calculate();
+        _bufferContext.getBufferView().adaptViewToCursor();
+    }
+
     public void deleteInnerWord() {
         int start = findStartOfWord();
         int end = findEndOfWord();
