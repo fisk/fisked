@@ -44,16 +44,8 @@ public class InputMode extends Mode {
                 window.getModeLineView().setNeedsRedraw();
             }
         });
-        _rootResponder.addEventResponder("<BACKSPACE>", () -> {
-            buffer.removeBefore();
-            bufferContext.getBufferView().setNeedsRedraw();
-            window.getModeLineView().setNeedsRedraw();
-        });
-        _rootResponder.addEventResponder("<ENTER>", () -> {
-            buffer.insert("\n");
-            bufferContext.getBufferView().setNeedsRedraw();
-            window.getModeLineView().setNeedsRedraw();
-        });
+        _rootResponder.addEventResponder("<BACKSPACE>", () -> { buffer.removeBefore(); });
+        _rootResponder.addEventResponder("<ENTER>", () -> { buffer.insert("\n"); });
         _rootResponder.addEventResponder("<LEFT>", () -> { cursor.goLeft(); });
         _rootResponder.addEventResponder("<RIGHT>", () -> { cursor.goRight(); });
         _rootResponder.addEventResponder("<DOWN>", () -> { cursor.goDown(); });

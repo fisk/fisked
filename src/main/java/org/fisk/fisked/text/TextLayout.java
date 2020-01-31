@@ -253,6 +253,7 @@ public class TextLayout {
     public void calculate() {
         calculateLogicalLines();
         calculatePhysicalLines();
+        _bufferContext.getBufferView().setNeedsRedraw();
     }
 
     public Stream<Glyph> getGlyphs() {
