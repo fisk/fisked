@@ -70,7 +70,11 @@ public class NormalMode extends Mode {
                 cursor.goBack();
             }
         });
+        _rootResponder.addEventResponder("P", () -> {
+            buffer.insert(Copy.getInstance().getText());
+        });
         _rootResponder.addEventResponder("p", () -> {
+            cursor.goForward();
             buffer.insert(Copy.getInstance().getText());
         });
     }
