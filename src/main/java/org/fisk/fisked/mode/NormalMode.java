@@ -70,12 +70,24 @@ public class NormalMode extends Mode {
                 cursor.goBack();
             }
         });
-        _rootResponder.addEventResponder("P", () -> {
-            buffer.insert(Copy.getInstance().getText());
-        });
         _rootResponder.addEventResponder("p", () -> {
-            cursor.goForward();
-            buffer.insert(Copy.getInstance().getText());
+            if (Copy.getInstance().isLine()) {
+                cursor.goEndOfLine();
+                cursor.goForward();
+                buffer.insert(Copy.getInstance().getText());
+                cursor.goBack();
+            } else {
+                cursor.goForward();
+                buffer.insert(Copy.getInstance().getText());
+            }
+        });
+        _rootResponder.addEventResponder("P", () -> {
+            if (Copy.getInstance().isLine()) {
+                cursor.goStartOfLine();
+                buffer.insert(Copy.getInstance().getText());
+            } else {
+                buffer.insert(Copy.getInstance().getText());
+            }
         });
     }
 

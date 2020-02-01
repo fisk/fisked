@@ -6,15 +6,17 @@ import com.googlecode.lanterna.TextColor;
 
 import org.fisk.fisked.terminal.TerminalContext;
 import org.fisk.fisked.ui.Cursor;
+import org.fisk.fisked.ui.Range;
 import org.fisk.fisked.ui.Rect;
 import org.fisk.fisked.ui.Window;
+import org.fisk.fisked.copy.Copy;
 
 public class VisualLineMode extends VisualMode {
     public VisualLineMode(Window window) {
         super(window);
     }
 
-    private void deleteSelection() {
+    private Range getSelection() {
         var buffer = _window.getBufferContext().getBuffer();
         var minLine = minCursor().getPhysicalLine();
         var maxLine = maxCursor().getPhysicalLine();
@@ -23,7 +25,13 @@ public class VisualLineMode extends VisualMode {
         if (maxLine.getNext() == null) {
             start = Math.max(0, start - 1);
         }
-        buffer.remove(start, end);
+        return Range.create(start, end);
+    }
+
+    private void deleteSelection() {
+        var buffer = _window.getBufferContext().getBuffer();
+        var selection = getSelection();
+        buffer.remove(selection.getStart(), selection.getEnd());
     }
 
     @Override
@@ -46,6 +54,12 @@ public class VisualLineMode extends VisualMode {
         _rootResponder.addEventResponder("c", () -> {
             deleteSelection();
             window.switchToMode(window.getInputMode());
+        });
+        _rootResponder.addEventResponder("y", () -> {
+            var selection = getSelection();
+            var text = buffer.getSubstring(selection.getStart(), selection.getEnd());
+            Copy.getInstance().setText(text, true /* isLine */);
+            window.switchToMode(window.getNormalMode());
         });
     }
 
