@@ -6,9 +6,9 @@ import com.googlecode.lanterna.TextColor;
 
 import org.fisk.fisked.terminal.TerminalContext;
 import org.fisk.fisked.ui.Cursor;
-import org.fisk.fisked.ui.Point;
 import org.fisk.fisked.ui.Rect;
 import org.fisk.fisked.ui.Window;
+import org.fisk.fisked.copy.Copy;
 
 public class VisualMode extends Mode {
     protected Cursor _other;
@@ -42,12 +42,17 @@ public class VisualMode extends Mode {
             bufferContext.getBufferView().adaptViewToCursor();
         });
         _rootResponder.addEventResponder("d", () -> {
-            buffer.remove(minCursor().getPosition(), maxCursor().getPosition());
+            buffer.remove(minCursor().getPosition(), maxCursor().getPosition() + 1);
             window.switchToMode(window.getNormalMode());
         });
         _rootResponder.addEventResponder("c", () -> {
-            buffer.remove(minCursor().getPosition(), maxCursor().getPosition());
+            buffer.remove(minCursor().getPosition(), maxCursor().getPosition() + 1);
             window.switchToMode(window.getInputMode());
+        });
+        _rootResponder.addEventResponder("y", () -> {
+            var text = buffer.getSubstring(minCursor().getPosition(), maxCursor().getPosition() + 1);
+            Copy.getInstance().setText(text, false /* isLine */);
+            window.switchToMode(window.getNormalMode());
         });
     }
 

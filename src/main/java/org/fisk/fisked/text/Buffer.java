@@ -87,7 +87,7 @@ public class Buffer {
         _undoLog.recordInsert(_cursor.getPosition(), str);
         _string.insert(_cursor.getPosition(), str);
         _bufferContext.getTextLayout().calculate();
-        _cursor.goForward();
+        _cursor.setPosition(_cursor.getPosition() + str.length());
         _bufferContext.getBufferView().adaptViewToCursor();
     }
 

@@ -148,7 +148,7 @@ public class Cursor {
         if (glyph == null) {
             _position = line.getStartPosition();
         } else {
-            _position = glyph.getPosition() + 1;
+            _position = glyph.getPosition();
         }
         calculate();
         Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();

@@ -1,6 +1,7 @@
 package org.fisk.fisked.mode;
 
 import org.fisk.fisked.ui.Window;
+import org.fisk.fisked.copy.Copy;
 
 public class NormalMode extends Mode {
     public NormalMode(Window window) {
@@ -68,6 +69,9 @@ public class NormalMode extends Mode {
             if (isFirst) {
                 cursor.goBack();
             }
+        });
+        _rootResponder.addEventResponder("p", () -> {
+            buffer.insert(Copy.getInstance().getText());
         });
     }
 

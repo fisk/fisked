@@ -2,6 +2,7 @@ package org.fisk.fisked.ui;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
@@ -22,6 +23,7 @@ import org.fisk.fisked.mode.VisualLineMode;
 import org.fisk.fisked.mode.VisualMode;
 import org.fisk.fisked.terminal.TerminalContext;
 import org.fisk.fisked.text.BufferContext;
+import org.fisk.fisked.ui.ListView.ListItem;
 import org.fisk.fisked.utils.LogFactory;
 import org.slf4j.Logger;
 
@@ -193,5 +195,17 @@ public class Window implements Drawable {
     @Override
     public void draw(Rect rect) {
         _rootView.draw(rect);
+    }
+
+    private ListView _listView;
+
+    public void showList(List<ListItem> list) {
+        var bufferView = _bufferContext.getBufferView();
+        var rect = bufferView.getBounds();
+        int height = rect.getSize().getHeight();
+        int newHeight = height * 2 / 3;
+        bufferView.resize(Size.create(_rootView.getBounds().getSize().getWidth(), newHeight));
+        bufferView.setNeedsRedraw();
+        var listView = new ListView(Rect.create(rect.getPoint().getX(), rect.getPoint().getY(), rect.getSize().getWidth(), height - newHeight), list);
     }
 }
