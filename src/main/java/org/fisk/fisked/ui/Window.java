@@ -41,6 +41,7 @@ public class Window implements Drawable {
 
     private View _rootView;
     private ModeLineView _modeLineView;
+    private CommandView _commandView;
     private Size _size;
     private BufferContext _bufferContext;
     private NormalMode _normalMode;
@@ -83,13 +84,17 @@ public class Window implements Drawable {
 
         _log.info("Terminal size: " + terminalSize.getColumns() + ", " + terminalSize.getRows());
 
-        _bufferContext = new BufferContext(Rect.create(0, 0, terminalSize.getColumns(), terminalSize.getRows() - 1), path);
+        _bufferContext = new BufferContext(Rect.create(0, 0, terminalSize.getColumns(), terminalSize.getRows() - 2), path);
         _rootView = new View(Rect.create(0, 0, terminalSize.getColumns(), terminalSize.getRows()));
         _rootView.setBackgroundColour(TextColor.ANSI.DEFAULT);
 
-        _modeLineView = new ModeLineView(Rect.create(0, terminalSize.getRows() - 1, terminalSize.getColumns(), 1));
+        _modeLineView = new ModeLineView(Rect.create(0, terminalSize.getRows() - 2, terminalSize.getColumns(), 1));
         _modeLineView.setResizeMask(View.RESIZE_MASK_BOTTOM | View.RESIZE_MASK_LEFT | View.RESIZE_MASK_RIGHT | View.RESIZE_MASK_HEIGHT);
         _rootView.addSubview(_modeLineView);
+
+        _commandView = new CommandView(Rect.create(0, terminalSize.getRows() - 1, terminalSize.getColumns(), 1));
+        _commandView.setResizeMask(View.RESIZE_MASK_BOTTOM | View.RESIZE_MASK_LEFT | View.RESIZE_MASK_RIGHT | View.RESIZE_MASK_HEIGHT);
+        _rootView.addSubview(_commandView);
 
         _rootView.addSubview(_bufferContext.getBufferView());
         _rootView.setFirstResponder(_bufferContext.getBufferView());
@@ -100,6 +105,17 @@ public class Window implements Drawable {
     private void setupBindings() {
         var eventThread = EventThread.getInstance();
         var responders = eventThread.getResponder();
+        responders.addEventResponder(new EventResponder() {
+            @Override
+            public Response processEvent(KeyStrokeEvent event) {
+                Window.this.getCommandView().setMessage(null);
+                return EventListener.Response.NO;
+            }
+
+            @Override
+            public void respond() {
+            }
+        });
         responders.addEventResponder(_rootView);
         responders.addEventResponder(new EventResponder() {
             @Override
@@ -121,6 +137,10 @@ public class Window implements Drawable {
         setupViews(path);
         setupBindings();
         setupModes();
+    }
+
+    public CommandView getCommandView() {
+        return _commandView;
     }
 
     public Mode getCurrentMode() {
@@ -161,6 +181,10 @@ public class Window implements Drawable {
     public void setRootView(View view) {
         _rootView = view;
         _size = view.getBounds().getSize();
+    }
+
+    public View getRootView() {
+        return _rootView;
     }
 
     public void update(boolean forced) {

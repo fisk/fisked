@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.regex.Pattern;
 
 import org.fisk.fisked.ui.Cursor;
+import org.fisk.fisked.ui.Window;
 import org.fisk.fisked.undo.UndoLog;
 
 public class Buffer {
@@ -198,6 +199,7 @@ public class Buffer {
     public void write() {
         try {
             Files.writeString(_path, _string.toString());
+            Window.getInstance().getCommandView().setMessage("Saved file");
         } catch (IOException e) {
         }
     }

@@ -17,11 +17,9 @@ public class NormalMode extends Mode {
         var bufferContext = window.getBufferContext();
         var buffer = bufferContext.getBuffer();
         var cursor = buffer.getCursor();
-        _rootResponder.addEventResponder("q", () -> { System.exit(0); });
         _rootResponder.addEventResponder("i", () -> { window.switchToMode(window.getInputMode()); });
         _rootResponder.addEventResponder("v", () -> { window.switchToMode(window.getVisualMode()); });
         _rootResponder.addEventResponder("V", () -> { window.switchToMode(window.getVisualLineMode()); });
-        _rootResponder.addEventResponder("w", () -> { buffer.write(); });
         _rootResponder.addEventResponder("u", () -> { buffer.undo(); });
         _rootResponder.addEventResponder("<CTRL>-r", () -> {window.getBufferContext().getBuffer().redo(); });
         _rootResponder.addEventResponder("d i w", () -> {
@@ -97,6 +95,9 @@ public class NormalMode extends Mode {
             } else {
                 window.showList(FileIndex.createFileList(), "Project Files");
             }
+        });
+        _rootResponder.addEventResponder(":", () -> {
+            window.getCommandView().activate();
         });
     }
 
