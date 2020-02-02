@@ -5,8 +5,10 @@ import java.util.List;
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.input.KeyType;
 
 import org.fisk.fisked.event.EventListener;
+import org.fisk.fisked.event.EventResponder;
 import org.fisk.fisked.event.KeyStrokeEvent;
 import org.fisk.fisked.event.ListEventResponder;
 import org.fisk.fisked.terminal.TerminalContext;
@@ -22,6 +24,7 @@ public class ListView extends View {
     private String _title;
     private int _selection;
     private int _start;
+    private StringBuilder _filter;
     protected ListEventResponder _responders = new ListEventResponder();
 
     public ListView(Rect bounds, List<? extends ListItem> list, String title) {
@@ -55,6 +58,30 @@ public class ListView extends View {
             ListView.this.getParent().setNeedsRedraw();
             item.onClick();
             Window.getInstance().hideList();
+        });
+        _responders.addEventResponder("<BACKSPACE>", () -> {
+            if (_filter.length() > 0) {
+                _filter.delete(_filter.length() - 1, _filter.length());
+                ListView.this.setNeedsRedraw();
+            }
+        });
+        _responders.addEventResponder(new EventResponder() {
+            private char _character;
+
+            @Override
+            public Response processEvent(KeyStrokeEvent event) {
+                if (event.getKeyStroke().getKeyType() == KeyType.Character) {
+                    _character = event.getKeyStroke().getCharacter();
+                    return EventListener.Response.YES;
+                }
+                return EventListener.Response.NO;
+            }
+
+            @Override
+            public void respond() {
+                _filter.append(_character);
+                ListView.this.setNeedsRedraw();
+            }
         });
     }
 
@@ -94,8 +121,10 @@ public class ListView extends View {
             _start = _selection;
         }
 
-        for (int i = _start; i < _list.size() && i - _start < listHeight; ++i) {
-            var item = _list.get(i);
+        ListItem[] list = (ListItem[])_list.stream().filter((item) -> {return item.displayString().contains(_filter.toString());}).toArray();
+
+        for (int i = _start; i < list.length && i - _start < listHeight; ++i) {
+            var item = list[i];
             boolean selected = i == _selection;
             var str = AttributedString.create(item.displayString(),
                                               selected ? TextColor.ANSI.RED : TextColor.ANSI.GREEN,
