@@ -1,6 +1,8 @@
 package org.fisk.fisked.ui;
 
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
@@ -21,15 +23,24 @@ public class ListView extends View {
     }
 
     private List<? extends ListItem> _list;
+    private List<? extends ListItem> _filteredList;
     private String _title;
     private int _selection;
     private int _start;
-    private StringBuilder _filter;
+    private StringBuilder _filter = new StringBuilder();
     protected ListEventResponder _responders = new ListEventResponder();
+
+    private void filterList() {
+        _filteredList = _filter.length() == 0 ? _list : _list.stream().filter((item) -> {
+            return Pattern.matches("(?i:.*" + _filter.toString() + ".*)", item.displayString());
+        }).collect(Collectors.toList());
+        setNeedsRedraw();
+    }
 
     public ListView(Rect bounds, List<? extends ListItem> list, String title) {
         super(bounds);
         _list = list;
+        _filteredList = _list;
         _title = title;
         _selection = 0;
         _responders.addEventResponder("<DOWN>", () -> {
@@ -51,10 +62,10 @@ public class ListView extends View {
             Window.getInstance().hideList();
         });
         _responders.addEventResponder("<ENTER>", () -> {
-            if (_selection >= _list.size()) {
+            if (_selection >= _filteredList.size()) {
                 return;
             }
-            var item = _list.get(_selection);
+            var item = _filteredList.get(_selection);
             ListView.this.getParent().setNeedsRedraw();
             item.onClick();
             Window.getInstance().hideList();
@@ -62,7 +73,7 @@ public class ListView extends View {
         _responders.addEventResponder("<BACKSPACE>", () -> {
             if (_filter.length() > 0) {
                 _filter.delete(_filter.length() - 1, _filter.length());
-                ListView.this.setNeedsRedraw();
+                filterList();
             }
         });
         _responders.addEventResponder(new EventResponder() {
@@ -80,7 +91,7 @@ public class ListView extends View {
             @Override
             public void respond() {
                 _filter.append(_character);
-                ListView.this.setNeedsRedraw();
+                filterList();
             }
         });
     }
@@ -109,11 +120,18 @@ public class ListView extends View {
         graphics.setBackgroundColor(TextColor.ANSI.RED);
         graphics.drawRectangle(new TerminalPosition(rect.getPoint().getX(), rect.getPoint().getY() + 1),
         new TerminalSize(rect.getSize().getWidth(), 1), ' ');
-        var searchText = AttributedString.create("Filter: ", TextColor.ANSI.BLACK, TextColor.ANSI.RED);
+        var searchText = AttributedString.create("Filter: " + _filter.toString(), TextColor.ANSI.BLACK, TextColor.ANSI.RED);
         searchText.drawAt(Point.create(rect.getPoint().getX(), rect.getPoint().getY() + 1), graphics);
 
         int totalHeight = rect.getSize().getHeight();
         int listHeight = totalHeight - 2;
+
+        if (_selection >= _filteredList.size()) {
+            _selection = _filteredList.size() - 1;
+        }
+        if (_selection < 0) {
+            _selection = 0;
+        }
 
         if (_selection >= _start + listHeight) {
             _start = _selection - listHeight + 1;
@@ -121,10 +139,8 @@ public class ListView extends View {
             _start = _selection;
         }
 
-        ListItem[] list = (ListItem[])_list.stream().filter((item) -> {return item.displayString().contains(_filter.toString());}).toArray();
-
-        for (int i = _start; i < list.length && i - _start < listHeight; ++i) {
-            var item = list[i];
+        for (int i = _start; i < _filteredList.size() && i - _start < listHeight; ++i) {
+            var item = _filteredList.get(i);
             boolean selected = i == _selection;
             var str = AttributedString.create(item.displayString(),
                                               selected ? TextColor.ANSI.RED : TextColor.ANSI.GREEN,
