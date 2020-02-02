@@ -12,14 +12,17 @@ import org.fisk.fisked.ui.ListView.ListItem;
 
 public class FileIndex {
     private static class FileIndexItem extends ListItem {
+        private Path _root;
         private Path _path;
 
-        public FileIndexItem(Path path) {
+        public FileIndexItem(Path root, Path path) {
+            _root = root;
             _path = path;
         }
 
         public String displayString() {
-            return _path.toString();
+            var path = _root.relativize(_path);
+            return path.toString();
         }
 
         public void onClick() {
@@ -27,26 +30,28 @@ public class FileIndex {
         }
     }
 
+    public Path getRootPath() {
+        var root = Paths.get(System.getProperty("user.dir")).toAbsolutePath();
+        while (!root.getRoot().equals(root)) {
+            if (root.resolve(".git").toFile().exists() || root.resolve(".fisked").toFile().exists()) {
+                return root;
+            }
+        }
+        return null;
+    }
+
     public List<FileIndexItem> createFileIndex() {
         var list = new ArrayList<FileIndexItem>();
         try {
-            var root = Paths.get(System.getProperty("user.dir")).toAbsolutePath();
-            boolean found = false;
-            while (!root.getRoot().equals(root)) {
-                if (root.resolve(".git").toFile().exists() ||
-                    root.resolve(".fisked").toFile().exists()) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
+            var root = getRootPath();
+            if (root == null) {
                 return list;
             }
             Files.find(root,
                        Integer.MAX_VALUE,
                        (filePath, fileAttr) -> fileAttr.isRegularFile())
             .forEach((path) -> {
-                list.add(new FileIndexItem(path));
+                list.add(new FileIndexItem(root, path));
             });
         } catch (IOException e) {
         }
