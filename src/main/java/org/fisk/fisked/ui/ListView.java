@@ -31,8 +31,18 @@ public class ListView extends View {
     protected ListEventResponder _responders = new ListEventResponder();
 
     private void filterList() {
+        if (_filter.length() == 0) {
+            _filteredList = _list;
+            return;
+        }
+        var filters = _filter.toString().split(" ");
         _filteredList = _filter.length() == 0 ? _list : _list.stream().filter((item) -> {
-            return Pattern.matches("(?i:.*" + _filter.toString() + ".*)", item.displayString());
+            for (var filter: filters) {
+                if (!Pattern.matches("(?i:.*" + filter + ".*)", item.displayString())) {
+                    return false;
+                }
+            }
+            return true;
         }).collect(Collectors.toList());
         setNeedsRedraw();
     }
