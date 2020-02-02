@@ -55,6 +55,17 @@ public class Window implements Drawable {
         _visualMode = new VisualMode(this);
         _visualLineMode = new VisualLineMode(this);
         _currentMode = _normalMode;
+        _bufferContext.getBufferView().setFirstResponder(_currentMode);
+    }
+
+    public void setBufferPath(Path path) {
+        var bufferView = _bufferContext.getBufferView();
+        bufferView.removeFromParent();
+        var rect = bufferView.getBounds();
+        _bufferContext = new BufferContext(rect, path);
+        _rootView.addSubview(_bufferContext.getBufferView());
+        _rootView.setFirstResponder(_bufferContext.getBufferView());
+        setupModes();
     }
 
     private void setupViews(Path path) {
@@ -89,17 +100,7 @@ public class Window implements Drawable {
     private void setupBindings() {
         var eventThread = EventThread.getInstance();
         var responders = eventThread.getResponder();
-        responders.addEventResponder(new EventResponder() {
-            @Override
-            public Response processEvent(KeyStrokeEvent event) {
-                return _currentMode.processEvent(event);
-            }
-
-            @Override
-            public void respond() {
-                _currentMode.respond();
-            }
-        });
+        responders.addEventResponder(_rootView);
         responders.addEventResponder(new EventResponder() {
             @Override
             public Response processEvent(KeyStrokeEvent event) {
@@ -144,6 +145,7 @@ public class Window implements Drawable {
 
     public void switchToMode(Mode mode) {
         _currentMode = mode;
+        _bufferContext.getBufferView().setFirstResponder(_currentMode);
         _modeLineView.setNeedsRedraw();
         mode.activate();
     }
@@ -199,13 +201,40 @@ public class Window implements Drawable {
 
     private ListView _listView;
 
-    public void showList(List<ListItem> list) {
+    public boolean isShowingList() {
+        return _listView != null;
+    }
+
+    public void showList(List<? extends ListItem> list, String title) {
+        if (_listView != null) {
+            return;
+        }
         var bufferView = _bufferContext.getBufferView();
         var rect = bufferView.getBounds();
         int height = rect.getSize().getHeight();
         int newHeight = height * 2 / 3;
-        bufferView.resize(Size.create(_rootView.getBounds().getSize().getWidth(), newHeight));
+        bufferView.setBounds(Rect.create(rect.getPoint().getX(), rect.getPoint().getY(),
+                                         rect.getSize().getWidth(), newHeight));
         bufferView.setNeedsRedraw();
-        var listView = new ListView(Rect.create(rect.getPoint().getX(), rect.getPoint().getY(), rect.getSize().getWidth(), height - newHeight), list);
+        var listView = new ListView(Rect.create(rect.getPoint().getX(), rect.getPoint().getY() + newHeight,
+                                                rect.getSize().getWidth(), height - newHeight), list, title);
+        _rootView.addSubview(listView);
+        _rootView.setFirstResponder(listView);
+        _listView = listView;
+        _rootView.setNeedsRedraw();
+    }
+
+    public void hideList() {
+        var bufferView = _bufferContext.getBufferView();
+        var rect = bufferView.getBounds();
+        int height = rect.getSize().getHeight();
+        int newHeight = height + _listView.getBounds().getSize().getHeight();
+        bufferView.setBounds(Rect.create(rect.getPoint().getX(), rect.getPoint().getY(),
+                                         rect.getSize().getWidth(), newHeight));
+        bufferView.setNeedsRedraw();
+        _listView.removeFromParent();
+        _rootView.setFirstResponder(_bufferContext.getBufferView());
+        _rootView.setNeedsRedraw();
+        _listView = null;
     }
 }

@@ -71,9 +71,9 @@
       <version>2.0.0-alpha1</version>
     </dependency>
     <dependency>
-      <groupId>com.github.davidmoten</groupId>
-      <artifactId>rtree</artifactId>
-      <version>0.8.7</version>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>8.4.1</version>
     </dependency>
   </dependencies>
 </project>

@@ -1,7 +1,9 @@
 package org.fisk.fisked.mode;
 
-import org.fisk.fisked.ui.Window;
 import org.fisk.fisked.copy.Copy;
+import org.fisk.fisked.fileindex.FileIndex;
+import org.fisk.fisked.ui.ListView.ListItem;
+import org.fisk.fisked.ui.Window;
 
 public class NormalMode extends Mode {
     public NormalMode(Window window) {
@@ -89,6 +91,30 @@ public class NormalMode extends Mode {
                 buffer.insert(Copy.getInstance().getText());
             }
         });
+        _rootResponder.addEventResponder("n", () -> {
+            if (window.isShowingList()) {
+                window.hideList();
+            } else {
+                window.showList(FileIndex.createFileList(), "Project Files");
+            }
+        });
+    }
+
+    private static class MyListItem extends ListItem {
+        private String _string;
+
+        public MyListItem(String string) {
+            _string = string;
+        }
+
+        @Override
+        public String displayString() {
+            return _string;
+        }
+
+        @Override
+        public void onClick() {
+        }
     }
 
     @Override

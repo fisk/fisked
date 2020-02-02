@@ -89,6 +89,10 @@ public class View implements Drawable, EventResponder {
         return _needsRedraw;
     }
 
+    public View getParent() {
+        return _parent;
+    }
+
     public void addSubview(View view) {
         _subviews.add(view);
         view._parent = this;
@@ -106,21 +110,21 @@ public class View implements Drawable, EventResponder {
     @Override
     public EventListener.Response processEvent(KeyStrokeEvent event) {
         var firstResponder = _firstResponder;
-        if (firstResponder != null) {
-            var result = firstResponder.processEvent(event);
-            if (result == EventListener.Response.YES) {
-                _lastResponder = firstResponder;
-            }
-            return result;
+        if (firstResponder == null) {
+            return EventListener.Response.NO;
         }
-        return EventListener.Response.NO;
+        var result = firstResponder.processEvent(event);
+        if (result == EventListener.Response.YES) {
+            _lastResponder = firstResponder;
+        }
+        return result;
     }
 
     @Override
     public void respond() {
         if (_lastResponder != null) {
-            _lastResponder = null;
             _lastResponder.respond();
+            _lastResponder = null;
         }
     }
 
@@ -130,6 +134,10 @@ public class View implements Drawable, EventResponder {
 
     private boolean isPinned(int mask) {
         return (_resizeMask & mask) != 0;
+    }
+
+    public void setBounds(Rect rect) {
+        _bounds = rect;
     }
 
     public void resize(Size newParentSize) {
