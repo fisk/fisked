@@ -1,0 +1,3 @@
+[submodule "deps/eclipse.jdt.ls"]
+	path = deps/eclipse.jdt.ls
+	url = https://github.com/eclipse/eclipse.jdt.ls

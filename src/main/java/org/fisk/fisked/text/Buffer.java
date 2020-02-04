@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
 
+import org.fisk.fisked.lsp.java.JavaLSPClient;
 import org.fisk.fisked.ui.Cursor;
 import org.fisk.fisked.ui.Window;
 import org.fisk.fisked.undo.UndoLog;
@@ -30,6 +31,9 @@ public class Buffer {
         _undoLog = new UndoLog(bufferContext);
         try {
             _string.append(Files.readString(path));
+            if (path.getFileName().endsWith(".java")) {
+                JavaLSPClient.getInstance().start();
+            }
         } catch (IOException e) {
         }
     }
