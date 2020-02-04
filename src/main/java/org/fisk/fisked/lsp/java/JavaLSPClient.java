@@ -1,5 +1,8 @@
 package org.fisk.fisked.lsp.java;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+
 public class JavaLSPClient {
     private boolean _started = false;
 
@@ -18,7 +21,6 @@ public class JavaLSPClient {
             processBuilder.start();
             _started = true;
         } catch (Throwable e) {
-            throw RuntimeException("Could not launch LSP server: ", e);
         }
     }
 
