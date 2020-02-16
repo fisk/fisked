@@ -30,20 +30,10 @@ public class FileIndex {
         }
     }
 
-    public Path getRootPath() {
-        var root = Paths.get(System.getProperty("user.dir")).toAbsolutePath();
-        while (!root.getRoot().equals(root)) {
-            if (root.resolve(".git").toFile().exists() || root.resolve(".fisked").toFile().exists()) {
-                return root;
-            }
-        }
-        return null;
-    }
-
     public List<FileIndexItem> createFileIndex() {
         var list = new ArrayList<FileIndexItem>();
         try {
-            var root = getRootPath();
+            var root = ProjectPaths.getSourceRootPath();
             if (root == null) {
                 return list;
             }

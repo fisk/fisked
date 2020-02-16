@@ -2,6 +2,7 @@ package org.fisk.fisked.mode;
 
 import org.fisk.fisked.copy.Copy;
 import org.fisk.fisked.fileindex.FileIndex;
+import org.fisk.fisked.lsp.java.JavaLSPClient;
 import org.fisk.fisked.ui.ListView.ListItem;
 import org.fisk.fisked.ui.Window;
 
@@ -17,6 +18,9 @@ public class NormalMode extends Mode {
         var bufferContext = window.getBufferContext();
         var buffer = bufferContext.getBuffer();
         var cursor = buffer.getCursor();
+        _rootResponder.addEventResponder("b", () -> {
+            JavaLSPClient.getInstance().organizeImports(window.getBufferContext());
+        });
         _rootResponder.addEventResponder("i", () -> { window.switchToMode(window.getInputMode()); });
         _rootResponder.addEventResponder("v", () -> { window.switchToMode(window.getVisualMode()); });
         _rootResponder.addEventResponder("V", () -> { window.switchToMode(window.getVisualLineMode()); });

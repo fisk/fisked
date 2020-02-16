@@ -16,6 +16,7 @@ import org.fisk.fisked.event.EventListener;
 import org.fisk.fisked.event.EventResponder;
 import org.fisk.fisked.event.KeyStrokeEvent;
 import org.fisk.fisked.event.RunnableEvent;
+import org.fisk.fisked.lsp.java.JavaLSPClient;
 import org.fisk.fisked.mode.InputMode;
 import org.fisk.fisked.mode.Mode;
 import org.fisk.fisked.mode.NormalMode;
@@ -137,6 +138,9 @@ public class Window implements Drawable {
         setupViews(path);
         setupBindings();
         setupModes();
+        var javaLS = JavaLSPClient.getInstance();
+        javaLS.start();
+        javaLS.ensureInit();
     }
 
     public CommandView getCommandView() {

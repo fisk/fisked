@@ -146,6 +146,10 @@ public class TextLayout {
         return _physicalLineAtPosition.floorEntry(position).getValue();
     }
 
+    public Line getLastPhysicalLine() {
+        return _physicalLines.lastEntry().getValue();
+    }
+
     private static class LayoutIterator {
         Line _line;
         TreeMap<Integer, Line> _lines = new TreeMap<>();
@@ -275,5 +279,9 @@ public class TextLayout {
 
     public int getLogicalLineCount() {
         return _logicalLines.size();
+    }
+
+    public int getPhysicalLineCount() {
+        return _physicalLines.size();
     }
 }

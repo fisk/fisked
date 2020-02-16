@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
 
+import org.eclipse.lsp4j.TextDocumentIdentifier;
+import org.eclipse.lsp4j.TextDocumentItem;
 import org.fisk.fisked.lsp.java.JavaLSPClient;
 import org.fisk.fisked.ui.Cursor;
 import org.fisk.fisked.ui.Window;
@@ -31,10 +33,10 @@ public class Buffer {
         _undoLog = new UndoLog(bufferContext);
         try {
             _string.append(Files.readString(path));
-            if (path.getFileName().endsWith(".java")) {
-                JavaLSPClient.getInstance().start();
-            }
         } catch (IOException e) {
+        }
+        if (path.getFileName().endsWith(".java")) {
+            JavaLSPClient.getInstance().postDidOpen(getTextDocument());
         }
     }
 
@@ -218,5 +220,16 @@ public class Buffer {
 
     public String getSubstring(int start, int end) {
         return _string.substring(start, end);
+    }
+
+    public TextDocumentItem getTextDocument() {
+        if (_path.getFileName().endsWith(".java")) {
+            return new TextDocumentItem(_path.toFile().toURI().toString(), "java", 11, _string.toString());
+        }
+        return null;
+    }
+
+    public TextDocumentIdentifier getTextDocumentID() {
+        return new TextDocumentIdentifier(_path.toFile().toURI().toString());
     }
 }
