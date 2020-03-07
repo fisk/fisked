@@ -7,6 +7,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
+import org.eclipse.lsp4j.ClientCapabilities;
+import org.eclipse.lsp4j.CodeActionCapabilities;
 import org.eclipse.lsp4j.CodeActionContext;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
@@ -18,13 +20,13 @@ import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
-import org.eclipse.lsp4j.TextDocumentIdentifier;
+import org.eclipse.lsp4j.TextDocumentClientCapabilities;
 import org.eclipse.lsp4j.TextDocumentItem;
+import org.eclipse.lsp4j.WorkspaceClientCapabilities;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.fisk.fisked.fileindex.ProjectPaths;
-import org.fisk.fisked.text.Buffer;
 import org.fisk.fisked.text.BufferContext;
 import org.fisk.fisked.utils.LogFactory;
 import org.slf4j.Logger;
@@ -85,7 +87,7 @@ public class JavaLSPClient extends Thread {
                     _log.info("Starting LSP server...");
                     _istream = process.getInputStream();
                     _ostream = process.getOutputStream();
-                    var clientLauncher = LSPLauncher.createClientLauncher(new LanguageClient() {
+                    var client = new LanguageClient() {
                         @Override
                         public void telemetryEvent(Object object) {
                             _log.info("telemetryEvent called");
@@ -107,12 +109,14 @@ public class JavaLSPClient extends Thread {
                         public void logMessage(MessageParams message) {
                             _log.info("logMessage: " + message.getMessage());
                         }
-                    }, _istream, _ostream);
+                    };
+                    var clientLauncher = LSPLauncher.createClientLauncher(client, _istream, _ostream);
                     var listeningFuture = clientLauncher.startListening();
                     _server = clientLauncher.getRemoteProxy();
                     try {
                         var initParams = new InitializeParams();
                         initParams.setRootUri(new File(projectPath).toURI().toString());
+                        initParams.setCapabilities(getClientCapabilities());
                         var initialized = _server.initialize(initParams).get();
                         _capabilities = initialized.getCapabilities();
                         synchronized (_lock) {
@@ -128,6 +132,17 @@ public class JavaLSPClient extends Thread {
                 }
             }
         }.start();
+    }
+
+    private ClientCapabilities getClientCapabilities() {
+        var workspace = new WorkspaceClientCapabilities();
+        var textDocument = new TextDocumentClientCapabilities();
+
+        var codeAction = new CodeActionCapabilities(false);
+        textDocument.setCodeAction(codeAction);
+
+        var clientCapabilities = new ClientCapabilities(workspace, textDocument, null);
+        return clientCapabilities;
     }
 
     public void run() {
