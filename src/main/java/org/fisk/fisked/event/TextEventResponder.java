@@ -57,7 +57,11 @@ public class TextEventResponder implements EventResponder {
             }
             switch (keyStroke.getKeyType()) {
             case Character:
-                if (keyStroke.getCharacter() != str.charAt(0)) {
+                if (str.equals("<SPACE>")) {
+                  if (keyStroke.getCharacter() != ' ') {
+                    return EventListener.Response.NO;
+                  }
+                } else if (keyStroke.getCharacter() != str.charAt(0)) {
                     return EventListener.Response.NO;
                 }
                 break;

@@ -6,13 +6,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 
-import com.googlecode.lanterna.input.KeyType;
-
-import org.fisk.fisked.event.EventListener;
-import org.fisk.fisked.event.EventResponder;
 import org.fisk.fisked.event.IOThread;
-import org.fisk.fisked.event.KeyStrokeEvent;
-import org.fisk.fisked.event.TextEventResponder;
 import org.fisk.fisked.terminal.TerminalContext;
 import org.fisk.fisked.ui.Window;
 import org.fisk.fisked.utils.LogFactory;

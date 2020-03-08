@@ -132,6 +132,12 @@ public class TextLayout {
         calculate();
     }
 
+    public int getIndexForPhysicalLineCharacter(int lineIndex, int characterIndex) {
+        var line = _physicalLines.get((Integer)lineIndex);
+        var lineStart = line.getStartPosition();
+        return lineStart + characterIndex;
+    }
+
     public Line getLogicalLineAt(int position) {
         if (position < 0) {
             position = 0;

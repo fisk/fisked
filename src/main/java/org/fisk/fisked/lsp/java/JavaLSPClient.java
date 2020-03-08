@@ -4,13 +4,24 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import com.google.gson.Gson;
+
 import org.eclipse.lsp4j.ClientCapabilities;
+import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionCapabilities;
 import org.eclipse.lsp4j.CodeActionContext;
 import org.eclipse.lsp4j.CodeActionParams;
+import org.eclipse.lsp4j.Command;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.MessageActionItem;
@@ -23,6 +34,7 @@ import org.eclipse.lsp4j.ShowMessageRequestParams;
 import org.eclipse.lsp4j.TextDocumentClientCapabilities;
 import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.WorkspaceClientCapabilities;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -126,6 +138,7 @@ public class JavaLSPClient extends Thread {
                     } catch (Exception e) {
                         _log.error("Exception initializing LSP server", e);
                     }
+                    listeningFuture.get();
                 } catch (Exception e) {
                     _log.error("Error reading process output: ", e);
                     return;
@@ -137,6 +150,9 @@ public class JavaLSPClient extends Thread {
     private ClientCapabilities getClientCapabilities() {
         var workspace = new WorkspaceClientCapabilities();
         var textDocument = new TextDocumentClientCapabilities();
+
+        var codeActions = new CodeActionCapabilities(false /* dynamic_registration */);
+        textDocument.setCodeAction(codeActions);
 
         var codeAction = new CodeActionCapabilities(false);
         textDocument.setCodeAction(codeAction);
@@ -183,29 +199,100 @@ public class JavaLSPClient extends Thread {
         _server.getTextDocumentService().didOpen(params);
     }
 
-    public void organizeImports(BufferContext bufferContext) {
+    private Diagnostic getDiagnostic(String code, Range range) {
+        var diagnostic = new Diagnostic();
+        diagnostic.setCode(code);
+        diagnostic.setRange(range);
+        diagnostic.setSeverity(DiagnosticSeverity.Error);
+        diagnostic.setMessage("Test Diagnostic");
+        return diagnostic;
+    }
+
+    private List<Either<Command, CodeAction>> getCodeActions(BufferContext bufferContext) {
         try {
-            _log.info("Organize imports");
-            var context = new CodeActionContext();
-            var kinds = new ArrayList<String>();
-            kinds.add("source.organizeImports");
-            context.setOnly(kinds);
+            _log.info("Get code actions");
             var lineCount = bufferContext.getTextLayout().getPhysicalLineCount();
             var line = bufferContext.getTextLayout().getLastPhysicalLine();
             var range = new Range(new Position(0, 0), new Position(lineCount - 1, line.getGlyphs().size()));
+            var diagnostics = new ArrayList<Diagnostic>();
+            diagnostics.add(getDiagnostic("source.organizeImports", range));
+            var context = new CodeActionContext(diagnostics);
             var params = new CodeActionParams(bufferContext.getBuffer().getTextDocumentID(), range, context);
             _log.info("Code action: " + params);
-            for (var command: _server.getTextDocumentService().codeAction(params).get()) {
-                if (command.isLeft()) {
-                    var left = command.getLeft();
-                } else if (command.isRight()) {
-                    var right = command.getRight();
-                    var changes = right.getEdit().getChanges();
-                _log.info("Got changes: " + changes);
+            return _server.getTextDocumentService().codeAction(params).join();
+        } catch (Exception e) {
+            _log.error("Error getting code actions: ", e);
+            throw new RuntimeException("Error getting code actions: ", e);
+        }
+    }
+
+    private Command getCodeActionCommand(BufferContext bufferContext, String title) {
+        for (var either: getCodeActions(bufferContext)) {
+            if (either.isLeft()) {
+                _log.info("Code action: " + either);
+                var command = either.getLeft();
+                if (command.getTitle().equals(title)) {
+                    return command;
                 }
             }
+        }
+        return null;
+    }
+
+    private void applyWorkspaceEdit(BufferContext context, List<Object> args) {
+        var json = args.get(0).toString();
+        _log.info("applyWorkspaceEdit: " + json);
+        var root = (Map<String, Object>)new Gson().fromJson(json, HashMap.class);
+        var changes = (Map<String, Object>)root.get("changes");
+        for (var changeEntry: changes.entrySet()) {
+            URI uri = null;
+            try {
+                uri = new URI(changeEntry.getKey());
+            } catch (URISyntaxException e) {
+                throw new RuntimeException("Invalid URI", e);
+            }
+            if (!uri.equals(context.getBuffer().getURI())) {
+                throw new RuntimeException("Applying workspace edit to unexpected URI: " + uri);
+            }
+            var edits = (List<Map<String, Object>>) changeEntry.getValue();
+            for (var edit: edits) {
+                var range = (Map<String, Object>) edit.get("range");
+                var startPoint = (Map<String, Double>)range.get("start");
+                var startLine = (int) (double)startPoint.get("line");
+                var startCharacter = (int) (double)startPoint.get("character");
+                var startIndex = context.getTextLayout().getIndexForPhysicalLineCharacter(startLine, startCharacter);
+                var endPoint = (Map<String, Double>) range.get("end");
+                var endLine = (int) (double)endPoint.get("line");
+                var endCharacter = (int) (double)endPoint.get("character");
+                var endIndex = context.getTextLayout().getIndexForPhysicalLineCharacter(endLine, endCharacter);
+                var buffer = context.getBuffer();
+                var newText = (String)edit.get("newText");
+                _log.info("Insert " + newText + " at " + startIndex);
+                _log.info("Remove [" + startIndex + ", " + endIndex + "]");
+                buffer.remove(startIndex, endIndex);
+                buffer.insert(startIndex, newText);
+            }
+        }
+    }
+
+    private void applyCommand(BufferContext bufferContext, Command command) {
+        switch (command.getCommand()) {
+            case "java.apply.workspaceEdit":
+                applyWorkspaceEdit(bufferContext, command.getArguments());
+                break;
+            default:
+                throw new RuntimeException("Unknown command: " + command);
+        }
+    }
+
+    public void organizeImports(BufferContext bufferContext) {
+        try {
+            var command = getCodeActionCommand(bufferContext, "Organize imports");
+            if (command != null) {
+                applyCommand(bufferContext, command);
+            }
         } catch (Exception e) {
-            _log.error("Error organizing imports: ", e);
+            _log.error("Exception: ", e);
         }
     }
 }

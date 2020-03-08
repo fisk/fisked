@@ -135,12 +135,12 @@ public class Window implements Drawable {
     }
 
     public Window(Path path) {
+        var lsp = JavaLSPClient.getInstance();
+        lsp.start();
+        lsp.ensureInit();
         setupViews(path);
         setupBindings();
         setupModes();
-        var javaLS = JavaLSPClient.getInstance();
-        javaLS.start();
-        javaLS.ensureInit();
     }
 
     public CommandView getCommandView() {

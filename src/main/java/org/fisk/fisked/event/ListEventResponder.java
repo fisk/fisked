@@ -18,18 +18,21 @@ public class ListEventResponder implements EventResponder {
     @Override
     public Response processEvent(KeyStrokeEvent event) {
         boolean maybe = false;
+        EventResponder yes = null;
         for (var responder : _responders) {
             var response = responder.processEvent(event);
             if (response == EventListener.Response.MAYBE) {
                 maybe = true;
             }
             if (response == EventListener.Response.YES) {
-                _responder = responder;
-                return response;
+                yes = responder;
             }
         }
         if (maybe) {
             return EventListener.Response.MAYBE;
+        } else if (yes != null) {
+            _responder = yes;
+            return EventListener.Response.YES;
         } else {
             return EventListener.Response.NO;
         }

@@ -18,7 +18,8 @@ public class NormalMode extends Mode {
         var bufferContext = window.getBufferContext();
         var buffer = bufferContext.getBuffer();
         var cursor = buffer.getCursor();
-        _rootResponder.addEventResponder("b", () -> {
+        String leader = "<SPACE>";
+        _rootResponder.addEventResponder(leader + " e i", () -> {
             JavaLSPClient.getInstance().organizeImports(window.getBufferContext());
         });
         _rootResponder.addEventResponder("i", () -> { window.switchToMode(window.getInputMode()); });

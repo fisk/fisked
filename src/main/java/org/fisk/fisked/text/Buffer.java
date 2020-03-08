@@ -1,6 +1,7 @@
 package org.fisk.fisked.text;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
@@ -95,6 +96,14 @@ public class Buffer {
         _string.insert(_cursor.getPosition(), str);
         _bufferContext.getTextLayout().calculate();
         _cursor.setPosition(_cursor.getPosition() + str.length());
+        _bufferContext.getBufferView().adaptViewToCursor();
+    }
+
+    public void insert(int position, String str) {
+        _undoLog.recordInsert(position, str);
+        _string.insert(position, str);
+        _bufferContext.getTextLayout().calculate();
+        _cursor.setPosition(position + str.length());
         _bufferContext.getBufferView().adaptViewToCursor();
     }
 
@@ -220,6 +229,10 @@ public class Buffer {
 
     public String getSubstring(int start, int end) {
         return _string.substring(start, end);
+    }
+
+    public URI getURI() {
+        return _path.toFile().toURI();
     }
 
     public TextDocumentItem getTextDocument() {
