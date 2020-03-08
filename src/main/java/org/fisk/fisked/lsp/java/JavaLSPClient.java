@@ -215,7 +215,6 @@ public class JavaLSPClient extends Thread {
             var line = bufferContext.getTextLayout().getLastPhysicalLine();
             var range = new Range(new Position(0, 0), new Position(lineCount - 1, line.getGlyphs().size()));
             var diagnostics = new ArrayList<Diagnostic>();
-            diagnostics.add(getDiagnostic("source.organizeImports", range));
             var context = new CodeActionContext(diagnostics);
             var params = new CodeActionParams(bufferContext.getBuffer().getTextDocumentID(), range, context);
             _log.info("Code action: " + params);
