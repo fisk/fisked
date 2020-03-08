@@ -199,15 +199,6 @@ public class JavaLSPClient extends Thread {
         _server.getTextDocumentService().didOpen(params);
     }
 
-    private Diagnostic getDiagnostic(String code, Range range) {
-        var diagnostic = new Diagnostic();
-        diagnostic.setCode(code);
-        diagnostic.setRange(range);
-        diagnostic.setSeverity(DiagnosticSeverity.Error);
-        diagnostic.setMessage("Test Diagnostic");
-        return diagnostic;
-    }
-
     private List<Either<Command, CodeAction>> getCodeActions(BufferContext bufferContext) {
         try {
             _log.info("Get code actions");
