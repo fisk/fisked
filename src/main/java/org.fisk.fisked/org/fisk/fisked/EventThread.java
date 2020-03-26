@@ -69,11 +69,19 @@ public class EventThread extends Thread {
             } else if (event instanceof RunnableEvent) {
                 _log.info("Received runnable event");
                 var runnableEvent = (RunnableEvent) event;
-                runnableEvent.execute();
+                try {
+                    runnableEvent.execute();
+                } catch (Exception e) {
+                    _log.error("Error processing event: ", e);
+                }
             }
             _log.info("Run post-event hooks");
             for (Runnable runnable: _onEventRunnables) {
-                runnable.run();
+                try {
+                    runnable.run();
+                } catch (Exception e) {
+                    _log.error("Error processing event: ", e);
+                }
             }
             _log.info("Ran post-event hooks");
         }

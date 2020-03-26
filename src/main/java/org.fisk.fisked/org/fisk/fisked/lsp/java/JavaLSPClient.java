@@ -14,26 +14,35 @@ import java.util.concurrent.CompletableFuture;
 
 import com.google.gson.Gson;
 
+import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
+import org.eclipse.lsp4j.ApplyWorkspaceEditResponse;
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionCapabilities;
 import org.eclipse.lsp4j.CodeActionContext;
 import org.eclipse.lsp4j.CodeActionParams;
+import org.eclipse.lsp4j.ColorInformation;
 import org.eclipse.lsp4j.Command;
+import org.eclipse.lsp4j.ConfigurationParams;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
+import org.eclipse.lsp4j.DocumentColorParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.RegistrationParams;
+import org.eclipse.lsp4j.SemanticHighlightingCapabilities;
+import org.eclipse.lsp4j.SemanticHighlightingParams;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
 import org.eclipse.lsp4j.TextDocumentClientCapabilities;
 import org.eclipse.lsp4j.TextDocumentItem;
+import org.eclipse.lsp4j.UnregistrationParams;
 import org.eclipse.lsp4j.WorkspaceClientCapabilities;
+import org.eclipse.lsp4j.WorkspaceFolder;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -121,6 +130,32 @@ public class JavaLSPClient extends Thread {
                         public void logMessage(MessageParams message) {
                             _log.info("logMessage: " + message.getMessage());
                         }
+                        @Override
+                        public void semanticHighlighting(SemanticHighlightingParams params) {
+                            _log.info("Semantic info: " + params);
+                        }
+                        @Override
+                        public CompletableFuture<List<WorkspaceFolder>> workspaceFolders() {
+                            _log.info("Workspace folders?");
+                            return null;
+                        }
+                        @Override
+                        public CompletableFuture<List<Object>> configuration(ConfigurationParams configurationParams) {
+                            _log.info("Configuration?");
+                            throw new UnsupportedOperationException();
+                        }
+                        public CompletableFuture<ApplyWorkspaceEditResponse> applyEdit(ApplyWorkspaceEditParams params) {
+                            _log.info("Workspace edit?");
+                            throw new UnsupportedOperationException();
+                        }
+                        public CompletableFuture<Void> registerCapability(RegistrationParams params) {
+                            _log.info("Register capability?");
+                            throw new UnsupportedOperationException();
+                        }
+                        public CompletableFuture<Void> unregisterCapability(UnregistrationParams params) {
+                            _log.info("Unregister capability?");
+                            throw new UnsupportedOperationException();
+                        }
                     };
                     var clientLauncher = LSPLauncher.createClientLauncher(client, _istream, _ostream);
                     var listeningFuture = clientLauncher.startListening();
@@ -131,6 +166,7 @@ public class JavaLSPClient extends Thread {
                         initParams.setCapabilities(getClientCapabilities());
                         var initialized = _server.initialize(initParams).get();
                         _capabilities = initialized.getCapabilities();
+                        _log.info("Server capabilities: " + _capabilities);
                         synchronized (_lock) {
                             _started = true;
                             _lock.notifyAll();
@@ -149,12 +185,13 @@ public class JavaLSPClient extends Thread {
 
     private ClientCapabilities getClientCapabilities() {
         var workspace = new WorkspaceClientCapabilities();
+        workspace.setApplyEdit(true);
         var textDocument = new TextDocumentClientCapabilities();
 
-        var codeActions = new CodeActionCapabilities(false /* dynamic_registration */);
-        textDocument.setCodeAction(codeActions);
+        var semanticHighlighting = new SemanticHighlightingCapabilities(true);
+        textDocument.setSemanticHighlightingCapabilities(semanticHighlighting);
 
-        var codeAction = new CodeActionCapabilities(false);
+        var codeAction = new CodeActionCapabilities(true);
         textDocument.setCodeAction(codeAction);
 
         var clientCapabilities = new ClientCapabilities(workspace, textDocument, null);
@@ -197,6 +234,17 @@ public class JavaLSPClient extends Thread {
     public void postDidOpen(TextDocumentItem textDocument) {
         var params = new DidOpenTextDocumentParams(textDocument);
         _server.getTextDocumentService().didOpen(params);
+    }
+
+    public List<ColorInformation> decorateBuffer(BufferContext bufferContext) {
+        try {
+            _log.info("Decorate buffer");
+            var colorParams = new DocumentColorParams(bufferContext.getBuffer().getTextDocumentID());
+            return _server.getTextDocumentService().documentColor(colorParams).join();
+        } catch (Exception e) {
+            _log.error("Error getting colours: ", e);
+            throw new RuntimeException("Error getting code actions: ", e);
+        }
     }
 
     private List<Either<Command, CodeAction>> getCodeActions(BufferContext bufferContext) {

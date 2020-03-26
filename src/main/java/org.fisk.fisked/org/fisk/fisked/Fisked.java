@@ -12,7 +12,7 @@ import org.fisk.fisked.ui.Window;
 import org.fisk.fisked.utils.LogFactory;
 import org.slf4j.Logger;
 
-public class App {
+public class Fisked {
     private static final Logger _log = LogFactory.createLog();
 
     private static void setupLogging() {
