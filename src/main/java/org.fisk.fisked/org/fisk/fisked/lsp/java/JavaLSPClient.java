@@ -76,7 +76,7 @@ public class JavaLSPClient extends Thread {
 
         var java = "java";
         var javaArgs = "-Declipse.application=org.eclipse.jdt.ls.core.id1 -Dosgi.bundles.defaultStartLevel=4 -Declipse.product=org.eclipse.jdt.ls.core.product -Dlog.level=ALL";
-        var jvmArgs = "-Xmx4G -XX:+UnlockExperimentalVMOptions -XX:+UseZGC --add-modules=ALL-SYSTEM --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED";
+        var jvmArgs = "-Xmx4G --add-modules=ALL-SYSTEM --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED";
         var jarPath = eclipsePath + "/plugins/org.eclipse.equinox.launcher_1.5.700.v20200107-1357.jar";
         var appArgs = "-configuration " + eclipsePath + "/config_linux -data " + workspacePath;
         var command = java + " " + javaArgs +  " " + jvmArgs + " -jar " + jarPath + " " + appArgs;
