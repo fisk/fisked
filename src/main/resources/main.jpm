@@ -1,10 +1,10 @@
 {
     module: "org.fisk.fisked-1.0.0"
     dependencies: [
-        "lanterna-3.0.1"
-        "lucene.core-8.4.1"
-        "org.eclipse.lsp4j-0.8.1"
-        "org.slf4j-2.0.0"
+        "lanterna-3.0.1",
+        "lucene.core-8.4.1",
+        "org.eclipse.lsp4j-0.8.1",
+        "org.slf4j-2.0.0",
         "org.slf4j.simple-2.0.0"
     ]
 }

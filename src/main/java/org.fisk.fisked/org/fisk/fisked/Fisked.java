@@ -32,14 +32,14 @@ public class Fisked {
     }
 
     private static Path checkArguments(String[] args) {
-        if (args.length != 1) {
+        if (args.length != 2) {
             System.out.println("fisked: Wrong number of arguments.");
             System.out.println("Try: fisked <file_path>");
             return null;
         }
 
         try {
-            var path = Path.of(args[0]);
+            var path = Path.of(args[1]);
             var file = path.toFile();
             if (!file.exists()) {
                 file.createNewFile();
