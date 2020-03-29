@@ -1,4 +1,5 @@
-target
 .classpath
 .settings
 .project
+build
+lib
