@@ -1,6 +1,7 @@
 {
     module: "org.fisk.fisked-1.0.0"
     dependencies: [
+        "gson-2.8.2",
         "java.sql-11.0.6",
         "lanterna-3.0.1",
         "lucene.core-8.4.1",
