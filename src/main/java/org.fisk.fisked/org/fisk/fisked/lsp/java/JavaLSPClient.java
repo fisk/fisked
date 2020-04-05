@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import com.google.gson.Gson;
-
 import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
 import org.eclipse.lsp4j.ApplyWorkspaceEditResponse;
 import org.eclipse.lsp4j.ClientCapabilities;
@@ -52,33 +50,43 @@ import org.fisk.fisked.text.BufferContext;
 import org.fisk.fisked.utils.LogFactory;
 import org.slf4j.Logger;
 
+import com.google.gson.Gson;
+
 public class JavaLSPClient extends Thread {
     private static final Logger _log = LogFactory.createLog();
 
     private Object _lock = new Object();
     private boolean _started = false;
+    private boolean _enabled = true;
 
     private InputStream _istream;
     private OutputStream _ostream;
     private LanguageServer _server;
     private ServerCapabilities _capabilities;
+    
+    private String _homePath = System.getProperty("user.home");
+    private String _fiskedHomePath = _homePath + "/.fisked";
+    private String _eclipsePath = _fiskedHomePath + "/deps/eclipse.jdt.ls/org.eclipse.jdt.ls.product/target/repository";
+    private String _projectPath = ProjectPaths.getProjectRootPath().toString();
+    private String _workspacePath = _fiskedHomePath + "/workspace";
+    
+    public JavaLSPClient() {
+        if (!new File(_eclipsePath).exists()) {
+            _log.info("No LSP support");
+            _enabled = false;
+        }
+    }
 
     private void setup() throws IOException {
-        var homePath = System.getProperty("user.home");
-        var fiskedHomePath = homePath + "/.fisked";
-        var eclipsePath = fiskedHomePath + "/deps/eclipse.jdt.ls/org.eclipse.jdt.ls.product/target/repository";
-        var projectPath = ProjectPaths.getProjectRootPath().toString();
-        var workspacePath = fiskedHomePath + "/workspace";
-
-        _log.info("LSP eclipse path: " + eclipsePath);
-        _log.info("LSP workspace path: " + projectPath);
-        _log.info("LSP workspace folder path: " + workspacePath);
+        _log.info("LSP eclipse path: " + _eclipsePath);
+        _log.info("LSP workspace path: " + _projectPath);
+        _log.info("LSP workspace folder path: " + _workspacePath);
 
         var java = "java";
         var javaArgs = "-Declipse.application=org.eclipse.jdt.ls.core.id1 -Dosgi.bundles.defaultStartLevel=4 -Declipse.product=org.eclipse.jdt.ls.core.product -Dlog.level=ALL";
         var jvmArgs = "-Xmx4G --add-modules=ALL-SYSTEM --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED";
-        var jarPath = eclipsePath + "/plugins/org.eclipse.equinox.launcher_1.5.700.v20200107-1357.jar";
-        var appArgs = "-configuration " + eclipsePath + "/config_linux -data " + workspacePath;
+        var jarPath = _eclipsePath + "/plugins/org.eclipse.equinox.launcher_1.5.700.v20200107-1357.jar";
+        var appArgs = "-configuration " + _eclipsePath + "/config_linux -data " + _workspacePath;
         var command = java + " " + javaArgs +  " " + jvmArgs + " -jar " + jarPath + " " + appArgs;
         var commandArg = command.split(" ");
         var processBuilder = new ProcessBuilder(commandArg);
@@ -162,7 +170,7 @@ public class JavaLSPClient extends Thread {
                     _server = clientLauncher.getRemoteProxy();
                     try {
                         var initParams = new InitializeParams();
-                        initParams.setRootUri(new File(projectPath).toURI().toString());
+                        initParams.setRootUri(new File(_projectPath).toURI().toString());
                         initParams.setCapabilities(getClientCapabilities());
                         var initialized = _server.initialize(initParams).get();
                         _capabilities = initialized.getCapabilities();
@@ -199,6 +207,9 @@ public class JavaLSPClient extends Thread {
     }
 
     public void run() {
+        if (!_enabled) {
+            return;
+        }
         try {
             setup();
         } catch (Throwable e) {
@@ -217,6 +228,9 @@ public class JavaLSPClient extends Thread {
     }
 
     public void ensureInit() {
+        if (!_enabled) {
+            return;
+        }
         for (;;) {
             synchronized (_lock) {
                 if (_started) {
@@ -232,11 +246,17 @@ public class JavaLSPClient extends Thread {
     }
 
     public void postDidOpen(TextDocumentItem textDocument) {
+        if (!_enabled) {
+            return;
+        }
         var params = new DidOpenTextDocumentParams(textDocument);
         _server.getTextDocumentService().didOpen(params);
     }
 
     public List<ColorInformation> decorateBuffer(BufferContext bufferContext) {
+        if (!_enabled) {
+            return new ArrayList<ColorInformation>();
+        }
         try {
             _log.info("Decorate buffer");
             var colorParams = new DocumentColorParams(bufferContext.getBuffer().getTextDocumentID());
@@ -324,6 +344,9 @@ public class JavaLSPClient extends Thread {
     }
 
     public void organizeImports(BufferContext bufferContext) {
+        if (!_enabled) {
+            return;
+        }
         try {
             var command = getCodeActionCommand(bufferContext, "Organize imports");
             if (command != null) {
