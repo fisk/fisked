@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentItem;
+import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 import org.fisk.fisked.lsp.java.JavaLSPClient;
 import org.fisk.fisked.ui.Cursor;
 import org.fisk.fisked.ui.Window;
@@ -19,6 +20,7 @@ public class Buffer {
     private Cursor _cursor;
     private BufferContext _bufferContext;
     private UndoLog _undoLog;
+    private int _version;
 
     public Buffer() {
     }
@@ -37,7 +39,7 @@ public class Buffer {
         } catch (IOException e) {
         }
         if (path.getFileName().endsWith(".java")) {
-            JavaLSPClient.getInstance().postDidOpen(getTextDocument());
+            JavaLSPClient.getInstance().didOpen(_bufferContext);
         }
     }
 
@@ -74,10 +76,18 @@ public class Buffer {
 
     public void rawInsert(int position, String str) {
         _string.insert(position, str);
+        _version++;
+        if (_path.getFileName().endsWith(".java")) {
+            JavaLSPClient.getInstance().didInsert(_bufferContext, position, str);
+        }
     }
 
     public void rawRemove(int startPosition, int endPosition) {
         _string.delete(startPosition, endPosition);
+        _version++;
+        if (_path.getFileName().endsWith(".java")) {
+            JavaLSPClient.getInstance().didRemove(_bufferContext, startPosition, endPosition);
+        }
     }
 
     public void remove(int startPosition, int endPosition) {
@@ -85,7 +95,7 @@ public class Buffer {
             return;
         }
         _undoLog.recordRemove(startPosition, endPosition);
-        _string.delete(startPosition, endPosition);
+        rawRemove(startPosition, endPosition);
         _cursor.setPosition(startPosition);
         _bufferContext.getTextLayout().calculate();
         _bufferContext.getBufferView().adaptViewToCursor();
@@ -93,7 +103,7 @@ public class Buffer {
 
     public void insert(String str) {
         _undoLog.recordInsert(_cursor.getPosition(), str);
-        _string.insert(_cursor.getPosition(), str);
+        rawInsert(_cursor.getPosition(), str);
         _bufferContext.getTextLayout().calculate();
         _cursor.setPosition(_cursor.getPosition() + str.length());
         _bufferContext.getBufferView().adaptViewToCursor();
@@ -101,7 +111,7 @@ public class Buffer {
 
     public void insert(int position, String str) {
         _undoLog.recordInsert(position, str);
-        _string.insert(position, str);
+        rawInsert(position, str);
         _bufferContext.getTextLayout().calculate();
         _cursor.setPosition(position + str.length());
         _bufferContext.getBufferView().adaptViewToCursor();
@@ -114,7 +124,7 @@ public class Buffer {
         int position = _cursor.getPosition();
         _undoLog.recordRemove(position - 1, position);
         _cursor.goBack();
-        _string.deleteCharAt(_cursor.getPosition());
+        rawRemove(_cursor.getPosition(), _cursor.getPosition() + 1);
         _bufferContext.getTextLayout().calculate();
         _bufferContext.getBufferView().adaptViewToCursor();
     }
@@ -128,7 +138,7 @@ public class Buffer {
             return;
         }
         _undoLog.recordRemove(position, position + 1);
-        _string.deleteCharAt(_cursor.getPosition());
+        rawRemove(_cursor.getPosition(), _cursor.getPosition() + 1);
         _bufferContext.getTextLayout().calculate();
         _bufferContext.getBufferView().adaptViewToCursor();
     }
@@ -140,7 +150,7 @@ public class Buffer {
             return;
         }
         _undoLog.recordRemove(start, end);
-        _string.delete(start, end);
+        rawRemove(start, end);
         _cursor.setPosition(start);
         _bufferContext.getTextLayout().calculate();
         _bufferContext.getBufferView().adaptViewToCursor();
@@ -156,7 +166,7 @@ public class Buffer {
             return;
         }
         _undoLog.recordRemove(start, end);
-        _string.delete(start, end);
+        rawRemove(start, end);
         _bufferContext.getTextLayout().calculate();
         _bufferContext.getBufferView().adaptViewToCursor();
     }
@@ -177,7 +187,7 @@ public class Buffer {
             start = Math.max(0, start - 1);
         }
         _undoLog.recordRemove(start, end);
-        _string.delete(start, end);
+        rawRemove(start, end);
         _bufferContext.getTextLayout().calculate();
         _cursor.setPosition(start);
         _bufferContext.getBufferView().adaptViewToCursor();
@@ -212,10 +222,22 @@ public class Buffer {
     }
 
     public void write() {
+        if (_path.getFileName().endsWith(".java")) {
+            JavaLSPClient.getInstance().willSave(_bufferContext);
+        }
         try {
             Files.writeString(_path, _string.toString());
             Window.getInstance().getCommandView().setMessage("Saved file");
         } catch (IOException e) {
+        }
+        if (_path.getFileName().endsWith(".java")) {
+            JavaLSPClient.getInstance().didSave(_bufferContext);
+        }
+    }
+    
+    public void close() {
+        if (_path.getFileName().endsWith(".java")) {
+            JavaLSPClient.getInstance().didClose(_bufferContext);
         }
     }
 
@@ -244,5 +266,9 @@ public class Buffer {
 
     public TextDocumentIdentifier getTextDocumentID() {
         return new TextDocumentIdentifier(_path.toFile().toURI().toString());
+    }
+    
+    public VersionedTextDocumentIdentifier getVersionedTextDocumentID() {
+        return new VersionedTextDocumentIdentifier(_path.toFile().toURI().toString(), _version);
     }
 }

@@ -23,7 +23,10 @@ import org.eclipse.lsp4j.ColorInformation;
 import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.ConfigurationParams;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DidChangeTextDocumentParams;
+import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
+import org.eclipse.lsp4j.DidSaveTextDocumentParams;
 import org.eclipse.lsp4j.DocumentColorParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.MessageActionItem;
@@ -37,11 +40,15 @@ import org.eclipse.lsp4j.SemanticHighlightingParams;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
 import org.eclipse.lsp4j.TextDocumentClientCapabilities;
+import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.TextDocumentItem;
+import org.eclipse.lsp4j.TextDocumentSaveReason;
 import org.eclipse.lsp4j.UnregistrationParams;
+import org.eclipse.lsp4j.WillSaveTextDocumentParams;
 import org.eclipse.lsp4j.WorkspaceClientCapabilities;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.eclipse.lsp4j.jsonrpc.validation.NonNull;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -245,14 +252,6 @@ public class JavaLSPClient extends Thread {
         }
     }
 
-    public void postDidOpen(TextDocumentItem textDocument) {
-        if (!_enabled) {
-            return;
-        }
-        var params = new DidOpenTextDocumentParams(textDocument);
-        _server.getTextDocumentService().didOpen(params);
-    }
-
     public List<ColorInformation> decorateBuffer(BufferContext bufferContext) {
         if (!_enabled) {
             return new ArrayList<ColorInformation>();
@@ -287,11 +286,14 @@ public class JavaLSPClient extends Thread {
     private Command getCodeActionCommand(BufferContext bufferContext, String title) {
         for (var either: getCodeActions(bufferContext)) {
             if (either.isLeft()) {
-                _log.info("Code action: " + either);
+                _log.info("Left code action: " + either);
                 var command = either.getLeft();
                 if (command.getTitle().equals(title)) {
                     return command;
                 }
+            }
+            if (either.isRight()) {
+                _log.info("Right code action: " + either);
             }
         }
         return null;
@@ -325,6 +327,7 @@ public class JavaLSPClient extends Thread {
                 var endIndex = context.getTextLayout().getIndexForPhysicalLineCharacter(endLine, endCharacter);
                 var buffer = context.getBuffer();
                 var newText = (String)edit.get("newText");
+                newText = newText.replaceAll("\t", "    ");
                 _log.info("Insert " + newText + " at " + startIndex);
                 _log.info("Remove [" + startIndex + ", " + endIndex + "]");
                 buffer.remove(startIndex, endIndex);
@@ -355,5 +358,119 @@ public class JavaLSPClient extends Thread {
         } catch (Exception e) {
             _log.error("Exception: ", e);
         }
+    }
+
+    public void makeFinal(BufferContext bufferContext) {
+        if (!_enabled) {
+            return;
+        }
+        try {
+            var command = getCodeActionCommand(bufferContext, "Change modifiers to final where possible");
+            if (command != null) {
+                applyCommand(bufferContext, command);
+            }
+        } catch (Exception e) {
+            _log.error("Exception: ", e);
+        }
+    }
+
+    public void generateAccessors(BufferContext bufferContext) {
+        if (!_enabled) {
+            return;
+        }
+        try {
+            var command = getCodeActionCommand(bufferContext, "Generate Getters and Setters");
+            if (command != null) {
+                applyCommand(bufferContext, command);
+            }
+        } catch (Exception e) {
+            _log.error("Exception: ", e);
+        }
+    }
+
+    public void generateToString(BufferContext bufferContext) {
+        if (!_enabled) {
+            return;
+        }
+        try {
+            var command = getCodeActionCommand(bufferContext, "Generate toString()...");
+            if (command != null) {
+                applyCommand(bufferContext, command);
+            }
+        } catch (Exception e) {
+            _log.error("Exception: ", e);
+        }
+    }
+    
+    public void willSave(BufferContext bufferContext) {
+        if (!_enabled) {
+            return;
+        }
+        var params = new WillSaveTextDocumentParams();
+        params.setTextDocument(bufferContext.getBuffer().getTextDocumentID());
+        params.setReason(TextDocumentSaveReason.Manual);
+        _server.getTextDocumentService().willSave(params);
+    }
+    
+    public void didSave(BufferContext bufferContext) {
+        if (!_enabled) {
+            return;
+        }
+        var params = new DidSaveTextDocumentParams();
+        params.setTextDocument(bufferContext.getBuffer().getTextDocumentID());
+        params.setText(bufferContext.getBuffer().getString());
+        _server.getTextDocumentService().didSave(params);
+    }
+
+    public void didOpen(BufferContext bufferContext) {
+        if (!_enabled) {
+            return;
+        }
+        var params = new DidOpenTextDocumentParams();
+        params.setTextDocument(bufferContext.getBuffer().getTextDocument());
+        _server.getTextDocumentService().didOpen(params);
+    }
+
+    public void didClose(BufferContext bufferContext) {
+        if (!_enabled) {
+            return;
+        }
+        var params = new DidCloseTextDocumentParams();
+        params.setTextDocument(bufferContext.getBuffer().getTextDocumentID());
+        _server.getTextDocumentService().didClose(params);
+    }
+
+    public void didInsert(BufferContext bufferContext, int position, String text) {
+        if (!_enabled) {
+            return;
+        }
+        var contentChanges = new ArrayList<TextDocumentContentChangeEvent>();
+        var lineIndex = bufferContext.getTextLayout().getPhysicalLineAt(position).getY();
+        var startIndex = bufferContext.getTextLayout().getIndexForPhysicalLineCharacter(lineIndex, position);
+        var range = new Range(new Position(lineIndex, startIndex), new Position(lineIndex, startIndex));
+        var insertEvent = new TextDocumentContentChangeEvent(range, text.length(), text);
+        contentChanges.add(insertEvent);
+        var params = new DidChangeTextDocumentParams();
+        params.setTextDocument(bufferContext.getBuffer().getVersionedTextDocumentID());
+        params.setContentChanges(contentChanges);
+        _server.getTextDocumentService().didChange(params);
+    }
+
+    public void didRemove(BufferContext bufferContext, int startPosition, int endPosition) {
+        if (!_enabled) {
+            return;
+        }
+        var contentChanges = new ArrayList<TextDocumentContentChangeEvent>();
+        var startLineIndex = bufferContext.getTextLayout().getPhysicalLineAt(startPosition).getY();
+        var startIndex = bufferContext.getTextLayout().getIndexForPhysicalLineCharacter(startLineIndex, startPosition);
+        var endLineIndex = bufferContext.getTextLayout().getPhysicalLineAt(endPosition).getY();
+        var endIndex = bufferContext.getTextLayout().getIndexForPhysicalLineCharacter(endLineIndex, endPosition);
+        var range = new Range(new Position(startLineIndex, startIndex), new Position(endLineIndex, endIndex));
+        var removeEvent = new TextDocumentContentChangeEvent(range, 0, "");
+        contentChanges.add(removeEvent);
+        var params = new DidChangeTextDocumentParams();
+        params.setTextDocument(bufferContext.getBuffer().getVersionedTextDocumentID());
+        params.setContentChanges(contentChanges);
+        _server.getTextDocumentService().didChange(params);
     }
 }

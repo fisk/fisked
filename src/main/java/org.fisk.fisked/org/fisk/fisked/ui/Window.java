@@ -64,6 +64,7 @@ public class Window implements Drawable {
         var bufferView = _bufferContext.getBufferView();
         bufferView.removeFromParent();
         var rect = bufferView.getBounds();
+        _bufferContext.getBuffer().close();
         _bufferContext = new BufferContext(rect, path);
         _rootView.addSubview(_bufferContext.getBufferView());
         _rootView.setFirstResponder(_bufferContext.getBufferView());
