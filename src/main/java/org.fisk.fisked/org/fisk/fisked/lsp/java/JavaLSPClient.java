@@ -697,7 +697,7 @@ public class JavaLSPClient extends Thread {
         var endLineIndex = endLine.getY();
         var endIndex = endPosition - endLine.getStartPosition();
         var range = new Range(new Position(startLineIndex, startIndex), new Position(endLineIndex, endIndex));
-        var removeEvent = new TextDocumentContentChangeEvent(range, 0, "");
+        var removeEvent = new TextDocumentContentChangeEvent(range, endPosition - startPosition, "");
         contentChanges.add(removeEvent);
         var params = new DidChangeTextDocumentParams();
         params.setTextDocument(bufferContext.getBuffer().getVersionedTextDocumentID());
