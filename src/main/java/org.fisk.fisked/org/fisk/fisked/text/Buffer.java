@@ -23,6 +23,7 @@ import org.fisk.fisked.utils.LogFactory;
 import org.slf4j.Logger;
 
 import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.TextColor.ANSI;
 
 public class Buffer {
     private StringBuilder _string = new StringBuilder();
@@ -346,11 +347,31 @@ public class Buffer {
 
     public void applyDecorations(int version, List<SemanticHighlightingInformation> info) {
         _log.info("Applying decorations for version " + version);
+        AttributedString str = null;
         for (var decoration: _decorations) {
+            if (decoration._isDecorated) {
+                _log.info("Found decorated string for version " + decoration._version);
+                str = AttributedString.create(decoration._str);
+            } else if (str != null) {
+                if (decoration._didInsert) {
+                    _log.info("Inserting string for version " + decoration._version);
+                    str.insert(decoration._insertString, decoration._insertPosition, TextColor.ANSI.DEFAULT, TextColor.ANSI.DEFAULT);
+                }
+                if (decoration._didRemove) {
+                    _log.info("Removing string for version " + decoration._version);
+                    str.remove(decoration._removeStart, decoration._removeEnd);
+                }
+            }
             if (decoration._version != version) {
                 _log.info("Skipping version " + decoration._version);
             } else {
                 _log.info("Found version " + version);
+                if (str != null) {
+                    if (!decoration._str.toString().equals(str.toString())) {
+                        throw new RuntimeException("Strings do not match: 1) " + decoration._str.toString() + "\n2) " + str.toString());
+                    }
+                    decoration._str = AttributedString.create(str);
+                }
                 _log.info("String length: " + decoration._str.length());
                 for (var line: info) {
                     var decodedTokens = SemanticHighlightingTokens.decode(line.getTokens());
