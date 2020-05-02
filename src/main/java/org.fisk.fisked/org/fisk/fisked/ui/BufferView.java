@@ -2,7 +2,6 @@ package org.fisk.fisked.ui;
 
 import com.googlecode.lanterna.TextColor;
 
-import org.fisk.fisked.lsp.java.JavaLSPClient;
 import org.fisk.fisked.terminal.TerminalContext;
 import org.fisk.fisked.text.AttributedString;
 import org.fisk.fisked.text.BufferContext;
@@ -35,16 +34,15 @@ public class BufferView extends View {
         _log.info("Draw buffer view");
         var mode = Window.getInstance().getCurrentMode();
         mode.draw(rect);
+        var attrString = _bufferContext.getBuffer().getAttributedString();
+        _log.info("Attributed string length: " + attrString.length());
         _bufferContext.getTextLayout().getGlyphs().forEach((glyph) -> {
-            var backgroundColour = _backgroundColour;
-            var foregroundColour = TextColor.ANSI.DEFAULT;
+            var character = attrString.getCharacter(glyph.getPosition());
             if (mode.isSelected(glyph.getPosition())) {
-                backgroundColour = TextColor.ANSI.YELLOW;
-                foregroundColour = TextColor.ANSI.BLACK;
+                character = AttributedString.create(glyph.getCharacter(), TextColor.ANSI.BLACK, TextColor.ANSI.YELLOW);
             }
-            var c = AttributedString.create(glyph.getCharacter(), foregroundColour, backgroundColour);
             var point = Point.create(rect.getPoint().getX() + glyph.getX(), rect.getPoint().getY() + glyph.getY() - _startLine);
-            c.drawAt(point, textGraphics);
+            character.drawAt(point, textGraphics);
         });
     }
 

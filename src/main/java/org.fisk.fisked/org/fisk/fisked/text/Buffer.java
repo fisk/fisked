@@ -4,15 +4,25 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
+import org.eclipse.lsp4j.SemanticHighlightingInformation;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
+import org.eclipse.lsp4j.util.SemanticHighlightingTokens;
+import org.fisk.fisked.EventThread;
+import org.fisk.fisked.event.RunnableEvent;
 import org.fisk.fisked.lsp.java.JavaLSPClient;
 import org.fisk.fisked.ui.Cursor;
 import org.fisk.fisked.ui.Window;
 import org.fisk.fisked.undo.UndoLog;
+import org.fisk.fisked.utils.LogFactory;
+import org.slf4j.Logger;
+
+import com.googlecode.lanterna.TextColor;
 
 public class Buffer {
     private StringBuilder _string = new StringBuilder();
@@ -20,10 +30,8 @@ public class Buffer {
     private Cursor _cursor;
     private BufferContext _bufferContext;
     private UndoLog _undoLog;
-    private int _version;
-
-    public Buffer() {
-    }
+    private int _version = 1;
+    private static Logger _log = LogFactory.createLog();
 
     public Cursor getCursor() {
         return _cursor;
@@ -36,10 +44,11 @@ public class Buffer {
         _undoLog = new UndoLog(bufferContext);
         try {
             _string.append(Files.readString(path));
+            var decoration = new Decoration();
+            decoration._str = AttributedString.create(_string.toString(), TextColor.ANSI.DEFAULT, TextColor.ANSI.DEFAULT);
+            decoration._version = _version;
+            _decorations.add(decoration);
         } catch (IOException e) {
-        }
-        if (path.getFileName().endsWith(".java")) {
-            JavaLSPClient.getInstance().didOpen(_bufferContext);
         }
     }
 
@@ -77,7 +86,14 @@ public class Buffer {
     public void rawInsert(int position, String str) {
         _string.insert(position, str);
         _version++;
-        if (_path.getFileName().endsWith(".java")) {
+        var decoration = new Decoration();
+        decoration._str = AttributedString.create(_string.toString(), TextColor.ANSI.DEFAULT, TextColor.ANSI.DEFAULT);
+        decoration._version = _version;
+        decoration._didInsert = true;
+        decoration._insertPosition = position;
+        decoration._insertString = str;
+        _decorations.add(decoration);
+        if (isJava()) {
             JavaLSPClient.getInstance().didInsert(_bufferContext, position, str);
         }
     }
@@ -85,7 +101,14 @@ public class Buffer {
     public void rawRemove(int startPosition, int endPosition) {
         _string.delete(startPosition, endPosition);
         _version++;
-        if (_path.getFileName().endsWith(".java")) {
+        var decoration = new Decoration();
+        decoration._str = AttributedString.create(_string.toString(), TextColor.ANSI.DEFAULT, TextColor.ANSI.DEFAULT);
+        decoration._version = _version;
+        decoration._didRemove = true;
+        decoration._removeStart = startPosition;
+        decoration._removeEnd = endPosition;
+        _decorations.add(decoration);
+        if (isJava()) {
             JavaLSPClient.getInstance().didRemove(_bufferContext, startPosition, endPosition);
         }
     }
@@ -222,7 +245,7 @@ public class Buffer {
     }
 
     public void write() {
-        if (_path.getFileName().endsWith(".java")) {
+        if (isJava()) {
             JavaLSPClient.getInstance().willSave(_bufferContext);
         }
         try {
@@ -230,14 +253,20 @@ public class Buffer {
             Window.getInstance().getCommandView().setMessage("Saved file");
         } catch (IOException e) {
         }
-        if (_path.getFileName().endsWith(".java")) {
+        if (isJava()) {
             JavaLSPClient.getInstance().didSave(_bufferContext);
         }
     }
     
     public void close() {
-        if (_path.getFileName().endsWith(".java")) {
+        if (isJava()) {
             JavaLSPClient.getInstance().didClose(_bufferContext);
+        }
+    }
+    
+    public void open() {
+        if (isJava()) {
+            JavaLSPClient.getInstance().didOpen(_bufferContext);
         }
     }
 
@@ -256,9 +285,137 @@ public class Buffer {
     public URI getURI() {
         return _path.toFile().toURI();
     }
+    
+    private Boolean _isJava;
+    private boolean isJava() {
+        if (_isJava != null) {
+            return _isJava;
+        }
+        String extension = "";
+        String fileName = _path.getFileName().toString();
+
+        int i = fileName.lastIndexOf('.');
+        if (i >= 0) {
+            extension = fileName.substring(i+1);
+        }
+        _isJava = extension.equals("java");
+        return _isJava;
+    }
+    
+    private static class Decoration {
+        private volatile AttributedString _str;
+        private int _version;
+        
+        private boolean _didInsert;
+        private int _insertPosition;
+        private String _insertString;
+        
+        private boolean _didRemove;
+        private int _removeStart;
+        private int _removeEnd;
+        
+        private volatile boolean _isDecorated;
+    }
+    
+    private CopyOnWriteArrayList<Decoration> _decorations = new CopyOnWriteArrayList<>();
+    
+    private static Pattern _javaCommentPattern = Pattern.compile("(/\\*([^*]|[\\n]|(\\*+([^*/]|[\\n])))*\\*+/)|(//.*)", Pattern.MULTILINE);
+    private static Pattern _javaStringPattern = Pattern.compile("\\\"([^\\\"]|[\\n])*\\\"", Pattern.MULTILINE);
+    private static Pattern _javaKeywordPattern = Pattern.compile(
+            "(\\bprivate\\b)|(\\bprotected\\b)|(\\bpublic\\b)|(\\bstatic\\b)|(\\babstract\\b)|" + 
+            "(\\bvoid\\b)|(\\bbyte\\b)|(\\bchar\\b)|(\\bboolean\\b)|(\\bshort\\b)|(\\bint\\b)|(\\blong\\b)|(\\bfloat\\b)|" + 
+            "(\\bdouble\\b)|(\\bimplements\\b)|(\\bextends\\b)|(\\bclass\\b)|(\\benum\\b)|(\\bfinal\\b)|" + 
+            "(\\btry\\b)|(\\bcatch\\b)|(\\bthrows\\b)|(\\bthrow\\b)|(\\brecord\\b)|(\\bnew\\b)|(\\breturn\\b)|" +
+            "(\\bif\\b)|(\\bfor\\b)|(\\bwhile\\b)|(\\bdo\\b)|(\\bimport\\b)|(\\bpackage\\b)", Pattern.MULTILINE);
+    private static Pattern _javaNullPattern = Pattern.compile("\\bnull\\b", Pattern.MULTILINE);
+    
+    private void applyJavaTokenColouring(AttributedString str) {
+        var string = str.toString();
+        formatToken(str, string, _javaKeywordPattern, TextColor.ANSI.RED);
+        formatToken(str, string, _javaNullPattern, TextColor.ANSI.CYAN);
+        formatToken(str, string, _javaCommentPattern, TextColor.ANSI.GREEN);
+        formatToken(str, string, _javaStringPattern, TextColor.ANSI.YELLOW);
+    }
+    
+    private void formatToken(AttributedString str, String string, Pattern pattern, TextColor colour) {
+        var matcher = pattern.matcher(string);
+        while (matcher.find()) {
+            str.format(matcher.start(), matcher.end(), colour, TextColor.ANSI.DEFAULT);
+        }
+    }
+
+    public void applyDecorations(int version, List<SemanticHighlightingInformation> info) {
+        _log.info("Applying decorations for version " + version);
+        for (var decoration: _decorations) {
+            if (decoration._version != version) {
+                _log.info("Skipping version " + decoration._version);
+            } else {
+                _log.info("Found version " + version);
+                _log.info("String length: " + decoration._str.length());
+                for (var line: info) {
+                    var decodedTokens = SemanticHighlightingTokens.decode(line.getTokens());
+                    var lineNum = line.getLine();
+                    for (var token: decodedTokens) {
+                        var charNum = token.character;
+                        int index = _bufferContext.getTextLayout().getIndexForPhysicalLineCharacter(lineNum, charNum);
+                        _log.info("Format range [" + index + ", " + (index + token.length) + ")");
+                        decoration._str.format(index, index + token.length, 
+                                JavaLSPClient.getInstance().foregroundColourForScope(token.scope), 
+                                TextColor.ANSI.DEFAULT);
+                    }
+                }
+                if (isJava()) {
+                    applyJavaTokenColouring(decoration._str);
+                }
+                decoration._isDecorated = true;
+                EventThread.getInstance().enqueue(new RunnableEvent(() -> {
+                    _log.info("Redrawing version " + version);
+                    _bufferContext.getBufferView().setNeedsRedraw();
+                }));
+                break;
+            }
+        }
+    }
+    
+    public AttributedString getAttributedString() {
+        Decoration lastAttributedDecoration = null;
+        for (var decoration: _decorations) {
+            if (decoration._isDecorated) {
+                lastAttributedDecoration = decoration;
+            }
+        }
+        if (lastAttributedDecoration != null) {
+            for (var decoration: _decorations) {
+                if (decoration == lastAttributedDecoration) {
+                    break;
+                } else {
+                    _decorations.remove(decoration);
+                }
+            }
+            AttributedString str = null;
+            for (var decoration: _decorations) {
+                if (decoration._isDecorated) {
+                    _log.info("Found decorated string for version " + decoration._version);
+                    str = AttributedString.create(decoration._str);
+                } else if (str != null) {
+                    if (decoration._didInsert) {
+                        _log.info("Inserting string for version " + decoration._version);
+                        str.insert(decoration._insertString, decoration._insertPosition, TextColor.ANSI.DEFAULT, TextColor.ANSI.DEFAULT);
+                    }
+                    if (decoration._didRemove) {
+                        _log.info("Removing string for version " + decoration._version);
+                        str.remove(decoration._removeStart, decoration._removeEnd);
+                    }
+                }
+            }
+            return str;
+        } else {
+            return AttributedString.create(_string.toString(), TextColor.ANSI.DEFAULT, TextColor.ANSI.DEFAULT);
+        }
+    }
 
     public TextDocumentItem getTextDocument() {
-        if (_path.getFileName().endsWith(".java")) {
+        if (isJava()) {
             return new TextDocumentItem(_path.toFile().toURI().toString(), "java", 11, _string.toString());
         }
         return null;

@@ -6,11 +6,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
 import org.eclipse.lsp4j.ApplyWorkspaceEditResponse;
@@ -19,6 +21,8 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionCapabilities;
 import org.eclipse.lsp4j.CodeActionContext;
 import org.eclipse.lsp4j.CodeActionParams;
+import org.eclipse.lsp4j.CodeLensCapabilities;
+import org.eclipse.lsp4j.CodeLensParams;
 import org.eclipse.lsp4j.ColorInformation;
 import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.ConfigurationParams;
@@ -28,12 +32,15 @@ import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
 import org.eclipse.lsp4j.DocumentColorParams;
+import org.eclipse.lsp4j.ExecuteCommandCapabilities;
+import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.ReferencesCapabilities;
 import org.eclipse.lsp4j.RegistrationParams;
 import org.eclipse.lsp4j.SemanticHighlightingCapabilities;
 import org.eclipse.lsp4j.SemanticHighlightingParams;
@@ -41,23 +48,23 @@ import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
 import org.eclipse.lsp4j.TextDocumentClientCapabilities;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
-import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.TextDocumentSaveReason;
 import org.eclipse.lsp4j.UnregistrationParams;
 import org.eclipse.lsp4j.WillSaveTextDocumentParams;
 import org.eclipse.lsp4j.WorkspaceClientCapabilities;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.eclipse.lsp4j.jsonrpc.validation.NonNull;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.fisk.fisked.fileindex.ProjectPaths;
 import org.fisk.fisked.text.BufferContext;
+import org.fisk.fisked.ui.Window;
 import org.fisk.fisked.utils.LogFactory;
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
+import com.googlecode.lanterna.TextColor;
 
 public class JavaLSPClient extends Thread {
     private static final Logger _log = LogFactory.createLog();
@@ -82,6 +89,184 @@ public class JavaLSPClient extends Thread {
             _log.info("No LSP support");
             _enabled = false;
         }
+        initColours();
+    }
+    
+    private void initColours() {
+        _foregroundColours.put(String.join(":", new String[] {
+            "invalid.deprecated.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.RED);
+        _foregroundColours.put(String.join(":", new String[] {
+            "variable.other.autoboxing.java",
+            "meta.method.body.java",
+            "meta.method.java",
+            "meta.class.body.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.BLUE);
+        _foregroundColours.put(String.join(":", new String[] {
+            "storage.modifier.static.java",
+            "storage.modifier.final.java",
+            "variable.other.definition.java",
+            "meta.definition.variable.java",
+            "meta.class.body.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.YELLOW);
+        _foregroundColours.put(String.join(":", new String[] {
+            "storage.modifier.static.java",
+            "variable.other.definition.java",
+            "meta.definition.variable.java",
+            "meta.class.body.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.YELLOW);
+        _foregroundColours.put(String.join(":", new String[] {
+            "meta.function-call.java",
+            "meta.method.body.java",
+            "meta.method.java",
+            "meta.class.body.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.BLUE);
+        _foregroundColours.put(String.join(":", new String[] {
+            "meta.definition.variable.java",
+            "meta.class.body.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.GREEN);
+        _foregroundColours.put(String.join(":", new String[] {
+            "entity.name.function.java",
+            "meta.method.identifier.java",
+            "meta.method.java",
+            "meta.class.body.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.BLUE);
+        _foregroundColours.put(String.join(":", new String[] {
+            "storage.modifier.static.java",
+            "entity.name.function.java",
+            "meta.function-call.java",
+            "meta.method.body.java",
+            "meta.method.java",
+            "meta.class.body.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.BLUE);
+        _foregroundColours.put(String.join(":", new String[] {
+            "storage.modifier.abstract.java",
+            "entity.name.function.java",
+            "meta.function-call.java",
+            "meta.method.body.java",
+            "meta.method.java",
+            "meta.class.body.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.BLUE);
+        _foregroundColours.put(String.join(":", new String[] {
+            "constant.other.key.java",
+            "meta.declaration.annotation.java",
+            "source.java"
+        }), TextColor.ANSI.CYAN);
+        _foregroundColours.put(String.join(":", new String[] {
+            "entity.name.function.java",
+            "meta.function-call.java",
+            "meta.method.body.java",
+            "meta.method.java",
+            "meta.class.body.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.BLUE);
+        _foregroundColours.put(String.join(":", new String[] {
+            "variable.parameter.java",
+            "meta.method.identifier.java",
+            "meta.method.java",
+            "meta.class.body.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.MAGENTA);
+        _foregroundColours.put(String.join(":", new String[] {
+            "variable.other.definition.java",
+            "meta.definition.variable.java",
+            "meta.method.body.java",
+            "meta.method.java",
+            "meta.class.body.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.MAGENTA);
+        _foregroundColours.put(String.join(":", new String[] {
+            "meta.method.body.java",
+            "meta.method.java",
+            "meta.class.body.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.DEFAULT);
+        _foregroundColours.put(String.join(":", new String[] {
+            "storage.type.generic.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.GREEN);
+        _foregroundColours.put(String.join(":", new String[] {
+            "entity.name.function.java",
+            "meta.method.identifier.java",
+            "meta.function-call.java",
+            "meta.method.java",
+            "meta.class.body.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.BLUE);
+        _foregroundColours.put(String.join(":", new String[] {
+            "storage.type.generic.java",
+            "meta.definition.class.implemented.interfaces.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.MAGENTA);
+        _foregroundColours.put(String.join(":", new String[] {
+            "storage.modifier.abstract.java",
+            "entity.name.type.class.java",
+            "meta.class.identifier.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.GREEN);
+        _foregroundColours.put(String.join(":", new String[] {
+            "entity.name.type.class.java",
+            "meta.class.identifier.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.GREEN);
+        _foregroundColours.put(String.join(":", new String[] {
+            "entity.name.type.enum.java",
+            "meta.enum.java",
+            "source.java"
+        }), TextColor.ANSI.GREEN);
+        _foregroundColours.put(String.join(":", new String[] {
+            "storage.type.annotation.java",
+            "meta.declaration.annotation.java",
+            "source.java"
+        }), TextColor.ANSI.GREEN);
+        _foregroundColours.put(String.join(":", new String[] {
+            "entity.name.type.interface.java",
+            "meta.class.identifier.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.GREEN);
+        _foregroundColours.put(String.join(":", new String[] {
+            "constant.numeric.decimal.java",
+            "meta.definition.variable.java",
+            "meta.method.body.java",
+            "meta.method.java",
+            "meta.class.body.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.MAGENTA);
+        _foregroundColours.put(String.join(":", new String[] {
+            "keyword.other.var.java",
+            "meta.class.body.java",
+            "meta.class.java",
+            "source.java"
+        }), TextColor.ANSI.RED);
     }
 
     private void setup() throws IOException {
@@ -148,6 +333,11 @@ public class JavaLSPClient extends Thread {
                         @Override
                         public void semanticHighlighting(SemanticHighlightingParams params) {
                             _log.info("Semantic info: " + params);
+                            var document = params.getTextDocument();
+                            var currentBuffer = Window.getInstance().getBufferContext().getBuffer();
+                            if (Paths.get(document.getUri()).equals(Paths.get(currentBuffer.getTextDocumentID().getUri()))) {
+                                currentBuffer.applyDecorations(document.getVersion(), params.getLines());
+                            }
                         }
                         @Override
                         public CompletableFuture<List<WorkspaceFolder>> workspaceFolders() {
@@ -201,6 +391,11 @@ public class JavaLSPClient extends Thread {
     private ClientCapabilities getClientCapabilities() {
         var workspace = new WorkspaceClientCapabilities();
         workspace.setApplyEdit(true);
+        workspace.setConfiguration(true);
+        
+        var executeCommand = new ExecuteCommandCapabilities();
+        workspace.setExecuteCommand(executeCommand);
+        
         var textDocument = new TextDocumentClientCapabilities();
 
         var semanticHighlighting = new SemanticHighlightingCapabilities(true);
@@ -208,6 +403,12 @@ public class JavaLSPClient extends Thread {
 
         var codeAction = new CodeActionCapabilities(true);
         textDocument.setCodeAction(codeAction);
+        
+        var codeLens = new CodeLensCapabilities();
+        textDocument.setCodeLens(codeLens);
+        
+        var references = new ReferencesCapabilities();
+        textDocument.setReferences(references);
 
         var clientCapabilities = new ClientCapabilities(workspace, textDocument, null);
         return clientCapabilities;
@@ -264,6 +465,27 @@ public class JavaLSPClient extends Thread {
             _log.error("Error getting colours: ", e);
             throw new RuntimeException("Error getting code actions: ", e);
         }
+    }
+    
+    public void codeLens(BufferContext bufferContext) {
+        try {
+            var params = new CodeLensParams();
+            params.setTextDocument(bufferContext.getBuffer().getTextDocumentID());
+            var result = _server.getTextDocumentService().codeLens(params).get();
+            for (var r: result) {
+                _log.info("Code lens item: " + r);
+                var resolved = _server.getTextDocumentService().resolveCodeLens(r).get();
+                _log.info("Resolved code lens item: " + resolved);
+                var params2 = new ExecuteCommandParams();
+                params2.setCommand(resolved.getCommand().getCommand());
+                params2.setArguments(resolved.getCommand().getArguments());
+                var commandResult = _server.getWorkspaceService().executeCommand(params2).get();
+                _log.info("Command result: " + commandResult);
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            _log.error("Code lens failed: ", e);
+        }
+        
     }
 
     private List<Either<Command, CodeAction>> getCodeActions(BufferContext bufferContext) {
@@ -406,6 +628,7 @@ public class JavaLSPClient extends Thread {
         if (!_enabled) {
             return;
         }
+        _log.info("willSave");
         var params = new WillSaveTextDocumentParams();
         params.setTextDocument(bufferContext.getBuffer().getTextDocumentID());
         params.setReason(TextDocumentSaveReason.Manual);
@@ -416,6 +639,7 @@ public class JavaLSPClient extends Thread {
         if (!_enabled) {
             return;
         }
+        _log.info("didSave");
         var params = new DidSaveTextDocumentParams();
         params.setTextDocument(bufferContext.getBuffer().getTextDocumentID());
         params.setText(bufferContext.getBuffer().getString());
@@ -426,6 +650,7 @@ public class JavaLSPClient extends Thread {
         if (!_enabled) {
             return;
         }
+        _log.info("didOpen");
         var params = new DidOpenTextDocumentParams();
         params.setTextDocument(bufferContext.getBuffer().getTextDocument());
         _server.getTextDocumentService().didOpen(params);
@@ -435,6 +660,7 @@ public class JavaLSPClient extends Thread {
         if (!_enabled) {
             return;
         }
+        _log.info("didClose");
         var params = new DidCloseTextDocumentParams();
         params.setTextDocument(bufferContext.getBuffer().getTextDocumentID());
         _server.getTextDocumentService().didClose(params);
@@ -445,10 +671,12 @@ public class JavaLSPClient extends Thread {
             return;
         }
         var contentChanges = new ArrayList<TextDocumentContentChangeEvent>();
-        var lineIndex = bufferContext.getTextLayout().getPhysicalLineAt(position).getY();
-        var startIndex = bufferContext.getTextLayout().getIndexForPhysicalLineCharacter(lineIndex, position);
-        var range = new Range(new Position(lineIndex, startIndex), new Position(lineIndex, startIndex));
-        var insertEvent = new TextDocumentContentChangeEvent(range, text.length(), text);
+        var line = bufferContext.getTextLayout().getPhysicalLineAt(position);
+        var lineIndex = line.getY();
+        var charIndex = position - line.getStartPosition();
+        _log.info("didInsert " + text + " at " +  position + " (" + lineIndex + ", " + charIndex + ")");
+        var range = new Range(new Position(lineIndex, charIndex), new Position(lineIndex, charIndex));
+        var insertEvent = new TextDocumentContentChangeEvent(range, 0, text);
         contentChanges.add(insertEvent);
         var params = new DidChangeTextDocumentParams();
         params.setTextDocument(bufferContext.getBuffer().getVersionedTextDocumentID());
@@ -460,11 +688,14 @@ public class JavaLSPClient extends Thread {
         if (!_enabled) {
             return;
         }
+        _log.info("didRemove at " + startPosition + ", " + endPosition);
         var contentChanges = new ArrayList<TextDocumentContentChangeEvent>();
-        var startLineIndex = bufferContext.getTextLayout().getPhysicalLineAt(startPosition).getY();
-        var startIndex = bufferContext.getTextLayout().getIndexForPhysicalLineCharacter(startLineIndex, startPosition);
-        var endLineIndex = bufferContext.getTextLayout().getPhysicalLineAt(endPosition).getY();
-        var endIndex = bufferContext.getTextLayout().getIndexForPhysicalLineCharacter(endLineIndex, endPosition);
+        var startLine = bufferContext.getTextLayout().getPhysicalLineAt(startPosition);
+        var startLineIndex = startLine.getY();
+        var startIndex = startPosition - startLine.getStartPosition();
+        var endLine = bufferContext.getTextLayout().getPhysicalLineAt(endPosition);
+        var endLineIndex = endLine.getY();
+        var endIndex = endPosition - endLine.getStartPosition();
         var range = new Range(new Position(startLineIndex, startIndex), new Position(endLineIndex, endIndex));
         var removeEvent = new TextDocumentContentChangeEvent(range, 0, "");
         contentChanges.add(removeEvent);
@@ -472,5 +703,22 @@ public class JavaLSPClient extends Thread {
         params.setTextDocument(bufferContext.getBuffer().getVersionedTextDocumentID());
         params.setContentChanges(contentChanges);
         _server.getTextDocumentService().didChange(params);
+    }
+
+    public ServerCapabilities getCapabilities() {
+        return _capabilities;
+    }
+    
+    private Map<String, TextColor> _foregroundColours = new HashMap<>();
+
+    public TextColor foregroundColourForScope(int scope) {
+        var capabilities = JavaLSPClient.getInstance().getCapabilities();
+        var scopes = capabilities.getSemanticHighlighting().getScopes();
+        var identifiers = String.join(":", scopes.get(scope));
+        var result = _foregroundColours.get(identifiers);
+        if (result == null) {
+            throw new RuntimeException("Wait what is this scope " + scope);
+        }
+        return result;
     }
 }

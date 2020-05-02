@@ -3,7 +3,6 @@ package org.fisk.fisked.mode;
 import org.fisk.fisked.copy.Copy;
 import org.fisk.fisked.fileindex.FileIndex;
 import org.fisk.fisked.lsp.java.JavaLSPClient;
-import org.fisk.fisked.ui.ListView.ListItem;
 import org.fisk.fisked.ui.Window;
 
 public class NormalMode extends Mode {
@@ -30,6 +29,9 @@ public class NormalMode extends Mode {
         });
         _rootResponder.addEventResponder(leader + " e s", () -> {
             JavaLSPClient.getInstance().generateToString(window.getBufferContext());
+        });
+        _rootResponder.addEventResponder(leader + " e l", () -> {
+            JavaLSPClient.getInstance().codeLens(window.getBufferContext());
         });
         _rootResponder.addEventResponder("i", () -> { window.switchToMode(window.getInputMode()); });
         _rootResponder.addEventResponder("v", () -> { window.switchToMode(window.getVisualMode()); });
@@ -72,7 +74,6 @@ public class NormalMode extends Mode {
             cursor.goEndOfLine();
             window.switchToMode(window.getInputMode());
             buffer.insert("\n");
-            cursor.goBack();
         });
         _rootResponder.addEventResponder("O", () -> {
             cursor.goStartOfLine();
@@ -113,23 +114,6 @@ public class NormalMode extends Mode {
         _rootResponder.addEventResponder(":", () -> {
             window.getCommandView().activate();
         });
-    }
-
-    private static class MyListItem extends ListItem {
-        private String _string;
-
-        public MyListItem(String string) {
-            _string = string;
-        }
-
-        @Override
-        public String displayString() {
-            return _string;
-        }
-
-        @Override
-        public void onClick() {
-        }
     }
 
     @Override

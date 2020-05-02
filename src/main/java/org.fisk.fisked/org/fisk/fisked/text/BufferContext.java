@@ -14,6 +14,7 @@ public class BufferContext {
         _buffer = new Buffer(path, this);
         _bufferView = new BufferView(rect, this);
         _textLayout = new TextLayout(this);
+        _buffer.open();
     }
 
     public Buffer getBuffer() {

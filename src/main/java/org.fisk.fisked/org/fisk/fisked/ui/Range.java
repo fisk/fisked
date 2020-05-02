@@ -20,4 +20,16 @@ public class Range {
     public int getEnd() {
         return _end;
     }
+    
+    public int getLength() {
+        return _end - _start;
+    }
+    
+    public Range intersection(Range range) {
+        var result = create(Math.max(_start, range._start), Math.min(_end,  range._end));
+        if (result.getLength() <= 0) {
+            return create(0, 0);
+        }
+        return result;
+    }
 }
