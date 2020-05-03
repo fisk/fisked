@@ -23,7 +23,6 @@ import org.fisk.fisked.utils.LogFactory;
 import org.slf4j.Logger;
 
 import com.googlecode.lanterna.TextColor;
-import com.googlecode.lanterna.TextColor.ANSI;
 
 public class Buffer {
     private StringBuilder _string = new StringBuilder();
@@ -126,6 +125,11 @@ public class Buffer {
     }
 
     public void insert(String str) {
+        if (str.equals("\n")) {
+            for (int i = 0; i < getIndentationLevel(); ++i) {
+                str += Settings.getIndentationString();
+            }
+        }
         _undoLog.recordInsert(_cursor.getPosition(), str);
         rawInsert(_cursor.getPosition(), str);
         _bufferContext.getTextLayout().calculate();
@@ -285,6 +289,27 @@ public class Buffer {
 
     public URI getURI() {
         return _path.toFile().toURI();
+    }
+
+    private static Pattern _bracketPattern = Pattern.compile("\\{|\\}");
+    public int getIndentationLevel() {
+        int indentation = 0;
+        if (isJava()) {
+            int cursor = getCursor().getPosition();
+            var matcher = _bracketPattern.matcher(_string.toString());
+            while (matcher.find()) {
+                if (matcher.start() >= cursor) {
+                    return indentation;
+                }
+                if (matcher.group(0).equals("{")) {
+                    ++indentation;
+                }
+                if (matcher.group(0).equals("}")) {
+                    --indentation;
+                }
+            }
+        }
+        return indentation;
     }
     
     private Boolean _isJava;
