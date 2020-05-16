@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
@@ -27,20 +28,43 @@ import com.googlecode.lanterna.TextColor;
 public class Buffer {
     private StringBuilder _string = new StringBuilder();
     private Path _path;
-    private Cursor _cursor;
+    private List<Cursor> _cursors = new ArrayList<>();
     private BufferContext _bufferContext;
     private UndoLog _undoLog;
     private int _version = 1;
     private static Logger _log = LogFactory.createLog();
 
     public Cursor getCursor() {
-        return _cursor;
+        return _cursors.get(0);
+    }
+    
+    public void addCursor(Cursor cursor) {
+        _cursors.add(cursor);
+    }
+    
+    public List<Cursor> getCursors() {
+        return _cursors;
+    }
+    
+    public void clearCursors() {
+        var cursor = _cursors.get(0);
+        _cursors.clear();
+        _cursors.add(cursor);
+    }
+    
+    public List<Cursor> getCursorsOrdered() {
+        var result = new ArrayList<Cursor>();
+        result.addAll(_cursors);
+        result.sort((Cursor c1, Cursor c2) -> {
+            return c1.getPosition() - c2.getPosition();
+        });
+        return result;
     }
 
     public Buffer(Path path, BufferContext bufferContext) {
         _path = path;
         _bufferContext = bufferContext;
-        _cursor = new Cursor(bufferContext);
+        _cursors.add(new Cursor(bufferContext));
         _undoLog = new UndoLog(bufferContext);
         try {
             _string.append(Files.readString(path));
@@ -64,7 +88,7 @@ public class Buffer {
         if (position == -1) {
             return;
         }
-        _cursor.setPosition(position);
+        getCursor().setPosition(position);
         _bufferContext.getTextLayout().calculate();
         _bufferContext.getBufferView().adaptViewToCursor();
     }
@@ -74,7 +98,7 @@ public class Buffer {
         if (position == -1) {
             return;
         }
-        _cursor.setPosition(position);
+        getCursor().setPosition(position);
         _bufferContext.getTextLayout().calculate();
         _bufferContext.getBufferView().adaptViewToCursor();
     }
@@ -119,7 +143,7 @@ public class Buffer {
         }
         _undoLog.recordRemove(startPosition, endPosition);
         rawRemove(startPosition, endPosition);
-        _cursor.setPosition(startPosition);
+        getCursor().setPosition(startPosition);
         _bufferContext.getTextLayout().calculate();
         _bufferContext.getBufferView().adaptViewToCursor();
     }
@@ -130,29 +154,38 @@ public class Buffer {
                 str += Settings.getIndentationString();
             }
         }
-        _undoLog.recordInsert(_cursor.getPosition(), str);
-        rawInsert(_cursor.getPosition(), str);
-        _bufferContext.getTextLayout().calculate();
-        _cursor.setPosition(_cursor.getPosition() + str.length());
-        _bufferContext.getBufferView().adaptViewToCursor();
+        int inserted = 0;
+        for (var cursor: getCursorsOrdered()) {
+            int position = cursor.getPosition() + inserted;
+            _undoLog.recordInsert(position, str);
+            rawInsert(position, str);
+            _bufferContext.getTextLayout().calculate();
+            cursor.setPosition(position + str.length());
+            _bufferContext.getBufferView().adaptViewToCursor();
+            inserted += str.length();
+        }
     }
 
     public void insert(int position, String str) {
         _undoLog.recordInsert(position, str);
         rawInsert(position, str);
         _bufferContext.getTextLayout().calculate();
-        _cursor.setPosition(position + str.length());
+        getCursor().setPosition(position + str.length());
         _bufferContext.getBufferView().adaptViewToCursor();
     }
 
     public void removeBefore() {
-        if (_cursor.getPosition() == 0 || _string.length() == 0) {
-            return;
+        int removed = 0;
+        for (var cursor: getCursorsOrdered()) {
+            int position = cursor.getPosition() - removed;
+            if (position <= 0 || _string.length() == 0) {
+                continue;
+            }
+            _undoLog.recordRemove(position - 1, position);
+            cursor.setPosition(position - 1);
+            rawRemove(position, position + 1);
+            removed++;
         }
-        int position = _cursor.getPosition();
-        _undoLog.recordRemove(position - 1, position);
-        _cursor.goBack();
-        rawRemove(_cursor.getPosition(), _cursor.getPosition() + 1);
         _bufferContext.getTextLayout().calculate();
         _bufferContext.getBufferView().adaptViewToCursor();
     }
@@ -161,12 +194,12 @@ public class Buffer {
         if (_string.length() == 0) {
             return;
         }
-        int position = _cursor.getPosition();
+        int position = getCursor().getPosition();
         if (position >= _string.length()) {
             return;
         }
         _undoLog.recordRemove(position, position + 1);
-        rawRemove(_cursor.getPosition(), _cursor.getPosition() + 1);
+        rawRemove(getCursor().getPosition(), getCursor().getPosition() + 1);
         _bufferContext.getTextLayout().calculate();
         _bufferContext.getBufferView().adaptViewToCursor();
     }
@@ -179,13 +212,13 @@ public class Buffer {
         }
         _undoLog.recordRemove(start, end);
         rawRemove(start, end);
-        _cursor.setPosition(start);
+        getCursor().setPosition(start);
         _bufferContext.getTextLayout().calculate();
         _bufferContext.getBufferView().adaptViewToCursor();
     }
 
     public void deleteWord() {
-        int start = _cursor.getPosition();
+        int start = getCursor().getPosition();
         if (!_wordPattern.matcher(getCharacter(start)).matches()) {
             return;
         }
@@ -201,7 +234,7 @@ public class Buffer {
 
     public void deleteLine() {
         var textLayout = _bufferContext.getTextLayout();
-        var line = textLayout.getPhysicalLineAt(_cursor.getPosition());
+        var line = textLayout.getPhysicalLineAt(getCursor().getPosition());
         int start = line.getStartPosition();
         var glyph = line.getLastGlyph();
         int end;
@@ -217,14 +250,14 @@ public class Buffer {
         _undoLog.recordRemove(start, end);
         rawRemove(start, end);
         _bufferContext.getTextLayout().calculate();
-        _cursor.setPosition(start);
+        getCursor().setPosition(start);
         _bufferContext.getBufferView().adaptViewToCursor();
     }
 
     static Pattern _wordPattern = Pattern.compile("\\w");
 
     private int findStartOfWord() {
-        int position = _cursor.getPosition();
+        int position = getCursor().getPosition();
         if (!_wordPattern.matcher(getCharacter(position)).matches()) {
             return -1;
         }
@@ -237,7 +270,7 @@ public class Buffer {
     }
 
     private int findEndOfWord() {
-        int position = _cursor.getPosition();
+        int position = getCursor().getPosition();
         if (!_wordPattern.matcher(getCharacter(position)).matches()) {
             return -1;
         }

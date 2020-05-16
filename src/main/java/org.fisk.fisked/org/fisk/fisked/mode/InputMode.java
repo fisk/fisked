@@ -43,13 +43,17 @@ public class InputMode extends Mode {
         });
         _rootResponder.addEventResponder("<BACKSPACE>", () -> { buffer.removeBefore(); });
         _rootResponder.addEventResponder("<ENTER>", () -> { buffer.insert("\n"); });
-        _rootResponder.addEventResponder("<LEFT>", () -> { cursor.goLeft(); });
-        _rootResponder.addEventResponder("<RIGHT>", () -> { cursor.goRight(); });
+        _rootResponder.addEventResponder("<LEFT>", () -> {
+            for (var c: buffer.getCursors()) {
+                c.goLeft();
+            }
+        });
+        _rootResponder.addEventResponder("<RIGHT>", () -> {
+            for (var c: buffer.getCursors()) {
+                c.goRight();
+            }
+        });
         _rootResponder.addEventResponder("<DOWN>", () -> { cursor.goDown(); });
         _rootResponder.addEventResponder("<UP>", () -> { cursor.goUp(); });
-    }
-
-    @Override
-    public void activate() {
     }
 }

@@ -53,6 +53,10 @@ public class Mode implements EventResponder, Drawable {
     public void activate() {
     }
 
+    public void deactivate() {
+        _window.getBufferContext().getBuffer().clearCursors();
+    }
+
     @Override
     public void draw(Rect rect) {
     }

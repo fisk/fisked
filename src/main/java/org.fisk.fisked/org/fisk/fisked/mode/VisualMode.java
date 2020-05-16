@@ -11,7 +11,10 @@ import org.fisk.fisked.ui.Window;
 import org.fisk.fisked.copy.Copy;
 
 public class VisualMode extends Mode {
-    protected Cursor _other;
+    
+    protected Cursor getOtherCursor() {
+        return _window.getBufferContext().getBuffer().getCursors().get(1);
+    }
 
     public VisualMode(Window window) {
         super("VISUAL", window);
@@ -21,12 +24,12 @@ public class VisualMode extends Mode {
 
     protected Cursor minCursor() {
         var cursor = _window.getBufferContext().getBuffer().getCursor();
-        return cursor.getPosition() < _other.getPosition() ? cursor : _other;
+        return cursor.getPosition() < getOtherCursor().getPosition() ? cursor : getOtherCursor();
     }
 
     protected Cursor maxCursor() {
         var cursor = _window.getBufferContext().getBuffer().getCursor();
-        return cursor.getPosition() >= _other.getPosition() ? cursor : _other;
+        return cursor.getPosition() >= getOtherCursor().getPosition() ? cursor : getOtherCursor();
     }
 
     protected void setupBasicResponders() {
@@ -37,8 +40,8 @@ public class VisualMode extends Mode {
         _rootResponder.addEventResponder("<ESC>", () -> { window.switchToMode(window.getNormalMode()); });
         _rootResponder.addEventResponder("o", () -> {
             var position = cursor.getPosition();
-            cursor.setPosition(_other.getPosition());
-            _other.setPosition(position);
+            cursor.setPosition(getOtherCursor().getPosition());
+            getOtherCursor().setPosition(position);
             bufferContext.getBufferView().adaptViewToCursor();
         });
         _rootResponder.addEventResponder("d", () -> {
@@ -58,8 +61,9 @@ public class VisualMode extends Mode {
 
     @Override
     public void activate() {
-        _other = new Cursor(_window.getBufferContext());
-        _other.setPosition(_window.getBufferContext().getBuffer().getCursor().getPosition());
+        var other = new Cursor(_window.getBufferContext());
+        other.setPosition(_window.getBufferContext().getBuffer().getCursor().getPosition());
+        _window.getBufferContext().getBuffer().addCursor(other);
     }
 
     @Override
@@ -91,8 +95,8 @@ public class VisualMode extends Mode {
 
     public boolean isSelected(int position) {
         var cursor = _window.getBufferContext().getBuffer().getCursor();
-        var minCursor = cursor.getPosition() < _other.getPosition() ? cursor : _other;
-        var maxCursor = cursor.getPosition() >= _other.getPosition() ? cursor : _other;
+        var minCursor = cursor.getPosition() < getOtherCursor().getPosition() ? cursor : getOtherCursor();
+        var maxCursor = cursor.getPosition() >= getOtherCursor().getPosition() ? cursor : getOtherCursor();
         return position >= minCursor.getPosition() && position <= maxCursor.getPosition();
     }
 }

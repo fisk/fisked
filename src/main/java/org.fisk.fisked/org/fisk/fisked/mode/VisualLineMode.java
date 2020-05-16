@@ -17,7 +17,6 @@ public class VisualLineMode extends VisualMode {
     }
 
     private Range getSelection() {
-        var buffer = _window.getBufferContext().getBuffer();
         var minLine = minCursor().getPhysicalLine();
         var maxLine = maxCursor().getPhysicalLine();
         int start = minLine.getStartPosition();
@@ -43,8 +42,8 @@ public class VisualLineMode extends VisualMode {
         _rootResponder.addEventResponder("<ESC>", () -> { window.switchToMode(window.getNormalMode()); });
         _rootResponder.addEventResponder("o", () -> {
             var position = cursor.getPosition();
-            cursor.setPosition(_other.getPosition());
-            _other.setPosition(position);
+            cursor.setPosition(getOtherCursor().getPosition());
+            getOtherCursor().setPosition(position);
             bufferContext.getBufferView().adaptViewToCursor();
         });
         _rootResponder.addEventResponder("d", () -> {
@@ -61,12 +60,6 @@ public class VisualLineMode extends VisualMode {
             Copy.getInstance().setText(text, true /* isLine */);
             window.switchToMode(window.getNormalMode());
         });
-    }
-
-    @Override
-    public void activate() {
-        _other = new Cursor(_window.getBufferContext());
-        _other.setPosition(_window.getBufferContext().getBuffer().getCursor().getPosition());
     }
 
     @Override

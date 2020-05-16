@@ -4,13 +4,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
-import com.googlecode.lanterna.TerminalPosition;
-import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.TextColor;
-import com.googlecode.lanterna.input.KeyType;
-import com.googlecode.lanterna.terminal.Terminal;
-import com.googlecode.lanterna.terminal.TerminalResizeListener;
-
 import org.fisk.fisked.EventThread;
 import org.fisk.fisked.event.EventListener;
 import org.fisk.fisked.event.EventResponder;
@@ -20,6 +13,7 @@ import org.fisk.fisked.lsp.java.JavaLSPClient;
 import org.fisk.fisked.mode.InputMode;
 import org.fisk.fisked.mode.Mode;
 import org.fisk.fisked.mode.NormalMode;
+import org.fisk.fisked.mode.VisualBlockMode;
 import org.fisk.fisked.mode.VisualLineMode;
 import org.fisk.fisked.mode.VisualMode;
 import org.fisk.fisked.terminal.TerminalContext;
@@ -27,6 +21,13 @@ import org.fisk.fisked.text.BufferContext;
 import org.fisk.fisked.ui.ListView.ListItem;
 import org.fisk.fisked.utils.LogFactory;
 import org.slf4j.Logger;
+
+import com.googlecode.lanterna.TerminalPosition;
+import com.googlecode.lanterna.TerminalSize;
+import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.input.KeyType;
+import com.googlecode.lanterna.terminal.Terminal;
+import com.googlecode.lanterna.terminal.TerminalResizeListener;
 
 public class Window implements Drawable {
     private static Logger _log = LogFactory.createLog();
@@ -49,6 +50,7 @@ public class Window implements Drawable {
     private InputMode _inputMode;
     private VisualMode _visualMode;
     private VisualLineMode _visualLineMode;
+    private VisualBlockMode _visualBlockMode;
     private Mode _currentMode;
 
     private void setupModes() {
@@ -56,6 +58,7 @@ public class Window implements Drawable {
         _inputMode = new InputMode(this);
         _visualMode = new VisualMode(this);
         _visualLineMode = new VisualLineMode(this);
+        _visualBlockMode = new VisualBlockMode(this);
         _currentMode = _normalMode;
         _bufferContext.getBufferView().setFirstResponder(_currentMode);
     }
@@ -168,7 +171,12 @@ public class Window implements Drawable {
         return _visualLineMode;
     }
 
+    public Mode getVisualBlockMode() {
+        return _visualBlockMode;
+    }
+
     public void switchToMode(Mode mode) {
+        _currentMode.deactivate();
         _currentMode = mode;
         _bufferContext.getBufferView().setFirstResponder(_currentMode);
         _modeLineView.setNeedsRedraw();

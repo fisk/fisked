@@ -166,7 +166,6 @@ public class Cursor {
     public void setPosition(int position) {
         _position = position;
         calculate();
-        Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();
     }
 
     public Line getPhysicalLine() {
