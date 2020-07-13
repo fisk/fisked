@@ -104,7 +104,7 @@ public class Cursor {
         }
         var glyph = prevLine.getGlyphAt(_lastX);
         if (glyph == null) {
-            glyph = prevLine.getLastGlyph();
+            glyph = prevLine.getLastGlyph(true);
             if (glyph != null) {
                 _position = glyph.getPosition() + 1;
             } else {
@@ -127,7 +127,7 @@ public class Cursor {
       }
       var glyph = nextLine.getGlyphAt(_lastX);
       if (glyph == null) {
-          glyph = nextLine.getLastGlyph();
+          glyph = nextLine.getLastGlyph(true);
           if (glyph != null) {
               _position = glyph.getPosition() + 1;
           } else {
@@ -144,7 +144,7 @@ public class Cursor {
         var textLayout = _bufferContext.getTextLayout();
         var position = _position;
         var line = textLayout.getPhysicalLineAt(position);
-        var glyph = line.getLastGlyph();
+        var glyph = line.getLastGlyph(false);
         if (glyph == null) {
             _position = line.getStartPosition();
         } else {

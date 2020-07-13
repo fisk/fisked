@@ -89,12 +89,12 @@ public class TextLayout {
             return _glyphs.get(index);
         }
 
-        public Glyph getLastGlyph() {
+        public Glyph getLastGlyph(boolean newline) {
             if (_glyphs.size() == 0) {
                 return null;
             }
             var result = _glyphs.get(_glyphs.size() - 1);
-            if (result._character.equals("\n")) {
+            if (!newline && result._character.equals("\n")) {
                 if (_glyphs.size() == 1) {
                     return null;
                 }
@@ -114,8 +114,8 @@ public class TextLayout {
             return _startPosition;
         }
 
-        public int getEndPosition() {
-            var glyph = getLastGlyph();
+        public int getEndPosition(boolean newline) {
+            var glyph = getLastGlyph(newline);
             if (glyph == null) {
                 return getStartPosition();
             } else {

@@ -20,7 +20,7 @@ public class VisualLineMode extends VisualMode {
         var minLine = minCursor().getPhysicalLine();
         var maxLine = maxCursor().getPhysicalLine();
         int start = minLine.getStartPosition();
-        int end = maxLine.getEndPosition();
+        int end = maxLine.getEndPosition(false);
         if (maxLine.getNext() == null) {
             start = Math.max(0, start - 1);
         }
@@ -80,7 +80,7 @@ public class VisualLineMode extends VisualMode {
 
     public boolean isSelected(int position) {
         var minPosition = minCursor().getPhysicalLine().getStartPosition();
-        var maxPosition = maxCursor().getPhysicalLine().getEndPosition();
+        var maxPosition = maxCursor().getPhysicalLine().getEndPosition(false);
         if (maxCursor().getPhysicalLine().getNext() == null) {
             minPosition = Math.max(0, minPosition - 1);
         }

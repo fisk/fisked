@@ -243,7 +243,7 @@ public class Buffer {
         var textLayout = _bufferContext.getTextLayout();
         var line = textLayout.getPhysicalLineAt(getCursor().getPosition());
         int start = line.getStartPosition();
-        var glyph = line.getLastGlyph();
+        var glyph = line.getLastGlyph(true);
         int end;
         if (glyph != null) {
             end = glyph.getPosition() + 1;

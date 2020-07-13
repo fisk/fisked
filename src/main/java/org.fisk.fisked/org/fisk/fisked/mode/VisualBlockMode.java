@@ -23,7 +23,7 @@ public class VisualBlockMode extends VisualMode {
         var rangeX = Range.create(minX, maxX);
         var current = minLine;
         for (;;) {
-            var lineRange = Range.create(0, current.getEndPosition() - current.getStartPosition());
+            var lineRange = Range.create(0, current.getEndPosition(false) - current.getStartPosition());
             var intersectionRange = rangeX.intersection(lineRange);
             if (intersectionRange.getLength() >= 0) {
                 selection.add(Range.create(intersectionRange.getStart() + current.getStartPosition(), 
