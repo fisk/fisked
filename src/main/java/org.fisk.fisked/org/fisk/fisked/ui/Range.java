@@ -32,4 +32,9 @@ public class Range {
         }
         return result;
     }
+    
+    @Override
+    public String toString() {
+        return "{" + _start + ", " + _end + "}";
+    }
 }

@@ -84,6 +84,10 @@ public class JavaLSPClient extends Thread {
     private String _projectPath = ProjectPaths.getProjectRootPath().toString();
     private String _workspacePath = _fiskedHomePath + "/workspace";
     
+    public boolean hasStarted() {
+        return _started;
+    }
+    
     public JavaLSPClient() {
         if (!new File(_eclipsePath).exists()) {
             _log.info("No LSP support");

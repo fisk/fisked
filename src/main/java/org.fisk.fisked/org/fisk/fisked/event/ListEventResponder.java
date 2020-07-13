@@ -15,6 +15,10 @@ public class ListEventResponder implements EventResponder {
         _responders.add(new TextEventResponder(pattern, runnable));
     }
 
+    public void removeEventResponder(EventResponder responder) {
+        _responders.remove(responder);
+    }
+
     @Override
     public Response processEvent(KeyStrokeEvent event) {
         boolean maybe = false;

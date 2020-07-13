@@ -74,6 +74,13 @@ public class Buffer {
             _decorations.add(decoration);
         } catch (IOException e) {
         }
+        if (isJava()) {
+            var lsp = JavaLSPClient.getInstance();
+            if (!lsp.hasStarted()) {
+                lsp.start();
+                lsp.ensureInit();
+            }
+        }
     }
 
     public String getCharacter(int position) {
@@ -177,13 +184,13 @@ public class Buffer {
     public void removeBefore() {
         int removed = 0;
         for (var cursor: getCursorsOrdered()) {
-            int position = cursor.getPosition() - removed;
-            if (position <= 0 || _string.length() == 0) {
+            int position = cursor.getPosition() - removed - 1;
+            if (position < 0 || _string.length() == 0) {
                 continue;
             }
-            _undoLog.recordRemove(position - 1, position);
-            cursor.setPosition(position - 1);
+            _undoLog.recordRemove(position, position + 1);
             rawRemove(position, position + 1);
+            cursor.setPosition(position);
             removed++;
         }
         _bufferContext.getTextLayout().calculate();

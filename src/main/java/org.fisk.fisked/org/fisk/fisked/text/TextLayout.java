@@ -3,16 +3,12 @@ package org.fisk.fisked.text;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.fisk.fisked.ui.Point;
-import org.fisk.fisked.ui.Rect;
-import org.fisk.fisked.utils.LogFactory;
-import org.slf4j.Logger;
+import org.fisk.fisked.ui.Range;
 
 public class TextLayout {
-    private static final Logger _log = LogFactory.createLog();
-
     public static class Glyph {
         private int _x;
         private int _y;
@@ -97,7 +93,14 @@ public class TextLayout {
             if (_glyphs.size() == 0) {
                 return null;
             }
-            return _glyphs.get(_glyphs.size() - 1);
+            var result = _glyphs.get(_glyphs.size() - 1);
+            if (result._character.equals("\n")) {
+                if (_glyphs.size() == 1) {
+                    return null;
+                }
+                result = _glyphs.get(_glyphs.size() - 2);
+            }
+            return result;
         }
 
         public String getCharacterAt(int index) {
@@ -281,6 +284,22 @@ public class TextLayout {
         var start = bufferView.getStartLine();
         var range = _logicalLines.subMap(start, start + rect.getSize().getHeight());
         return range.entrySet().stream().map((entry) -> entry.getValue().getGlyphs()).flatMap((list) -> list.stream());
+    }
+    
+    public Range getGlyphRange() {
+        int start = -1;
+        int end = -1;
+        for (var glyph: getGlyphs().collect(Collectors.toList())) {
+            if (start == -1) {
+                start = glyph._position;
+            }
+            end = glyph._position;
+        }
+        if (end == -1) {
+            return Range.create(0, 0);
+        } else {
+            return Range.create(start, end + 1);
+        }
     }
 
     public int getLogicalLineCount() {
