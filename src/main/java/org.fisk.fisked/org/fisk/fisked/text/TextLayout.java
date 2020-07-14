@@ -244,6 +244,7 @@ public class TextLayout {
             } else if (iter.isWrapped()) {
                 iter.newLine();
                 iter.insertGlyph();
+                iter.incX();
             } else {
                 iter.insertGlyph();
                 iter.incX();
