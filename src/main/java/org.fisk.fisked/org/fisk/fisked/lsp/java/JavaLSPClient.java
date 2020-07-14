@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Pattern;
 
 import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
 import org.eclipse.lsp4j.ApplyWorkspaceEditResponse;
@@ -48,6 +49,7 @@ import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
 import org.eclipse.lsp4j.TextDocumentClientCapabilities;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
+import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.TextDocumentSaveReason;
 import org.eclipse.lsp4j.UnregistrationParams;
 import org.eclipse.lsp4j.WillSaveTextDocumentParams;
@@ -58,6 +60,8 @@ import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.fisk.fisked.fileindex.ProjectPaths;
+import org.fisk.fisked.lsp.LanguageMode;
+import org.fisk.fisked.text.AttributedString;
 import org.fisk.fisked.text.BufferContext;
 import org.fisk.fisked.ui.Window;
 import org.fisk.fisked.utils.LogFactory;
@@ -66,7 +70,7 @@ import org.slf4j.Logger;
 import com.google.gson.Gson;
 import com.googlecode.lanterna.TextColor;
 
-public class JavaLSPClient extends Thread {
+public class JavaLSPClient extends Thread implements LanguageMode {
     private static final Logger _log = LogFactory.createLog();
 
     private Object _lock = new Object();
@@ -713,6 +717,13 @@ public class JavaLSPClient extends Thread {
         return _capabilities;
     }
     
+    private void formatToken(AttributedString str, String string, Pattern pattern, TextColor colour) {
+        var matcher = pattern.matcher(string);
+        while (matcher.find()) {
+            str.format(matcher.start(), matcher.end(), colour, TextColor.ANSI.DEFAULT);
+        }
+    }
+    
     private Map<String, TextColor> _foregroundColours = new HashMap<>();
 
     public TextColor foregroundColourForScope(int scope) {
@@ -724,5 +735,52 @@ public class JavaLSPClient extends Thread {
             throw new RuntimeException("Wait what is this scope " + scope);
         }
         return result;
+    }
+    
+    private static Pattern _javaCommentPattern = Pattern.compile("(/\\*([^*]|[\\n]|(\\*+([^*/]|[\\n])))*\\*+/)|(//.*)", Pattern.MULTILINE);
+    private static Pattern _javaStringPattern = Pattern.compile("\\\"([^\\\"]|[\\n])*\\\"", Pattern.MULTILINE);
+    private static Pattern _javaKeywordPattern = Pattern.compile(
+            "(\\bprivate\\b)|(\\bprotected\\b)|(\\bpublic\\b)|(\\bstatic\\b)|(\\babstract\\b)|" + 
+            "(\\bvoid\\b)|(\\bbyte\\b)|(\\bchar\\b)|(\\bboolean\\b)|(\\bshort\\b)|(\\bint\\b)|(\\blong\\b)|(\\bfloat\\b)|" + 
+            "(\\bdouble\\b)|(\\bimplements\\b)|(\\bextends\\b)|(\\bclass\\b)|(\\benum\\b)|(\\bfinal\\b)|" + 
+            "(\\btry\\b)|(\\bcatch\\b)|(\\bthrows\\b)|(\\bthrow\\b)|(\\brecord\\b)|(\\bnew\\b)|(\\breturn\\b)|" +
+            "(\\bif\\b)|(\\bfor\\b)|(\\bwhile\\b)|(\\bdo\\b)|(\\bimport\\b)|(\\bpackage\\b)|(\\btrue\\b)|(\\bfalse\\b)",
+            Pattern.MULTILINE);
+    private static Pattern _javaNullPattern = Pattern.compile("\\bnull\\b", Pattern.MULTILINE);
+
+
+    @Override
+    public void applyColouring(BufferContext bufferContext, AttributedString str) {
+        var string = str.toString();
+        formatToken(str, string, _javaKeywordPattern, TextColor.ANSI.RED);
+        formatToken(str, string, _javaNullPattern, TextColor.ANSI.CYAN);
+        formatToken(str, string, _javaCommentPattern, TextColor.ANSI.GREEN);
+        formatToken(str, string, _javaStringPattern, TextColor.ANSI.YELLOW);
+    }
+
+    private static Pattern _bracketPattern = Pattern.compile("\\{|\\}");
+    
+    @Override
+    public int getIndentationLevel(BufferContext bufferContext) {
+        int indentation = 0;
+        int cursor = bufferContext.getBuffer().getCursor().getPosition();
+        var matcher = _bracketPattern.matcher( bufferContext.getBuffer().getString());
+        while (matcher.find()) {
+            if (matcher.start() >= cursor) {
+                return indentation;
+            }
+            if (matcher.group(0).equals("{")) {
+                ++indentation;
+            }
+            if (matcher.group(0).equals("}")) {
+                --indentation;
+            }
+        }
+        return indentation;
+    }
+
+    @Override
+    public TextDocumentItem getTextDocument(BufferContext bufferContext) {
+        return new TextDocumentItem(bufferContext.getBuffer().getPath().toFile().toURI().toString(), "java", 11, bufferContext.getBuffer().getString());
     }
 }

@@ -42,28 +42,39 @@ public class Fisked {
             var path = Path.of(args[1]);
             var file = path.toFile();
             if (!file.exists()) {
-                file.createNewFile();
+                try {
+                    if (file.createNewFile()) {
+                        return path;
+                    }
+                } catch (Exception e) {
+                }
+                System.out.println("fisked: No such file: " + path.toString());
+                return null;
+            } else {
+                return path;
             }
-
-            return path;
         } catch (Throwable e) {
             return null;
         }
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        var path = checkArguments(args);
-        if (path == null) {
-            return;
+        try {
+            setupLogging();
+            var path = checkArguments(args);
+            if (path == null) {
+                return;
+            }
+            _log.info("Fisked started");
+            setupWindow(path);
+            var eventThread = EventThread.getInstance();
+            eventThread.addOnEvent(() -> {
+                Window.getInstance().update(false /* forced */);
+            });
+            eventThread.start();
+            new IOThread(TerminalContext.getInstance().getScreen()).start();
+        } catch (Exception e) {
+            _log.error("Error starting: ", e);
         }
-        setupLogging();
-        _log.info("Fisked started");
-        setupWindow(path);
-        var eventThread = EventThread.getInstance();
-        eventThread.addOnEvent(() -> {
-            Window.getInstance().update(false /* forced */);
-        });
-        eventThread.start();
-        new IOThread(TerminalContext.getInstance().getScreen()).start();
     }
 }

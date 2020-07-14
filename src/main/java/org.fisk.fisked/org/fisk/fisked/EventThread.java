@@ -56,15 +56,19 @@ public class EventThread extends Thread {
                 _log.info("Received key stroke event");
                 var keyEvent = (KeyStrokeEvent) event;
                 keyEvent.setPrevious(_previous);
-                switch (_responder.processEvent(keyEvent)) {
-                case MAYBE:
-                    _previous = keyEvent;
-                    break;
-                case YES:
-                    _responder.respond();
-                case NO:
-                    _previous = null;
-                    break;
+                try {
+                    switch (_responder.processEvent(keyEvent)) {
+                    case MAYBE:
+                        _previous = keyEvent;
+                        break;
+                    case YES:
+                        _responder.respond();
+                    case NO:
+                        _previous = null;
+                        break;
+                    }
+                } catch (Exception e) {
+                    _log.error("Error processing event: ", e);
                 }
             } else if (event instanceof RunnableEvent) {
                 _log.info("Received runnable event");

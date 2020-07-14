@@ -16,6 +16,8 @@ import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 import org.eclipse.lsp4j.util.SemanticHighlightingTokens;
 import org.fisk.fisked.EventThread;
 import org.fisk.fisked.event.RunnableEvent;
+import org.fisk.fisked.lsp.LanguageMode;
+import org.fisk.fisked.lsp.LanguageModeProvider;
 import org.fisk.fisked.lsp.java.JavaLSPClient;
 import org.fisk.fisked.ui.Cursor;
 import org.fisk.fisked.ui.Window;
@@ -60,6 +62,8 @@ public class Buffer {
         });
         return result;
     }
+    
+    private LanguageMode _languageMode;
 
     public Buffer(Path path, BufferContext bufferContext) {
         _path = path;
@@ -74,13 +78,7 @@ public class Buffer {
             _decorations.add(decoration);
         } catch (IOException e) {
         }
-        if (isJava()) {
-            var lsp = JavaLSPClient.getInstance();
-            if (!lsp.hasStarted()) {
-                lsp.start();
-                lsp.ensureInit();
-            }
-        }
+        _languageMode = LanguageModeProvider.getInstance().getLanguageMode(path);
     }
 
     public String getCharacter(int position) {
@@ -124,9 +122,7 @@ public class Buffer {
         decoration._insertPosition = position;
         decoration._insertString = str;
         _decorations.add(decoration);
-        if (isJava()) {
-            JavaLSPClient.getInstance().didInsert(_bufferContext, position, str);
-        }
+        _languageMode.didInsert(_bufferContext, position, str);
     }
 
     public void rawRemove(int startPosition, int endPosition) {
@@ -139,9 +135,7 @@ public class Buffer {
         decoration._removeStart = startPosition;
         decoration._removeEnd = endPosition;
         _decorations.add(decoration);
-        if (isJava()) {
-            JavaLSPClient.getInstance().didRemove(_bufferContext, startPosition, endPosition);
-        }
+        _languageMode.didRemove(_bufferContext, startPosition, endPosition);
     }
 
     public void remove(int startPosition, int endPosition) {
@@ -290,29 +284,21 @@ public class Buffer {
     }
 
     public void write() {
-        if (isJava()) {
-            JavaLSPClient.getInstance().willSave(_bufferContext);
-        }
+        _languageMode.willSave(_bufferContext);
         try {
             Files.writeString(_path, _string.toString());
             Window.getInstance().getCommandView().setMessage("Saved file");
         } catch (IOException e) {
         }
-        if (isJava()) {
-            JavaLSPClient.getInstance().didSave(_bufferContext);
-        }
+        _languageMode.didSave(_bufferContext);
     }
     
     public void close() {
-        if (isJava()) {
-            JavaLSPClient.getInstance().didClose(_bufferContext);
-        }
+        _languageMode.didClose(_bufferContext);
     }
     
     public void open() {
-        if (isJava()) {
-            JavaLSPClient.getInstance().didOpen(_bufferContext);
-        }
+        _languageMode.didOpen(_bufferContext);
     }
 
     public int getLength() {
@@ -331,41 +317,8 @@ public class Buffer {
         return _path.toFile().toURI();
     }
 
-    private static Pattern _bracketPattern = Pattern.compile("\\{|\\}");
     public int getIndentationLevel() {
-        int indentation = 0;
-        if (isJava()) {
-            int cursor = getCursor().getPosition();
-            var matcher = _bracketPattern.matcher(_string.toString());
-            while (matcher.find()) {
-                if (matcher.start() >= cursor) {
-                    return indentation;
-                }
-                if (matcher.group(0).equals("{")) {
-                    ++indentation;
-                }
-                if (matcher.group(0).equals("}")) {
-                    --indentation;
-                }
-            }
-        }
-        return indentation;
-    }
-    
-    private Boolean _isJava;
-    private boolean isJava() {
-        if (_isJava != null) {
-            return _isJava;
-        }
-        String extension = "";
-        String fileName = _path.getFileName().toString();
-
-        int i = fileName.lastIndexOf('.');
-        if (i >= 0) {
-            extension = fileName.substring(i+1);
-        }
-        _isJava = extension.equals("java");
-        return _isJava;
+        return _languageMode.getIndentationLevel(_bufferContext);
     }
     
     private static class Decoration {
@@ -384,31 +337,6 @@ public class Buffer {
     }
     
     private CopyOnWriteArrayList<Decoration> _decorations = new CopyOnWriteArrayList<>();
-    
-    private static Pattern _javaCommentPattern = Pattern.compile("(/\\*([^*]|[\\n]|(\\*+([^*/]|[\\n])))*\\*+/)|(//.*)", Pattern.MULTILINE);
-    private static Pattern _javaStringPattern = Pattern.compile("\\\"([^\\\"]|[\\n])*\\\"", Pattern.MULTILINE);
-    private static Pattern _javaKeywordPattern = Pattern.compile(
-            "(\\bprivate\\b)|(\\bprotected\\b)|(\\bpublic\\b)|(\\bstatic\\b)|(\\babstract\\b)|" + 
-            "(\\bvoid\\b)|(\\bbyte\\b)|(\\bchar\\b)|(\\bboolean\\b)|(\\bshort\\b)|(\\bint\\b)|(\\blong\\b)|(\\bfloat\\b)|" + 
-            "(\\bdouble\\b)|(\\bimplements\\b)|(\\bextends\\b)|(\\bclass\\b)|(\\benum\\b)|(\\bfinal\\b)|" + 
-            "(\\btry\\b)|(\\bcatch\\b)|(\\bthrows\\b)|(\\bthrow\\b)|(\\brecord\\b)|(\\bnew\\b)|(\\breturn\\b)|" +
-            "(\\bif\\b)|(\\bfor\\b)|(\\bwhile\\b)|(\\bdo\\b)|(\\bimport\\b)|(\\bpackage\\b)", Pattern.MULTILINE);
-    private static Pattern _javaNullPattern = Pattern.compile("\\bnull\\b", Pattern.MULTILINE);
-    
-    private void applyJavaTokenColouring(AttributedString str) {
-        var string = str.toString();
-        formatToken(str, string, _javaKeywordPattern, TextColor.ANSI.RED);
-        formatToken(str, string, _javaNullPattern, TextColor.ANSI.CYAN);
-        formatToken(str, string, _javaCommentPattern, TextColor.ANSI.GREEN);
-        formatToken(str, string, _javaStringPattern, TextColor.ANSI.YELLOW);
-    }
-    
-    private void formatToken(AttributedString str, String string, Pattern pattern, TextColor colour) {
-        var matcher = pattern.matcher(string);
-        while (matcher.find()) {
-            str.format(matcher.start(), matcher.end(), colour, TextColor.ANSI.DEFAULT);
-        }
-    }
 
     public void applyDecorations(int version, List<SemanticHighlightingInformation> info) {
         _log.info("Applying decorations for version " + version);
@@ -450,9 +378,7 @@ public class Buffer {
                                 TextColor.ANSI.DEFAULT);
                     }
                 }
-                if (isJava()) {
-                    applyJavaTokenColouring(decoration._str);
-                }
+                _languageMode.applyColouring(_bufferContext, decoration._str);
                 decoration._isDecorated = true;
                 EventThread.getInstance().enqueue(new RunnableEvent(() -> {
                     _log.info("Redrawing version " + version);
@@ -501,10 +427,7 @@ public class Buffer {
     }
 
     public TextDocumentItem getTextDocument() {
-        if (isJava()) {
-            return new TextDocumentItem(_path.toFile().toURI().toString(), "java", 11, _string.toString());
-        }
-        return null;
+        return _languageMode.getTextDocument(_bufferContext);
     }
 
     public TextDocumentIdentifier getTextDocumentID() {
@@ -513,5 +436,9 @@ public class Buffer {
     
     public VersionedTextDocumentIdentifier getVersionedTextDocumentID() {
         return new VersionedTextDocumentIdentifier(_path.toFile().toURI().toString(), _version);
+    }
+
+    public Path getPath() {
+        return _path;
     }
 }
