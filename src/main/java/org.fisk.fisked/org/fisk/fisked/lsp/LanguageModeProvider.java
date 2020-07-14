@@ -4,6 +4,7 @@ import java.nio.file.Path;
 
 import org.eclipse.lsp4j.TextDocumentItem;
 import org.fisk.fisked.lsp.java.JavaLSPClient;
+import org.fisk.fisked.lsp.latex.LatexLSPClient;
 import org.fisk.fisked.text.AttributedString;
 import org.fisk.fisked.text.BufferContext;
 
@@ -14,15 +15,15 @@ public class LanguageModeProvider {
         return _instance;
     }
 
-    private boolean isJava(Path path) {
+    private boolean endsIn(Path path, String ending) {
         String extension = "";
         String fileName = path.getFileName().toString();
 
         int i = fileName.lastIndexOf('.');
         if (i >= 0) {
-            extension = fileName.substring(i+1);
+            extension = fileName.substring(i + 1);
         }
-        return extension.equals("java");
+        return extension.equals(ending);
     }
     
     private LanguageMode getPlainLanguageMode() {
@@ -68,13 +69,16 @@ public class LanguageModeProvider {
     }
     
     public LanguageMode getLanguageMode(Path path) {
-        if (isJava(path)) {
+        if (endsIn(path, "java")) {
             var lsp = JavaLSPClient.getInstance();
             if (!lsp.hasStarted()) {
                 lsp.start();
                 lsp.ensureInit();
             }
             return lsp;
+        }
+        if (endsIn(path, "tex")) {
+            return new LatexLSPClient();
         }
         return getPlainLanguageMode();
     }

@@ -422,7 +422,9 @@ public class Buffer {
             }
             return str;
         } else {
-            return AttributedString.create(_string.toString(), TextColor.ANSI.DEFAULT, TextColor.ANSI.DEFAULT);
+            var str = AttributedString.create(_string.toString(), TextColor.ANSI.DEFAULT, TextColor.ANSI.DEFAULT);
+            _languageMode.applyColouring(_bufferContext, str);
+            return str;
         }
     }
 

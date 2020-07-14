@@ -717,13 +717,6 @@ public class JavaLSPClient extends Thread implements LanguageMode {
         return _capabilities;
     }
     
-    private void formatToken(AttributedString str, String string, Pattern pattern, TextColor colour) {
-        var matcher = pattern.matcher(string);
-        while (matcher.find()) {
-            str.format(matcher.start(), matcher.end(), colour, TextColor.ANSI.DEFAULT);
-        }
-    }
-    
     private Map<String, TextColor> _foregroundColours = new HashMap<>();
 
     public TextColor foregroundColourForScope(int scope) {
@@ -748,6 +741,12 @@ public class JavaLSPClient extends Thread implements LanguageMode {
             Pattern.MULTILINE);
     private static Pattern _javaNullPattern = Pattern.compile("\\bnull\\b", Pattern.MULTILINE);
 
+    private void formatToken(AttributedString str, String string, Pattern pattern, TextColor colour) {
+        var matcher = pattern.matcher(string);
+        while (matcher.find()) {
+            str.format(matcher.start(), matcher.end(), colour, TextColor.ANSI.DEFAULT);
+        }
+    }
 
     @Override
     public void applyColouring(BufferContext bufferContext, AttributedString str) {
