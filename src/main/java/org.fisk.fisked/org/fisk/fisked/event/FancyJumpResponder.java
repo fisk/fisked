@@ -36,18 +36,15 @@ public class FancyJumpResponder implements EventResponder {
         private String _matchStringRaw;
         private int _matches = 0;
         
-        public WordResponder(int position, int number, char character, ListEventResponder parent) {
+        public WordResponder(int position, int number, int max, char character, ListEventResponder parent) {
             _parent = parent;
             _position = position;
             var str = new StringBuilder();
-            boolean first = true;
-            for (;;) {
+            max = (int)Math.floor(Math.log((double)max) / Math.log(52.0));
+            int i;
+            for (i = 0;; ++i) {
                 int c = number % 52;
-                if (!first) {
-                    str.append(" ");
-                } else {
-                    first = false;
-                }
+                str.append(" ");
                 if (c < 26) {
                     str.append(Character.toString('a' + c));
                 } else {
@@ -59,10 +56,12 @@ public class FancyJumpResponder implements EventResponder {
                     number /= 52;
                 }
             }
+            for (; i < max; ++i) {
+                str.append(" a");
+            }
+            str.reverse();
             _matchStringRaw = str.toString().replace(" ", "");
-            str.append(" " + Character.toString(character));
-            str.append(" g");
-            str = str.reverse();
+            str.insert(0, "g " + Character.toString(character) + " ");
             _matchString = str.toString();
             _log.info("Word match: " + str);
             _responder = new TextEventResponder(str.toString(), () -> {
@@ -92,7 +91,9 @@ public class FancyJumpResponder implements EventResponder {
                 };
                 break;
             case MAYBE:
-                _log.info("Maybe match word at " + _position + ", current char: " + _matchString.substring(_matches, _matches++));
+                _matches++;
+                _log.info("Failed match word at " + _position + ", matchString: " + _matchString + ", eventChar: " + event.getKeyStroke().getCharacter());
+                _log.info("Maybe match word at " + _position + ", current char: " + _matchStringRaw.substring(_matches, _matches + 1));
                 break;
             }
             return result;
@@ -109,7 +110,8 @@ public class FancyJumpResponder implements EventResponder {
             if (glyph.getPosition() != _position) {
                 return character;
             }
-            return AttributedString.create(_matchStringRaw.substring(_matches, _matches + 1), TextColor.ANSI.RED, TextColor.ANSI.DEFAULT);
+            return AttributedString.create(_matchStringRaw.substring(_matches, _matches + 1), 
+                    TextColor.ANSI.RED, TextColor.ANSI.DEFAULT);
         }
     }
     
@@ -129,10 +131,16 @@ public class FancyJumpResponder implements EventResponder {
                     var pattern = Pattern.compile("\\b" + key.getCharacter(), Pattern.MULTILINE);
                     var str = _bufferContext.getBuffer().getString().substring(range.getStart(), range.getEnd());
                     var matcher = pattern.matcher(str);
-                    int number = 0;
+                    var matches = new ArrayList<Integer>();
                     while (matcher.find()) {
-                        _log.info("Adding word responder: " + (range.getStart() + matcher.start()) + ", " + number);
-                        var responder = new WordResponder(range.getStart() + matcher.start(), number++, key.getCharacter(), responders);
+                        matches.add(matcher.start());
+                    }
+                    int number = 0;
+                    var iter = matches.iterator();
+                    while (iter.hasNext()) {
+                        int match = iter.next();
+                        _log.info("Adding word responder: " + (range.getStart() + match) + ", " + number);
+                        var responder = new WordResponder(range.getStart() + match, number++, matches.size(), key.getCharacter(), responders);
                         responders.addEventResponder(responder);
                         _normalMode.addGlyphDecorator(responder);
                         _installedResponders.add(responder);
