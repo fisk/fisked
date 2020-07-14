@@ -38,9 +38,7 @@ public class BufferView extends View {
         _log.info("Attributed string length: " + attrString.length());
         _bufferContext.getTextLayout().getGlyphs().forEach((glyph) -> {
             var character = attrString.getCharacter(glyph.getPosition());
-            if (mode.isSelected(glyph.getPosition())) {
-                character = AttributedString.create(glyph.getCharacter(), TextColor.ANSI.BLACK, TextColor.ANSI.YELLOW);
-            }
+            character = mode.decorate(glyph, character);
             var point = Point.create(rect.getPoint().getX() + glyph.getX(), rect.getPoint().getY() + glyph.getY() - _startLine);
             character.drawAt(point, textGraphics);
         });

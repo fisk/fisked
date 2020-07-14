@@ -1,14 +1,16 @@
 package org.fisk.fisked.mode;
 
-import com.googlecode.lanterna.TerminalPosition;
-import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.TextColor;
-
+import org.fisk.fisked.copy.Copy;
 import org.fisk.fisked.terminal.TerminalContext;
+import org.fisk.fisked.text.AttributedString;
+import org.fisk.fisked.text.TextLayout.Glyph;
 import org.fisk.fisked.ui.Cursor;
 import org.fisk.fisked.ui.Rect;
 import org.fisk.fisked.ui.Window;
-import org.fisk.fisked.copy.Copy;
+
+import com.googlecode.lanterna.TerminalPosition;
+import com.googlecode.lanterna.TerminalSize;
+import com.googlecode.lanterna.TextColor;
 
 public class VisualMode extends Mode {
     
@@ -98,5 +100,13 @@ public class VisualMode extends Mode {
         var minCursor = cursor.getPosition() < getOtherCursor().getPosition() ? cursor : getOtherCursor();
         var maxCursor = cursor.getPosition() >= getOtherCursor().getPosition() ? cursor : getOtherCursor();
         return position >= minCursor.getPosition() && position <= maxCursor.getPosition();
+    }
+    
+    @Override
+    public AttributedString decorate(Glyph glyph, AttributedString character) {
+        if (isSelected(glyph.getPosition())) {
+            return AttributedString.create(glyph.getCharacter(), TextColor.ANSI.BLACK, TextColor.ANSI.YELLOW);
+        }
+        return character;
     }
 }

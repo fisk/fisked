@@ -1,15 +1,14 @@
 package org.fisk.fisked.mode;
 
-import com.googlecode.lanterna.TerminalPosition;
-import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.TextColor;
-
+import org.fisk.fisked.copy.Copy;
 import org.fisk.fisked.terminal.TerminalContext;
-import org.fisk.fisked.ui.Cursor;
 import org.fisk.fisked.ui.Range;
 import org.fisk.fisked.ui.Rect;
 import org.fisk.fisked.ui.Window;
-import org.fisk.fisked.copy.Copy;
+
+import com.googlecode.lanterna.TerminalPosition;
+import com.googlecode.lanterna.TerminalSize;
+import com.googlecode.lanterna.TextColor;
 
 public class VisualLineMode extends VisualMode {
     public VisualLineMode(Window window) {
