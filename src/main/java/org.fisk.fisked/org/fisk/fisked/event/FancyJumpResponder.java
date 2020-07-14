@@ -51,7 +51,7 @@ public class FancyJumpResponder implements EventResponder {
                 if (c < 26) {
                     str.append(Character.toString('a' + c));
                 } else {
-                    str.append(Character.toString('A' + c));
+                    str.append(Character.toString('A' + c - 26));
                 }
                 if (number < 52) {
                     break;

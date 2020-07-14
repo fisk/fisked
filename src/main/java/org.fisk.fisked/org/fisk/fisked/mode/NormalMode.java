@@ -128,6 +128,11 @@ public class NormalMode extends Mode {
     public void activate() {
         _window.getBufferContext().getBuffer().getUndoLog().commit();
     }
+
+    @Override
+    public void deactivate() {
+        _glyphDecorators.clear();
+    }
     
     public static interface GlyphDecorator {
         public AttributedString decorate(Glyph glyph, AttributedString character);
