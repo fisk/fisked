@@ -1,6 +1,7 @@
 package org.fisk.fisked.mode;
 
 import org.fisk.fisked.copy.Copy;
+import org.fisk.fisked.event.FancyJumpResponder;
 import org.fisk.fisked.terminal.TerminalContext;
 import org.fisk.fisked.text.AttributedString;
 import org.fisk.fisked.text.TextLayout.Glyph;
@@ -13,6 +14,7 @@ import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
 
 public class VisualMode extends Mode {
+    private FancyJumpResponder _fancyJump;
     
     protected Cursor getOtherCursor() {
         return _window.getBufferContext().getBuffer().getCursors().get(1);
@@ -20,6 +22,8 @@ public class VisualMode extends Mode {
 
     public VisualMode(Window window) {
         super("VISUAL", window);
+        _fancyJump = new FancyJumpResponder(window.getBufferContext());
+        _rootResponder.addEventResponder(_fancyJump);
         setupBasicResponders();
         setupNavigationResponders();
     }
@@ -105,8 +109,9 @@ public class VisualMode extends Mode {
     @Override
     public AttributedString decorate(Glyph glyph, AttributedString character) {
         if (isSelected(glyph.getPosition())) {
-            return AttributedString.create(glyph.getCharacter(), TextColor.ANSI.BLACK, TextColor.ANSI.YELLOW);
+            character = AttributedString.create(glyph.getCharacter(), TextColor.ANSI.BLACK, TextColor.ANSI.YELLOW);
         }
+        character = _fancyJump.decorate(glyph, character);
         return character;
     }
 }

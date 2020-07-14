@@ -1,8 +1,5 @@
 package org.fisk.fisked.mode;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.fisk.fisked.copy.Copy;
 import org.fisk.fisked.event.FancyJumpResponder;
 import org.fisk.fisked.fileindex.FileIndex;
@@ -12,6 +9,8 @@ import org.fisk.fisked.text.TextLayout.Glyph;
 import org.fisk.fisked.ui.Window;
 
 public class NormalMode extends Mode {
+    private FancyJumpResponder _fancyJump;
+    
     public NormalMode(Window window) {
         super("NORMAL", window);
         setupBasicResponders();
@@ -24,7 +23,8 @@ public class NormalMode extends Mode {
         var buffer = bufferContext.getBuffer();
         var cursor = buffer.getCursor();
         String leader = "<SPACE>";
-        _rootResponder.addEventResponder(new FancyJumpResponder(bufferContext, NormalMode.this));
+        _fancyJump = new FancyJumpResponder(bufferContext);
+        _rootResponder.addEventResponder(_fancyJump);
         _rootResponder.addEventResponder(leader + " e i", () -> {
             JavaLSPClient.getInstance().organizeImports(window.getBufferContext());
         });
@@ -128,31 +128,10 @@ public class NormalMode extends Mode {
     public void activate() {
         _window.getBufferContext().getBuffer().getUndoLog().commit();
     }
-
-    @Override
-    public void deactivate() {
-        _glyphDecorators.clear();
-    }
-    
-    public static interface GlyphDecorator {
-        public AttributedString decorate(Glyph glyph, AttributedString character);
-    }
-    
-    private List<GlyphDecorator> _glyphDecorators = new ArrayList<>();
-    
-    public void addGlyphDecorator(GlyphDecorator decorator) {
-        _glyphDecorators.add(decorator);
-    }
-    
-    public void removeGlyphDecorator(GlyphDecorator decorator) {
-        _glyphDecorators.remove(decorator);
-    }
     
     @Override
     public AttributedString decorate(Glyph glyph, AttributedString character) {
-        for (var decorator: _glyphDecorators) {
-            character = decorator.decorate(glyph, character);
-        }
+        character = _fancyJump.decorate(glyph, character);
         return character;
     }
 }

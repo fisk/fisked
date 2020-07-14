@@ -18,17 +18,15 @@ public class FancyJumpResponder implements EventResponder {
     private BufferContext _bufferContext;
     private EventResponder _currentResponder = getInitialResponder();
     private Runnable _postfix = null;
-    private NormalMode _normalMode;
     private List<WordResponder> _installedResponders = new ArrayList<>();
     
     private static final Logger _log = LogFactory.createLog();
     
-    public FancyJumpResponder(BufferContext bufferContext, NormalMode normalMode) {
+    public FancyJumpResponder(BufferContext bufferContext) {
         _bufferContext = bufferContext;
-        _normalMode = normalMode;
     }
 
-    private class WordResponder implements EventResponder, NormalMode.GlyphDecorator {
+    private class WordResponder implements EventResponder {
         private int _position;
         private TextEventResponder _responder;
         private ListEventResponder _parent;
@@ -69,9 +67,7 @@ public class FancyJumpResponder implements EventResponder {
                 _bufferContext.getBuffer().getCursor().setPosition(_position);
                 _bufferContext.getBufferView().adaptViewToCursor();
                 _currentResponder = getInitialResponder();
-                for (var responder: _installedResponders) {
-                    _normalMode.removeGlyphDecorator(responder);
-                }
+                _installedResponders.clear();
             });
         }
         
@@ -86,7 +82,6 @@ public class FancyJumpResponder implements EventResponder {
                 _log.info("Failed match word at " + _position + ", matchString: " + _matchString + ", eventChar: " + event.getKeyStroke().getCharacter());
                 _postfix = () -> {
                     _parent.removeEventResponder(this);
-                    _normalMode.removeGlyphDecorator(this);
                     _installedResponders.remove(this);
                 };
                 break;
@@ -105,7 +100,6 @@ public class FancyJumpResponder implements EventResponder {
             _responder.respond();
         }
 
-        @Override
         public AttributedString decorate(Glyph glyph, AttributedString character) {
             if (glyph.getPosition() != _position) {
                 return character;
@@ -142,7 +136,6 @@ public class FancyJumpResponder implements EventResponder {
                         _log.info("Adding word responder: " + (range.getStart() + match) + ", " + number);
                         var responder = new WordResponder(range.getStart() + match, number++, matches.size(), key.getCharacter(), responders);
                         responders.addEventResponder(responder);
-                        _normalMode.addGlyphDecorator(responder);
                         _installedResponders.add(responder);
                     }
                     if (number > 0) {
@@ -200,4 +193,10 @@ public class FancyJumpResponder implements EventResponder {
         _currentResponder.respond();
     }
 
+    public AttributedString decorate(Glyph glyph, AttributedString character) {
+        for (var responder: _installedResponders) {
+            character = responder.decorate(glyph, character);
+        }
+        return character;
+    }
 }
