@@ -5,18 +5,17 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.googlecode.lanterna.TextColor;
-
 import org.fisk.fisked.EventThread;
 import org.fisk.fisked.event.RunnableEvent;
+import org.fisk.fisked.fileindex.ProjectPaths;
 import org.fisk.fisked.terminal.TerminalContext;
 import org.fisk.fisked.text.AttributedString;
 import org.fisk.fisked.text.Powerline;
 
+import com.googlecode.lanterna.TextColor;
+
 public class ModeLineView extends View {
     private String _time;
-    private String _branch = "master";
-    private String _name = "*scratch*";
     private TextColor _foregroundColour;
 
     private String getTime() {
@@ -26,6 +25,25 @@ public class ModeLineView extends View {
 
     private String getMode() {
         return Window.getInstance().getCurrentMode().getName();
+    }
+    
+    private String getName() {
+        var window = Window.getInstance();
+        var buffer = window.getBufferContext().getBuffer();
+        var path = buffer.getPath();
+        if (path == null) {
+            return "*scratch*";
+        }
+        var root = ProjectPaths.getProjectRootPath();
+        if (root != null) {
+            return root.relativize(path).toString();
+        } else {
+            return buffer.getPath().toString();
+        }
+    }
+    
+    private String getBranch() {
+        return "master";
     }
 
     private String getLine() {
@@ -78,7 +96,7 @@ public class ModeLineView extends View {
         TextColor modeColour = getModeColor();
         str.append(" " + getMode() + " ", _backgroundColour, modeColour);
         str.append(Powerline.SYMBOL_FILLED_RIGHT_ARROW, modeColour, _backgroundColour);
-        str.append(" " + _name + " ", _foregroundColour, _backgroundColour);
+        str.append(" " + getName() + " ", _foregroundColour, _backgroundColour);
         str.append(Powerline.SYMBOL_RIGHT_ARROW, _foregroundColour, _backgroundColour);
         str.append(" ", _foregroundColour, _backgroundColour);
         str.append(Powerline.SYMBOL_LN, _foregroundColour, _backgroundColour);
@@ -91,7 +109,7 @@ public class ModeLineView extends View {
         var str = new AttributedString();
         str.append(Powerline.SYMBOL_LEFT_ARROW, _foregroundColour, _backgroundColour);
         str.append(" " + Powerline.SYMBOL_BRANCH + " ", _foregroundColour, _backgroundColour);
-        str.append(_branch, _foregroundColour, _backgroundColour);
+        str.append(getBranch(), _foregroundColour, _backgroundColour);
         str.append(" ", _foregroundColour, _backgroundColour);
         str.append(Powerline.SYMBOL_LEFT_ARROW, _foregroundColour, _backgroundColour);
         str.append(" " + _time + " ", _foregroundColour, _backgroundColour);

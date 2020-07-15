@@ -26,6 +26,7 @@ import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.input.KeyType;
+import com.googlecode.lanterna.screen.Screen.RefreshType;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.terminal.TerminalResizeListener;
 
@@ -224,7 +225,7 @@ public class Window implements Drawable {
             screen.setCursorPosition(new TerminalPosition(cursor.getX(), cursor.getYRelative()));
         }
         try {
-            screen.refresh();
+            screen.refresh(RefreshType.DELTA);
         } catch (IOException e) {}
     }
 

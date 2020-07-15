@@ -5,6 +5,8 @@ import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.input.KeyType;
 
+import java.nio.file.Paths;
+
 import org.fisk.fisked.event.EventListener;
 import org.fisk.fisked.event.EventResponder;
 import org.fisk.fisked.event.KeyStrokeEvent;
@@ -23,7 +25,7 @@ public class CommandView extends View {
             deactivate();
         });
         _responders.addEventResponder("<ENTER>", () -> {
-            runCommand(_command.toString());
+            runCommand(_command.toString().split(" "));
             deactivate();
         });
         _responders.addEventResponder("<BACKSPACE>", () -> {
@@ -52,13 +54,40 @@ public class CommandView extends View {
         });
     }
 
-    private void runCommand(String command) {
+    private void runCommand(String[] args) {
+        if (args.length == 0) {
+            return;
+        }
+        String command = args[0];
         switch (command) {
         case "q":
             System.exit(0);
+        case "e":
+            open(args);
+            break;
         case "w":
             Window.getInstance().getBufferContext().getBuffer().write();
             break;
+        }
+    }
+    
+    private void open(String[] args) {
+        if (args.length != 2) {
+            _message = "Wrong number of parameters";
+            return;
+        }
+        var path = Paths.get(args[1]).toAbsolutePath();
+        if (!path.toFile().exists()) {
+            try {
+                if (path.toFile().createNewFile()) {
+                    Window.getInstance().setBufferPath(path);
+                    return;
+                }
+            } catch (Exception e) {
+            }
+            _message = "File does not exist";
+        } else {
+            Window.getInstance().setBufferPath(path);
         }
     }
 

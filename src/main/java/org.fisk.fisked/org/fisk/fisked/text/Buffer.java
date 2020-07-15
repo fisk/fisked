@@ -66,6 +66,7 @@ public class Buffer {
     private LanguageMode _languageMode;
 
     public Buffer(Path path, BufferContext bufferContext) {
+        path = path.toAbsolutePath();
         _path = path;
         _bufferContext = bufferContext;
         _cursors.add(new Cursor(bufferContext));
