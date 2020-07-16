@@ -1,10 +1,14 @@
 package org.fisk.fisked.ui;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.fisk.fisked.EventThread;
 import org.fisk.fisked.event.RunnableEvent;
 import org.fisk.fisked.fileindex.ProjectPaths;
@@ -43,7 +47,14 @@ public class ModeLineView extends View {
     }
     
     private String getBranch() {
-        return "master";
+        try {
+            var repo = new FileRepositoryBuilder()
+                    .setGitDir(ProjectPaths.getProjectRootPath().resolve(".git").toFile())
+                    .build();
+            return repo.getBranch();
+        } catch (IOException e) {
+            return "";
+        }
     }
 
     private String getLine() {

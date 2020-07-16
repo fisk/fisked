@@ -2,7 +2,6 @@ package org.fisk.fisked;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 
@@ -58,7 +57,7 @@ public class Fisked {
         }
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) {
         try {
             setupLogging();
             var path = checkArguments(args);

@@ -3,8 +3,9 @@ module org.fisk.fisked {
     requires java.sql;
     requires lanterna;
     requires lucene.core;
+    requires org.eclipse.jgit;
     requires org.eclipse.lsp4j;
     requires org.eclipse.lsp4j.jsonrpc;
-    requires org.slf4j;
-    requires org.slf4j.simple;
+    requires slf4j.api;
+    requires slf4j.simple;
 }
