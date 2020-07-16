@@ -124,9 +124,9 @@ public class TextLayout {
         }
     }
 
-    private TreeMap<Integer, Line> _logicalLines;
+    private ArrayList<Line> _logicalLines;
     private TreeMap<Integer, Line> _logicalLineAtPosition;
-    private TreeMap<Integer, Line> _physicalLines;
+    private ArrayList<Line> _physicalLines;
     private TreeMap<Integer, Line> _physicalLineAtPosition;
     private BufferContext _bufferContext;
 
@@ -156,12 +156,12 @@ public class TextLayout {
     }
 
     public Line getLastPhysicalLine() {
-        return _physicalLines.lastEntry().getValue();
+        return _physicalLines.get(_physicalLines.size() - 1);
     }
 
     private static class LayoutIterator {
         Line _line;
-        TreeMap<Integer, Line> _lines = new TreeMap<>();
+        ArrayList<Line> _lines = new ArrayList<>();
         TreeMap<Integer, Line> _lineAtPosition = new TreeMap<>();
         int _x = 0;
         int _y = -1;
@@ -190,7 +190,7 @@ public class TextLayout {
                 _line.setNext(line);
             }
             _line = line;
-            _lines.put(_y, line);
+            _lines.add(_y, line);
             _lineAtPosition.put(position, line);
         }
 
@@ -225,7 +225,7 @@ public class TextLayout {
             return _isWrapped;
         }
 
-        TreeMap<Integer, Line> getLines() {
+        ArrayList<Line> getLines() {
             return _lines;
         }
 
@@ -283,8 +283,9 @@ public class TextLayout {
         var bufferView = _bufferContext.getBufferView();
         var rect = bufferView.getBounds();
         var start = bufferView.getStartLine();
-        var range = _logicalLines.subMap(start, start + rect.getSize().getHeight());
-        return range.entrySet().stream().map((entry) -> entry.getValue().getGlyphs()).flatMap((list) -> list.stream());
+        var end = Math.min(start + rect.getSize().getHeight(), _logicalLines.size());
+        var range = _logicalLines.subList(start, end);
+        return range.stream().map((line) -> line.getGlyphs()).flatMap((list) -> list.stream());
     }
     
     public Range getGlyphRange() {
