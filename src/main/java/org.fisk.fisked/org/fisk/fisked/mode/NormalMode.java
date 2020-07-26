@@ -2,6 +2,7 @@ package org.fisk.fisked.mode;
 
 import org.fisk.fisked.copy.Copy;
 import org.fisk.fisked.event.FancyJumpResponder;
+import org.fisk.fisked.event.FindResponder;
 import org.fisk.fisked.fileindex.FileIndex;
 import org.fisk.fisked.lsp.java.JavaLSPClient;
 import org.fisk.fisked.text.AttributedString;
@@ -23,7 +24,7 @@ public class NormalMode extends Mode {
         var buffer = bufferContext.getBuffer();
         var cursor = buffer.getCursor();
         String leader = "<SPACE>";
-        _fancyJump = new FancyJumpResponder(bufferContext);
+        _fancyJump = new FancyJumpResponder(bufferContext, 'w');
         _rootResponder.addEventResponder(_fancyJump);
         _rootResponder.addEventResponder(leader + " e i", () -> {
             JavaLSPClient.getInstance().organizeImports(window.getBufferContext());

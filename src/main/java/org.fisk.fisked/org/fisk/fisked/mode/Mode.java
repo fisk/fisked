@@ -1,6 +1,7 @@
 package org.fisk.fisked.mode;
 
 import org.fisk.fisked.event.EventResponder;
+import org.fisk.fisked.event.FindResponder;
 import org.fisk.fisked.event.KeyStrokeEvent;
 import org.fisk.fisked.event.ListEventResponder;
 import org.fisk.fisked.text.AttributedString;
@@ -50,6 +51,10 @@ public class Mode implements EventResponder, Drawable {
         _rootResponder.addEventResponder("<RIGHT>", () -> { cursor.goRight(); });
         _rootResponder.addEventResponder("<DOWN>", () -> { cursor.goDown(); });
         _rootResponder.addEventResponder("<UP>", () -> { cursor.goUp(); });
+        _rootResponder.addEventResponder("g g", () -> { cursor.setPosition(0); });
+        _rootResponder.addEventResponder("G", () -> { cursor.setPosition(buffer.getLength() - 1); });
+        //_rootResponder.addEventResponder(new FindResponder(bufferContext, "f", true));
+        //_rootResponder.addEventResponder(new FindResponder(bufferContext, "F", false));
     }
 
     public void activate() {

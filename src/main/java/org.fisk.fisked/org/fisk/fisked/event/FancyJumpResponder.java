@@ -22,8 +22,11 @@ public class FancyJumpResponder implements EventResponder {
     
     private static final Logger _log = LogFactory.createLog();
     
-    public FancyJumpResponder(BufferContext bufferContext) {
+    private char _prefix;
+    
+    public FancyJumpResponder(BufferContext bufferContext, char prefix) {
         _bufferContext = bufferContext;
+        _prefix = prefix;
     }
 
     private class WordResponder implements EventResponder {
@@ -59,7 +62,7 @@ public class FancyJumpResponder implements EventResponder {
             }
             str.reverse();
             _matchStringRaw = str.toString().replace(" ", "");
-            str.insert(0, "g " + Character.toString(character) + " ");
+            str.insert(0, Character.toString(_prefix) + " " + Character.toString(character) + " ");
             _matchString = str.toString();
             _log.info("Word match: " + str);
             _responder = new TextEventResponder(str.toString(), () -> {
@@ -158,7 +161,7 @@ public class FancyJumpResponder implements EventResponder {
             @Override
             public Response processEvent(KeyStrokeEvent event) {
                 var key = event.getKeyStroke();
-                if (key.getKeyType() == KeyType.Character && key.getCharacter() == 'g') {
+                if (key.getKeyType() == KeyType.Character && key.getCharacter() == _prefix) {
                     _currentResponder = getFirstCharResponder();
                     _log.info("Set first char responder");
                     return Response.MAYBE;
@@ -178,6 +181,7 @@ public class FancyJumpResponder implements EventResponder {
         var result = _currentResponder.processEvent(event);
         if (result == Response.NO) {
             _currentResponder = getInitialResponder();
+            _installedResponders.clear();
             _log.info("Restoring initial responder");
         }
         if (_postfix != null) {

@@ -53,7 +53,6 @@ public class View implements Drawable, EventResponder {
 
     @Override
     public void draw(Rect rect) {
-        _log.info("View draw rect: " + _bounds);
         var terminalContext = TerminalContext.getInstance();
         var textGraphics = terminalContext.getGraphics();
         if (_backgroundColour != null) {

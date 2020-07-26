@@ -1,5 +1,7 @@
 package org.fisk.fisked.ui;
 
+import java.util.regex.Pattern;
+
 import org.fisk.fisked.text.BufferContext;
 import org.fisk.fisked.text.TextLayout.Line;
 
@@ -176,5 +178,33 @@ public class Cursor {
     public Line getLogicalLine() {
         var textLayout = _bufferContext.getTextLayout();
         return textLayout.getLogicalLineAt(_position);
+    }
+
+    public void goNext(Pattern pattern) {
+        var str = _bufferContext.getBuffer().getString();
+        var matcher = pattern.matcher(str);
+        if (matcher.find(_position + 1)) {
+            int start = matcher.start();
+            _position = start;
+            calculate();
+            Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();
+        }
+    }
+
+    public void goPrevious(Pattern pattern) {
+        var str = _bufferContext.getBuffer().getString();
+        var matcher = pattern.matcher(str);
+        int last = -1;
+        while (matcher.find()) {
+            int start = matcher.start();
+            if (start < _position) {
+                last = start;
+            }
+        }
+        if (last > 0) {
+            _position = last;
+            calculate();
+            Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();
+        }
     }
 }

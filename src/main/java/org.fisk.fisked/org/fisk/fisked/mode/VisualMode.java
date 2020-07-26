@@ -22,7 +22,7 @@ public class VisualMode extends Mode {
 
     public VisualMode(Window window) {
         super("VISUAL", window);
-        _fancyJump = new FancyJumpResponder(window.getBufferContext());
+        _fancyJump = new FancyJumpResponder(window.getBufferContext(), 'w');
         _rootResponder.addEventResponder(_fancyJump);
         setupBasicResponders();
         setupNavigationResponders();
