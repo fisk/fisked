@@ -2,8 +2,9 @@ package org.fisk.fisked.mode;
 
 import org.fisk.fisked.event.EventResponder;
 import org.fisk.fisked.event.FindResponder;
-import org.fisk.fisked.event.KeyStrokeEvent;
+import org.fisk.fisked.event.KeyStrokes;
 import org.fisk.fisked.event.ListEventResponder;
+import org.fisk.fisked.event.Response;
 import org.fisk.fisked.text.AttributedString;
 import org.fisk.fisked.text.TextLayout.Glyph;
 import org.fisk.fisked.ui.Drawable;
@@ -25,8 +26,8 @@ public class Mode implements EventResponder, Drawable {
     }
 
     @Override
-    public Response processEvent(KeyStrokeEvent event) {
-        return _rootResponder.processEvent(event);
+    public Response processEvent(KeyStrokes events) {
+        return _rootResponder.processEvent(events);
     }
 
     @Override
@@ -53,8 +54,8 @@ public class Mode implements EventResponder, Drawable {
         _rootResponder.addEventResponder("<UP>", () -> { cursor.goUp(); });
         _rootResponder.addEventResponder("g g", () -> { cursor.setPosition(0); });
         _rootResponder.addEventResponder("G", () -> { cursor.setPosition(buffer.getLength() - 1); });
-        //_rootResponder.addEventResponder(new FindResponder(bufferContext, "f", true));
-        //_rootResponder.addEventResponder(new FindResponder(bufferContext, "F", false));
+        _rootResponder.addEventResponder(new FindResponder(bufferContext, "f", true));
+        _rootResponder.addEventResponder(new FindResponder(bufferContext, "F", false));
     }
 
     public void activate() {

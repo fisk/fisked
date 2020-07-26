@@ -1,6 +1,7 @@
 package org.fisk.fisked.event;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class ListEventResponder implements EventResponder {
@@ -20,25 +21,25 @@ public class ListEventResponder implements EventResponder {
     }
 
     @Override
-    public Response processEvent(KeyStrokeEvent event) {
+    public Response processEvent(KeyStrokes events) {
         boolean maybe = false;
         EventResponder yes = null;
         for (var responder : _responders) {
-            var response = responder.processEvent(event);
-            if (response == EventListener.Response.MAYBE) {
+            var response = responder.processEvent(new KeyStrokes(events));
+            if (response == Response.MAYBE) {
                 maybe = true;
             }
-            if (response == EventListener.Response.YES) {
+            if (response == Response.YES) {
                 yes = responder;
             }
         }
         if (maybe) {
-            return EventListener.Response.MAYBE;
+            return Response.MAYBE;
         } else if (yes != null) {
             _responder = yes;
-            return EventListener.Response.YES;
+            return Response.YES;
         } else {
-            return EventListener.Response.NO;
+            return Response.NO;
         }
     }
 

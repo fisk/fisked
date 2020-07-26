@@ -1,11 +1,11 @@
 package org.fisk.fisked.mode;
 
-import com.googlecode.lanterna.input.KeyType;
-
-import org.fisk.fisked.event.EventListener;
 import org.fisk.fisked.event.EventResponder;
-import org.fisk.fisked.event.KeyStrokeEvent;
+import org.fisk.fisked.event.KeyStrokes;
+import org.fisk.fisked.event.Response;
 import org.fisk.fisked.ui.Window;
+
+import com.googlecode.lanterna.input.KeyType;
 
 public class InputMode extends Mode {
     public InputMode(Window window) {
@@ -26,12 +26,16 @@ public class InputMode extends Mode {
             private char _character;
 
             @Override
-            public Response processEvent(KeyStrokeEvent event) {
-                if (event.getKeyStroke().getKeyType() == KeyType.Character) {
-                    _character = event.getKeyStroke().getCharacter();
-                    return EventListener.Response.YES;
+            public Response processEvent(KeyStrokes events) {
+                if (events.remaining() != 0) {
+                    return Response.NO;
                 }
-                return EventListener.Response.NO;
+                var event = events.current();
+                if (event.getKeyType() == KeyType.Character) {
+                    _character = event.getCharacter();
+                    return Response.YES;
+                }
+                return Response.NO;
             }
 
             @Override

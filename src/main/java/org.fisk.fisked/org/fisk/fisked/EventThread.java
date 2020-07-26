@@ -7,15 +7,17 @@ import java.util.concurrent.TimeUnit;
 
 import org.fisk.fisked.event.Event;
 import org.fisk.fisked.event.KeyStrokeEvent;
+import org.fisk.fisked.event.KeyStrokes;
 import org.fisk.fisked.event.ListEventResponder;
 import org.fisk.fisked.event.RunnableEvent;
 import org.fisk.fisked.utils.LogFactory;
 import org.slf4j.Logger;
 
+import com.googlecode.lanterna.input.KeyStroke;
+
 public class EventThread extends Thread {
     private static Logger _log = LogFactory.createLog();
 
-    private KeyStrokeEvent _previous;
     private final ListEventResponder _responder;
     private final ArrayBlockingQueue<Event> _events = new ArrayBlockingQueue<>(1024, true);
     private static volatile EventThread _instance;
@@ -41,6 +43,7 @@ public class EventThread extends Thread {
 
     @Override
     public void run() {
+        ArrayList<KeyStroke> events = new ArrayList<>();
         while (true) {
             Event event = null;
             while (true) {
@@ -53,18 +56,21 @@ public class EventThread extends Thread {
                 } catch (InterruptedException e) {}
             }
             if (event instanceof KeyStrokeEvent) {
-                _log.info("Received key stroke event");
-                var keyEvent = (KeyStrokeEvent) event;
-                keyEvent.setPrevious(_previous);
                 try {
-                    switch (_responder.processEvent(keyEvent)) {
+                    _log.info("Received key stroke event");
+                    var keyEvent = (KeyStrokeEvent) event;
+                    events.add(keyEvent.getKeyStroke());
+                    var keys = new KeyStrokes(events);
+                    switch (_responder.processEvent(keys)) {
                     case MAYBE:
-                        _previous = keyEvent;
+                        _log.info("Maybe");
                         break;
                     case YES:
+                        _log.info("Yes");
                         _responder.respond();
                     case NO:
-                        _previous = null;
+                        _log.info("No/Clear");
+                        events.clear();
                         break;
                     }
                 } catch (Exception e) {

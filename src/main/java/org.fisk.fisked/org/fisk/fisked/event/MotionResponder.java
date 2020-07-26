@@ -9,55 +9,41 @@ public class MotionResponder implements EventResponder {
     private static final Logger _log = LogFactory.createLog();
     
     private String _motion;
-    private EventResponder _responder;
+    private EventResponder _prefixResponder;
+    private EventResponder _motionResponder;
     
     private Responder _delegate;
     
     public static interface Responder {
         void respond(int count);
     }
-    
-    private EventResponder getMotionResponder(String prefixStr) {
-        _log.info("Getting motion responder: " + prefixStr);
-        var match = new StringBuilder();
-        if (!prefixStr.equals("")) {
-            for (int i = 0; i < prefixStr.length(); ++i) {
-                if (i != 0) {
-                    match.append(" ");
-                }
-                match.append(Character.toString(prefixStr.charAt(i)));
-            }
-            match.append(" ");
-        }
-        match.append(_motion);
-        _log.info("Getting motion responder: " + _motion);
-        _log.info("Getting motion responder: " + match);
-        return new TextEventResponder(match.toString(), () -> {
-            if (prefixStr.equals("")) {
-                _delegate.respond(1);
-            } else {
-                _delegate.respond(Integer.parseInt(prefixStr));
-            }
-        });
-    }
+
+    private StringBuffer _prefix = new StringBuffer();
     
     private EventResponder getInitialResponder() {
         return new EventResponder() {
-            private StringBuffer _prefix = new StringBuffer();
-
             @Override
-            public Response processEvent(KeyStrokeEvent event) {
-                if (event.getKeyStroke().getKeyType() != KeyType.Character) {
-                    _responder = getMotionResponder(_prefix.toString());
-                    return Response.MAYBE;
+            public Response processEvent(KeyStrokes events) {
+                _prefix = new StringBuffer();
+                for (;;) {
+                    var event = events.current();
+                    if (event.getKeyType() != KeyType.Character) {
+                        return Response.YES;
+                    }
+                    int diff = '9' - event.getCharacter();
+                    if (diff >= 10 || diff < 0) {
+                        return Response.YES;
+                    }
+                    
+                    _prefix.append(Character.toString(event.getCharacter()));
+                    
+                    if (!events.hasNext()) {
+                        events.consume(1);
+                        return Response.YES;
+                    } else {
+                        events.consume(1);
+                    }
                 }
-                int diff = '9' - event.getKeyStroke().getCharacter();
-                if (diff >= 10 || diff < 0) {
-                    _responder = getMotionResponder(_prefix.toString());
-                    return Response.MAYBE;
-                }
-                _prefix.append(Character.toString(event.getKeyStroke().getCharacter()));
-                return Response.MAYBE;
             }
 
             @Override
@@ -68,24 +54,27 @@ public class MotionResponder implements EventResponder {
 
     public MotionResponder(String motion, Responder responder) {
         _motion = motion;
-        _responder = getInitialResponder();
+        _prefixResponder = getInitialResponder();
+        _motionResponder = new TextEventResponder(_motion, () -> {});
         _delegate = responder;
     }
-    
-    private EventResponder _matched;
 
     @Override
-    public Response processEvent(KeyStrokeEvent event) {
-        _matched = _responder;
-        var response = _responder.processEvent(event);
-        if (response != Response.MAYBE) {
-            _responder = getInitialResponder();
+    public Response processEvent(KeyStrokes events) {
+        _prefixResponder.processEvent(events);
+        if (events.consumed()) {
+            return Response.MAYBE;
         }
-        return response;
+        return _motionResponder.processEvent(events);
     }
 
     @Override
     public void respond() {
-        _matched.respond();
+        var prefixStr = _prefix.toString();
+        if (prefixStr.equals("")) {
+            _delegate.respond(1);
+        } else {
+            _delegate.respond(Integer.parseInt(prefixStr));
+        }
     }
 }

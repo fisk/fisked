@@ -5,11 +5,10 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.fisk.fisked.EventThread;
-import org.fisk.fisked.event.EventListener;
 import org.fisk.fisked.event.EventResponder;
-import org.fisk.fisked.event.KeyStrokeEvent;
+import org.fisk.fisked.event.KeyStrokes;
+import org.fisk.fisked.event.Response;
 import org.fisk.fisked.event.RunnableEvent;
-import org.fisk.fisked.lsp.java.JavaLSPClient;
 import org.fisk.fisked.mode.InputMode;
 import org.fisk.fisked.mode.Mode;
 import org.fisk.fisked.mode.NormalMode;
@@ -113,9 +112,9 @@ public class Window implements Drawable {
         var responders = eventThread.getResponder();
         responders.addEventResponder(new EventResponder() {
             @Override
-            public Response processEvent(KeyStrokeEvent event) {
+            public Response processEvent(KeyStrokes events) {
                 Window.this.getCommandView().setMessage(null);
-                return EventListener.Response.NO;
+                return Response.NO;
             }
 
             @Override
@@ -125,11 +124,14 @@ public class Window implements Drawable {
         responders.addEventResponder(_rootView);
         responders.addEventResponder(new EventResponder() {
             @Override
-            public Response processEvent(KeyStrokeEvent event) {
-                if (event.getKeyStroke().getKeyType() == KeyType.EOF) {
-                    return EventListener.Response.YES;
+            public Response processEvent(KeyStrokes events) {
+                if (events.remaining() != 0) {
+                    return Response.NO;
                 }
-                return EventListener.Response.NO;
+                if (events.current().getKeyType() == KeyType.EOF) {
+                    return Response.YES;
+                }
+                return Response.NO;
             }
 
             @Override

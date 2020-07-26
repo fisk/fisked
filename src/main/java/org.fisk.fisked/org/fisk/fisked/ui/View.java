@@ -3,16 +3,16 @@ package org.fisk.fisked.ui;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.googlecode.lanterna.TerminalPosition;
-import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.TextColor;
-
-import org.fisk.fisked.event.EventListener;
 import org.fisk.fisked.event.EventResponder;
-import org.fisk.fisked.event.KeyStrokeEvent;
+import org.fisk.fisked.event.KeyStrokes;
+import org.fisk.fisked.event.Response;
 import org.fisk.fisked.terminal.TerminalContext;
 import org.fisk.fisked.utils.LogFactory;
 import org.slf4j.Logger;
+
+import com.googlecode.lanterna.TerminalPosition;
+import com.googlecode.lanterna.TerminalSize;
+import com.googlecode.lanterna.TextColor;
 
 public class View implements Drawable, EventResponder {
     private static final Logger _log = LogFactory.createLog();
@@ -107,13 +107,13 @@ public class View implements Drawable, EventResponder {
     }
 
     @Override
-    public EventListener.Response processEvent(KeyStrokeEvent event) {
+    public Response processEvent(KeyStrokes events) {
         var firstResponder = _firstResponder;
         if (firstResponder == null) {
-            return EventListener.Response.NO;
+            return Response.NO;
         }
-        var result = firstResponder.processEvent(event);
-        if (result == EventListener.Response.YES) {
+        var result = firstResponder.processEvent(events);
+        if (result == Response.YES) {
             _lastResponder = firstResponder;
         }
         return result;

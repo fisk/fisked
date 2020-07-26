@@ -4,17 +4,17 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.fisk.fisked.event.EventResponder;
+import org.fisk.fisked.event.KeyStrokes;
+import org.fisk.fisked.event.ListEventResponder;
+import org.fisk.fisked.event.Response;
+import org.fisk.fisked.terminal.TerminalContext;
+import org.fisk.fisked.text.AttributedString;
+
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.input.KeyType;
-
-import org.fisk.fisked.event.EventListener;
-import org.fisk.fisked.event.EventResponder;
-import org.fisk.fisked.event.KeyStrokeEvent;
-import org.fisk.fisked.event.ListEventResponder;
-import org.fisk.fisked.terminal.TerminalContext;
-import org.fisk.fisked.text.AttributedString;
 
 public class ListView extends View {
     public static abstract class ListItem {
@@ -90,12 +90,16 @@ public class ListView extends View {
             private char _character;
 
             @Override
-            public Response processEvent(KeyStrokeEvent event) {
-                if (event.getKeyStroke().getKeyType() == KeyType.Character) {
-                    _character = event.getKeyStroke().getCharacter();
-                    return EventListener.Response.YES;
+            public Response processEvent(KeyStrokes events) {
+                if (events.remaining() != 0) {
+                    return Response.NO;
                 }
-                return EventListener.Response.NO;
+                var event = events.current();
+                if (event.getKeyType() == KeyType.Character) {
+                    _character = event.getCharacter();
+                    return Response.YES;
+                }
+                return Response.NO;
             }
 
             @Override
@@ -107,8 +111,8 @@ public class ListView extends View {
     }
 
     @Override
-    public EventListener.Response processEvent(KeyStrokeEvent event) {
-        return _responders.processEvent(event);
+    public Response processEvent(KeyStrokes events) {
+        return _responders.processEvent(events);
     }
 
     @Override

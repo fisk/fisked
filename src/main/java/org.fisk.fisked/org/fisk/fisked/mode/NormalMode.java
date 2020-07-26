@@ -2,7 +2,6 @@ package org.fisk.fisked.mode;
 
 import org.fisk.fisked.copy.Copy;
 import org.fisk.fisked.event.FancyJumpResponder;
-import org.fisk.fisked.event.FindResponder;
 import org.fisk.fisked.fileindex.FileIndex;
 import org.fisk.fisked.lsp.java.JavaLSPClient;
 import org.fisk.fisked.text.AttributedString;
