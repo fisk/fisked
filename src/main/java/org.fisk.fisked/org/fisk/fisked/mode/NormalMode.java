@@ -112,7 +112,7 @@ public class NormalMode extends Mode {
                 buffer.insert(Copy.getInstance().getText());
             }
         });
-        _rootResponder.addEventResponder("n", () -> {
+        _rootResponder.addEventResponder("m", () -> {
             if (window.isShowingList()) {
                 window.hideList();
             } else {
@@ -120,7 +120,19 @@ public class NormalMode extends Mode {
             }
         });
         _rootResponder.addEventResponder(":", () -> {
-            window.getCommandView().activate();
+            window.getCommandView().activate(":");
+        });
+        _rootResponder.addEventResponder("/", () -> {
+            window.getCommandView().activate("/");
+        });
+        _rootResponder.addEventResponder("?", () -> {
+            window.getCommandView().activate("?");
+        });
+        _rootResponder.addEventResponder("n", () -> {
+            window.getCommandView().searchNext();
+        });
+        _rootResponder.addEventResponder("N", () -> {
+            window.getCommandView().searchPrevious();
         });
     }
 

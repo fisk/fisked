@@ -1,6 +1,7 @@
 package org.fisk.fisked.ui;
 
 import java.nio.file.Paths;
+import java.util.regex.Pattern;
 
 import org.fisk.fisked.event.EventResponder;
 import org.fisk.fisked.event.KeyStrokes;
@@ -16,8 +17,16 @@ import com.googlecode.lanterna.input.KeyType;
 
 public class CommandView extends View {
     private String _message = null;
+    private String _prompt = null;
     private StringBuilder _command = null;
     private ListEventResponder _responders = new ListEventResponder();
+    private boolean _searchForward;
+    private String _searchString;
+    
+    private boolean isSearch() {
+        // Is this hacky? Yeah it is. Buy hey deal with it later.
+        return _prompt.equals("/") || _prompt.equals("?");
+    }
 
     public CommandView(Rect bounds) {
         super(bounds);
@@ -25,7 +34,11 @@ public class CommandView extends View {
             deactivate();
         });
         _responders.addEventResponder("<ENTER>", () -> {
-            runCommand(_command.toString().split(" "));
+            if (isSearch()) {
+                runSearch(_command.toString());
+            } else {
+                runCommand(_command.toString().split(" "));
+            }
             deactivate();
         });
         _responders.addEventResponder("<BACKSPACE>", () -> {
@@ -56,6 +69,39 @@ public class CommandView extends View {
                 CommandView.this.setNeedsRedraw();
             }
         });
+    }
+
+    private void runSearch(String string) {
+        var pattern = Pattern.compile(string);
+        var cursor = Window.getInstance().getBufferContext().getBuffer().getCursor();
+        _searchString = string;
+        if (_prompt.equals("/")) {
+            _searchForward = true;
+            cursor.goNext(pattern);
+        } else {
+            _searchForward = false;
+            cursor.goPrevious(pattern);
+        }
+    }
+
+    public void searchNext() {
+        var pattern = Pattern.compile(_searchString);
+        var cursor = Window.getInstance().getBufferContext().getBuffer().getCursor();
+        if (!_searchForward) {
+            cursor.goPrevious(pattern);
+        } else {
+            cursor.goNext(pattern);
+        }
+    }
+
+    public void searchPrevious() {
+        var pattern = Pattern.compile(_searchString);
+        var cursor = Window.getInstance().getBufferContext().getBuffer().getCursor();
+        if (!_searchForward) {
+            cursor.goNext(pattern);
+        } else {
+            cursor.goPrevious(pattern);
+        }
     }
 
     private void runCommand(String[] args) {
@@ -119,7 +165,7 @@ public class CommandView extends View {
             var message = AttributedString.create(_message, TextColor.ANSI.DEFAULT, _backgroundColour);
             message.drawAt(rect.getPoint(), graphics);
         } else if (_command != null) {
-            var message = AttributedString.create(":" + _command, TextColor.ANSI.DEFAULT, _backgroundColour);
+            var message = AttributedString.create(_prompt + _command, TextColor.ANSI.DEFAULT, _backgroundColour);
             message.drawAt(rect.getPoint(), graphics);
         }
     }
@@ -129,8 +175,9 @@ public class CommandView extends View {
         setNeedsRedraw();
     }
 
-    public void activate() {
+    public void activate(String prompt) {
         _message = null;
+        _prompt = prompt;
         _command = new StringBuilder();
         var window = Window.getInstance();
         var rootView = window.getRootView();

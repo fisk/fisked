@@ -154,6 +154,7 @@ public class Cursor {
         }
         calculate();
         Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();
+        _lastX = _x;
     }
 
     public void goStartOfLine() {
@@ -163,6 +164,7 @@ public class Cursor {
         _position = line.getStartPosition();
         calculate();
         Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();
+        _lastX = _x;
     }
 
     public void setPosition(int position) {
@@ -189,6 +191,7 @@ public class Cursor {
             calculate();
             Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();
         }
+        _lastX = _x;
     }
 
     public void goPrevious(Pattern pattern) {
@@ -206,5 +209,6 @@ public class Cursor {
             calculate();
             Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();
         }
+        _lastX = _x;
     }
 }
