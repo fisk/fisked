@@ -16,6 +16,7 @@ import org.fisk.fisked.mode.VisualBlockMode;
 import org.fisk.fisked.mode.VisualLineMode;
 import org.fisk.fisked.mode.VisualMode;
 import org.fisk.fisked.terminal.TerminalContext;
+import org.fisk.fisked.text.AttributedString;
 import org.fisk.fisked.text.BufferContext;
 import org.fisk.fisked.ui.ListView.ListItem;
 import org.fisk.fisked.utils.LogFactory;
@@ -72,6 +73,22 @@ public class Window implements Drawable {
         _rootView.addSubview(_bufferContext.getBufferView());
         _rootView.setFirstResponder(_bufferContext.getBufferView());
         setupModes();
+    }
+
+    private void setupSplashScreen() {
+        var terminalContext = TerminalContext.getInstance();
+        var screen = terminalContext.getScreen();
+        var terminalSize = screen.getTerminalSize();
+        var textGraphics = terminalContext.getGraphics();
+        _log.info("Draw splash screen");
+        var attrString = new AttributedString();
+        var str = "== Loading Fisked ==";
+        attrString.append(str, TextColor.ANSI.CYAN, TextColor.ANSI.DEFAULT);
+        attrString.drawAt(Point.create(terminalSize.getColumns() / 2 - str.length() / 2, terminalSize.getRows() / 2), textGraphics);
+        screen.setCursorPosition(new TerminalPosition(0, 0));
+        try {
+            screen.refresh(RefreshType.DELTA);
+        } catch (IOException e) {}
     }
 
     private void setupViews(Path path) {
@@ -142,6 +159,7 @@ public class Window implements Drawable {
     }
 
     public Window(Path path) {
+        setupSplashScreen();
         setupViews(path);
         setupBindings();
         setupModes();
