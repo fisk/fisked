@@ -211,4 +211,16 @@ public class Cursor {
         }
         _lastX = _x;
     }
+
+    public void goStartOfBuffer() {
+        setPosition(0);
+        calculate();
+        Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();
+    }
+
+    public void goEndOfBuffer() {
+        setPosition(_bufferContext.getBuffer().getLength());
+        calculate();
+        Window.getInstance().getBufferContext().getBufferView().adaptViewToCursor();
+    }
 }
