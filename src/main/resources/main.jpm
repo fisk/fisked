@@ -3,6 +3,7 @@
     dependencies: [
         "gson-2.8.2",
         "java.sql-11.0.6",
+        "java.management-11.0.8",
         "lanterna-3.0.1",
         "lucene.core-8.4.1",
         "org.eclipse.jgit-5.8.0",

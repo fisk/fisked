@@ -2,6 +2,9 @@ package org.fisk.fisked.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Timer;
@@ -55,6 +58,12 @@ public class ModeLineView extends View {
         } catch (IOException e) {
             return "";
         }
+    }
+    
+    private String getHeapData() {
+        MemoryMXBean bean = ManagementFactory.getMemoryMXBean();
+        MemoryUsage memoryUsage = bean.getHeapMemoryUsage();
+        return "" + memoryUsage.getUsed() / 1024 / 1024 + " MB / " + memoryUsage.getCommitted() / 1024 / 1024 + " MB";
     }
 
     private String getLine() {
@@ -124,6 +133,8 @@ public class ModeLineView extends View {
         str.append(" ", _foregroundColour, _backgroundColour);
         str.append(Powerline.SYMBOL_LEFT_ARROW, _foregroundColour, _backgroundColour);
         str.append(" " + _time + " ", _foregroundColour, _backgroundColour);
+        str.append(Powerline.SYMBOL_LEFT_ARROW, _foregroundColour, _backgroundColour);
+        str.append(" " + getHeapData() + " ", _foregroundColour, _backgroundColour);
         str.append(Powerline.SYMBOL_LEFT_ARROW, _foregroundColour, _backgroundColour);
         return str;
     }

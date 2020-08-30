@@ -1,6 +1,7 @@
 module org.fisk.fisked {
     requires gson;
     requires java.sql;
+    requires java.management;
     requires lanterna;
     requires lucene.core;
     requires org.eclipse.jgit;

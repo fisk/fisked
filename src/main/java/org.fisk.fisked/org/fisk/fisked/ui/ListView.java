@@ -157,7 +157,7 @@ public class ListView extends View {
             var item = _filteredList.get(i);
             boolean selected = i == _selection;
             var str = AttributedString.create(item.displayString(),
-                                              selected ? TextColor.ANSI.RED : TextColor.ANSI.GREEN,
+                                              selected ? TextColor.ANSI.YELLOW : TextColor.ANSI.DEFAULT,
                                               selected ? TextColor.ANSI.BLACK : _backgroundColour);
             str.drawAt(Point.create(0, i - _start + rect.getPoint().getY() + 2), graphics);
         }

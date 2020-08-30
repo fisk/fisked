@@ -85,6 +85,9 @@ public class CommandView extends View {
     }
 
     public void searchNext() {
+        if (_searchString == null) {
+            return;
+        }
         var pattern = Pattern.compile(_searchString);
         var cursor = Window.getInstance().getBufferContext().getBuffer().getCursor();
         if (!_searchForward) {
@@ -95,6 +98,9 @@ public class CommandView extends View {
     }
 
     public void searchPrevious() {
+        if (_searchString == null) {
+            return;
+        }
         var pattern = Pattern.compile(_searchString);
         var cursor = Window.getInstance().getBufferContext().getBuffer().getCursor();
         if (!_searchForward) {

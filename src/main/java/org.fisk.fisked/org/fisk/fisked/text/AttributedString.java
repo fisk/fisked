@@ -110,17 +110,22 @@ public class AttributedString {
     
     public void insert(String str, int position, TextColor foregroundColour, TextColor backgroundColour) {
         _log.info("Inserting " + str + " at " + position);
+        if (position > _length || position < 0) {
+            throw new IllegalArgumentException("Insert out of bounds: " + position + " length: " + _length);
+        }
         var newAttr = new AttributeSet(foregroundColour, backgroundColour);
         var oldFragments = _fragments;
         int currentX = 0;
         _fragments = new ArrayList<>();
+        boolean inserted = false;
         int length = 0;
         for (var fragment: oldFragments) {
             int fragmentLength = fragment._string.length();
-            if (currentX + fragmentLength <= position ||
+            if (inserted ||
+                    currentX + fragmentLength <= position ||
                     currentX >= position + str.length()) {
                 _fragments.add(fragment);
-                length += fragment._string.length();
+                length += fragmentLength;
             } else {
                 int splitIndex = position - currentX;
                 var preString = fragment._string.substring(0, splitIndex);
@@ -135,6 +140,7 @@ public class AttributedString {
                     _fragments.add(new AttributedStringFragment(postString, fragment._attributes));
                     length += postString.length();
                 }
+                inserted = true;
             }
             currentX += fragmentLength;
         }
@@ -157,8 +163,8 @@ public class AttributedString {
                     currentX >= endPosition) {
                 _fragments.add(fragment);
             } else {
-                formatFragmentRange(Range.create(currentX, startPosition), fragmentRange, fragment._attributes, fragment._string);
                 formatFragmentRange(Range.create(endPosition, currentX + fragmentLength), fragmentRange, fragment._attributes, fragment._string);
+                formatFragmentRange(Range.create(currentX, startPosition), fragmentRange, fragment._attributes, fragment._string);
             }
         }
         Collections.reverse(_fragments);
@@ -169,8 +175,6 @@ public class AttributedString {
         int currentX = 0;
         for (var fragment: _fragments) {
             int fragmentLength = fragment._string.length();
-            /* if (position < currentX ||
-                   position + 1 > currentX + fragmentLength) */
             if (position >= currentX &&
                 position + 1 <= currentX + fragmentLength) {
                 return AttributedString.create(fragment._string.substring(position - currentX, position - currentX + 1), 
