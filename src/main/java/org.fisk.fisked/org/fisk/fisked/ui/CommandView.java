@@ -15,6 +15,9 @@ import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.input.KeyType;
 
+import org.fisk.fisked.utils.LogFactory;
+import org.slf4j.Logger;
+
 public class CommandView extends View {
     private String _message = null;
     private String _prompt = null;
@@ -22,7 +25,8 @@ public class CommandView extends View {
     private ListEventResponder _responders = new ListEventResponder();
     private boolean _searchForward;
     private String _searchString;
-    
+    private static final Logger _log = LogFactory.createLog();    
+
     private boolean isSearch() {
         // Is this hacky? Yeah it is. Buy hey deal with it later.
         return _prompt.equals("/") || _prompt.equals("?");
@@ -72,7 +76,15 @@ public class CommandView extends View {
     }
 
     private void runSearch(String string) {
-        var pattern = Pattern.compile(string);
+        var quotedString = Pattern.quote(string);
+        _log.info("Searching for: " + string);
+        Pattern pattern;
+        try {
+          pattern = Pattern.compile(quotedString);
+        } catch (Throwable e) {
+            _log.error("Pattern threw exception: ", e);
+            return;
+        }
         var cursor = Window.getInstance().getBufferContext().getBuffer().getCursor();
         _searchString = string;
         if (_prompt.equals("/")) {
