@@ -51,10 +51,14 @@ public class ModeLineView extends View {
     
     private String getBranch() {
         try {
-            var repo = new FileRepositoryBuilder()
-                    .setGitDir(ProjectPaths.getProjectRootPath().resolve(".git").toFile())
-                    .build();
-            return repo.getBranch();
+            if (ProjectPaths.hasRepository()) {
+                var repo = new FileRepositoryBuilder()
+                        .setGitDir(ProjectPaths.getProjectRootPath().resolve(".git").toFile())
+                        .build();
+                return repo.getBranch();
+            } else {
+                return "";
+            }
         } catch (IOException e) {
             return "";
         }

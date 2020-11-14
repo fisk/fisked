@@ -29,4 +29,13 @@ public class ProjectPaths {
         }
         return null;
     }
+    
+    public static boolean hasRepository() {
+        var projectPath = getProjectRootPath();
+        if (projectPath == null) {
+            return false;
+        }
+        var gitPath = projectPath.resolve(".git");        
+        return gitPath.toFile().exists();
+    }
 }
