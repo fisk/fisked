@@ -39,6 +39,11 @@ public class LatexLSPClient implements LanguageMode {
     public int getIndentationLevel(BufferContext bufferContext) {
         return 0;
     }
+    
+    @Override
+    public boolean isIndentationEnd(BufferContext bufferContext, String character) {
+        return false;
+    }
 
     @Override
     public TextDocumentItem getTextDocument(BufferContext bufferContext) {

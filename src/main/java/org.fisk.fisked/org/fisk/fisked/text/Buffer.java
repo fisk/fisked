@@ -149,6 +149,26 @@ public class Buffer {
         _bufferContext.getTextLayout().calculate();
         _bufferContext.getBufferView().adaptViewToCursor();
     }
+    
+    public void reindentLine() {
+        var textLayout = _bufferContext.getTextLayout();
+        var position = getCursor().getPosition();
+        var line = textLayout.getPhysicalLineAt(position);
+        int lineStartPosition = line.getStartPosition();
+        if (lineStartPosition >= position) {
+            return;
+        }
+        var substring = getString().substring(lineStartPosition, position - 1);
+        if (substring.trim().equals("")) {
+            remove(lineStartPosition, position - 1);
+            var str = "";
+            for (int i = 0; i < getIndentationLevel() - 1; ++i) {
+                str += Settings.getIndentationString();
+            }
+            insert(str);
+        }
+    }
+
 
     public void insert(String str) {
         if (str.equals("\n")) {
@@ -165,6 +185,9 @@ public class Buffer {
             cursor.setPosition(position + str.length());
             _bufferContext.getBufferView().adaptViewToCursor();
             inserted += str.length();
+        }
+        if (isIndentationEnd(str)) {
+            reindentLine();
         }
     }
 
@@ -320,6 +343,10 @@ public class Buffer {
 
     public int getIndentationLevel() {
         return _languageMode.getIndentationLevel(_bufferContext);
+    }
+    
+    public boolean isIndentationEnd(String character) {
+        return _languageMode.isIndentationEnd(_bufferContext, character);
     }
     
     private static class Decoration {

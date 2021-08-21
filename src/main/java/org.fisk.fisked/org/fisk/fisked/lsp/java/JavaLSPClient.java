@@ -735,7 +735,7 @@ public class JavaLSPClient extends Thread implements LanguageMode {
     }
     
     private static Pattern _javaCommentPattern = Pattern.compile("(/\\*([^*]|[\\n]|(\\*+([^*/]|[\\n])))*\\*+/)|(//.*)", Pattern.MULTILINE);
-    private static Pattern _javaStringPattern = Pattern.compile("\\\"([^\\\\\\\"]|[\\n]|(\\\\.))*\\\"", Pattern.MULTILINE);
+    private static Pattern _javaStringPattern = Pattern.compile("\\\"([^\\\\\\\"]|(\\\\.))*\\\"", Pattern.MULTILINE);
     private static Pattern _javaCharacterPattern = Pattern.compile("'[^']*'", Pattern.MULTILINE);
     private static Pattern _javaKeywordPattern = Pattern.compile(
             "(\\bprivate\\b)|(\\bprotected\\b)|(\\bpublic\\b)|(\\bstatic\\b)|(\\babstract\\b)|" + 
@@ -743,15 +743,19 @@ public class JavaLSPClient extends Thread implements LanguageMode {
             "(\\bdouble\\b)|(\\bimplements\\b)|(\\bextends\\b)|(\\bclass\\b)|(\\benum\\b)|(\\bfinal\\b)|" + 
             "(\\btry\\b)|(\\bcatch\\b)|(\\bthrows\\b)|(\\bthrow\\b)|(\\brecord\\b)|(\\bnew\\b)|(\\breturn\\b)|" +
             "(\\bif\\b)|(\\belse\\b)|(\\bfor\\b)|(\\bwhile\\b)|(\\bdo\\b)|(\\bimport\\b)|(\\bpackage\\b)|" +
-            "(\\bcase\\b)|(\\bbreak\\b)|(\\bthis\\b)|(\\bsynchronized\\b)",
+            "(\\bcase\\b)|(\\bbreak\\b)|(\\bthis\\b)|(\\bsynchronized\\b)|(\\bvar\\b)",
             Pattern.MULTILINE);
     private static Pattern _javaKeywordTokenPattern = Pattern.compile("(\\bnull\\b)|(\\btrue\\b)|(\\bfalse\\b)", Pattern.MULTILINE);
 
     private void formatToken(AttributedString str, String string, Pattern pattern, TextColor colour) {
-        var matcher = pattern.matcher(string);
-        while (matcher.find()) {
-            str.format(matcher.start(), matcher.end(), colour, TextColor.ANSI.DEFAULT);
-        }
+        // TODO: Exclude range intersections so that strings with comments in them dont both match.
+        // Note the misspelled dont above for this very reason. Spell it right to see what I mean.
+        try {
+            var matcher = pattern.matcher(string);
+            while (matcher.find()) {
+                str.format(matcher.start(), matcher.end(), colour, TextColor.ANSI.DEFAULT);
+            }
+        } catch (Throwable e) {}
     }
 
     @Override
@@ -783,6 +787,14 @@ public class JavaLSPClient extends Thread implements LanguageMode {
             }
         }
         return indentation;
+    }
+    
+    @Override
+    public boolean isIndentationEnd(BufferContext bufferContext, String character) {
+        if (character.equals("}")) {
+            return true;
+        }
+        return false;
     }
 
     @Override

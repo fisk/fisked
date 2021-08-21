@@ -12,6 +12,7 @@ public interface LanguageMode {
     void didClose(BufferContext bufferContext);
     void didOpen(BufferContext bufferContext);
     int getIndentationLevel(BufferContext bufferContext);
+    boolean isIndentationEnd(BufferContext bufferContext, String chracter);
     TextDocumentItem getTextDocument(BufferContext bufferContext);
     void applyColouring(BufferContext bufferContext, AttributedString str);
 }
