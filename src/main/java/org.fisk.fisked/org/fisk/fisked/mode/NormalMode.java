@@ -66,7 +66,7 @@ public class NormalMode extends Mode {
             buffer.deleteInnerWord();
             window.switchToMode(window.getInputMode());
         });
-        _rootResponder.addEventResponder("c i w", () -> {
+        _rootResponder.addEventResponder("c w", () -> {
             buffer.deleteWord();
             window.switchToMode(window.getInputMode());
         });
