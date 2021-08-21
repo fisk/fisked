@@ -97,7 +97,7 @@ public class NormalMode extends Mode {
             if (Copy.getInstance().isLine()) {
                 cursor.goEndOfLine();
                 cursor.goForward();
-                buffer.insert(Copy.getInstance().getText());
+                buffer.insert(Copy.getInstance().getText() + "\n");
                 cursor.goBack();
             } else {
                 cursor.goForward();
@@ -107,7 +107,7 @@ public class NormalMode extends Mode {
         _rootResponder.addEventResponder("P", () -> {
             if (Copy.getInstance().isLine()) {
                 cursor.goStartOfLine();
-                buffer.insert(Copy.getInstance().getText());
+                buffer.insert(Copy.getInstance().getText() + "\n");
             } else {
                 buffer.insert(Copy.getInstance().getText());
             }
