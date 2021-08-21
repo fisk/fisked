@@ -41,7 +41,7 @@ public class TextEventResponder implements EventResponder {
                   if (keyStroke.getCharacter() != ' ') {
                     return Response.NO;
                   }
-                } else if (keyStroke.getCharacter() != str.charAt(0)) {
+                } else if (str.length() != 1 || keyStroke.getCharacter() != str.charAt(0)) {
                     return Response.NO;
                 }
                 break;
