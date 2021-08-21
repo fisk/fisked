@@ -92,6 +92,10 @@ public class JavaLSPClient extends Thread implements LanguageMode {
         return _started;
     }
     
+    public boolean isEnabled() {
+        return _enabled;
+    }
+    
     public JavaLSPClient() {
         if (!new File(_eclipsePath).exists()) {
             _log.info("No LSP support");

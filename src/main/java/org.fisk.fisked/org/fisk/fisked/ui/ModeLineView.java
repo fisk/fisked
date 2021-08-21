@@ -78,7 +78,7 @@ public class ModeLineView extends View {
         var line = cursor.getYAbsolute();
         var position = cursor.getPosition();
         var index = textLayout.getLogicalLineAt(position).getIndex(position);
-        return "" + position + ": " + line + ", " + index;
+        return "" + (position + 1) + ": " + (line + 1) + ", " + (index + 1);
     }
 
     private TextColor getModeColor() {

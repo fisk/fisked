@@ -71,7 +71,7 @@ public class LanguageModeProvider {
     public LanguageMode getLanguageMode(Path path) {
         if (endsIn(path, "java")) {
             var lsp = JavaLSPClient.getInstance();
-            if (!lsp.hasStarted()) {
+            if (lsp.isEnabled() && !lsp.hasStarted()) {
                 lsp.start();
                 lsp.ensureInit();
             }

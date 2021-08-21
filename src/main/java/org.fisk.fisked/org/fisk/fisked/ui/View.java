@@ -98,8 +98,10 @@ public class View implements Drawable, EventResponder {
     }
 
     public void removeFromParent() {
-        this._parent._subviews.remove(this);
-        this._parent = null;
+        if (_parent != null) {
+            _parent._subviews.remove(this);
+            _parent = null;
+        }
     }
 
     public void setBackgroundColour(TextColor colour) {
