@@ -278,6 +278,24 @@ public class Buffer {
         getCursor().setPosition(start);
         _bufferContext.getBufferView().adaptViewToCursor();
     }
+    
+    public String getCurrentLineText() {
+        var textLayout = _bufferContext.getTextLayout();
+        var line = textLayout.getPhysicalLineAt(getCursor().getPosition());
+        int start = line.getStartPosition();
+        var glyph = line.getLastGlyph(true);
+        int end;
+        if (glyph != null) {
+            end = glyph.getPosition() + 1;
+        } else {
+            end = line.getStartPosition();
+        }
+        if (line.getNext() == null) {
+            // Last line is special
+            start = Math.max(0, start - 1);
+        }
+        return getSubstring(start, end);
+    }
 
     static Pattern _wordPattern = Pattern.compile("\\w");
 

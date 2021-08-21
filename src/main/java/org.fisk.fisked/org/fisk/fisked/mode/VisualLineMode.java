@@ -19,7 +19,7 @@ public class VisualLineMode extends VisualMode {
         var minLine = minCursor().getPhysicalLine();
         var maxLine = maxCursor().getPhysicalLine();
         int start = minLine.getStartPosition();
-        int end = maxLine.getEndPosition(false);
+        int end = maxLine.getEndPosition(true);
         if (maxLine.getNext() == null) {
             start = Math.max(0, start - 1);
         }
