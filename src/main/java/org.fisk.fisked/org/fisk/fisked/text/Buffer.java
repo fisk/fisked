@@ -241,6 +241,15 @@ public class Buffer {
         _bufferContext.getTextLayout().calculate();
         _bufferContext.getBufferView().adaptViewToCursor();
     }
+    
+    public String getInnerWord() {
+        int start = findStartOfWord();
+        int end = findEndOfWord();
+        if (start == -1 || end == -1) {
+            return "";
+        }
+        return getSubstring(start, end);
+    }
 
     public void deleteWord() {
         int start = getCursor().getPosition();

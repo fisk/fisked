@@ -126,6 +126,22 @@ public class NormalMode extends Mode {
         _rootResponder.addEventResponder(":", () -> {
             window.getCommandView().activate(":");
         });
+        _rootResponder.addEventResponder("*", () -> {
+            var word = buffer.getInnerWord();
+            if (word != null && !word.equals("")) {
+                window.getCommandView().activate("/");
+                window.getCommandView().runSearch(word);
+                window.getCommandView().deactivate();
+            }
+        });
+        _rootResponder.addEventResponder("#", () -> {
+            var word = buffer.getInnerWord();
+            if (word != null && !word.equals("")) {
+                window.getCommandView().activate("?");
+                window.getCommandView().runSearch(word);
+                window.getCommandView().deactivate();
+            }
+        });
         _rootResponder.addEventResponder("/", () -> {
             window.getCommandView().activate("/");
         });

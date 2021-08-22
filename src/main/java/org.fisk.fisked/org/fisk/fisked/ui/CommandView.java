@@ -75,7 +75,7 @@ public class CommandView extends View {
         });
     }
 
-    private void runSearch(String string) {
+    public void runSearch(String string) {
         var quotedString = Pattern.quote(string);
         _log.info("Searching for: " + string);
         Pattern pattern;
@@ -203,7 +203,7 @@ public class CommandView extends View {
         rootView.setNeedsRedraw();
     }
 
-    private void deactivate() {
+    public void deactivate() {
         _command = null;
         var window = Window.getInstance();
         var rootView = window.getRootView();
