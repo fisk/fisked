@@ -14,6 +14,7 @@ import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 import org.eclipse.lsp4j.util.SemanticHighlightingTokens;
+import org.fisk.fisked.copy.Copy;
 import org.fisk.fisked.EventThread;
 import org.fisk.fisked.event.RunnableEvent;
 import org.fisk.fisked.lsp.LanguageMode;
@@ -223,6 +224,7 @@ public class Buffer {
         if (position >= _string.length()) {
             return;
         }
+        Copy.getInstance().setText(getSubstring(position, position + 1), false /* isLine */);
         _undoLog.recordRemove(position, position + 1);
         rawRemove(getCursor().getPosition(), getCursor().getPosition() + 1);
         _bufferContext.getTextLayout().calculate();
@@ -235,6 +237,7 @@ public class Buffer {
         if (start == -1 || end == -1) {
             return;
         }
+        Copy.getInstance().setText(getSubstring(start, end), false /* isLine */);
         _undoLog.recordRemove(start, end);
         rawRemove(start, end);
         getCursor().setPosition(start);
@@ -260,6 +263,7 @@ public class Buffer {
         if (end == -1) {
             return;
         }
+        Copy.getInstance().setText(getSubstring(start, end), false /* isLine */);
         _undoLog.recordRemove(start, end);
         rawRemove(start, end);
         _bufferContext.getTextLayout().calculate();
@@ -281,6 +285,7 @@ public class Buffer {
             // Last line is special
             start = Math.max(0, start - 1);
         }
+        Copy.getInstance().setText(getSubstring(start, end), true /* isLine */);
         _undoLog.recordRemove(start, end);
         rawRemove(start, end);
         _bufferContext.getTextLayout().calculate();
